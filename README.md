@@ -1,4 +1,4 @@
-# Sessy
+# 📨 Sessy
 
 Open-source email observability for AWS SES by [Marc Köhlbrugge](https://x.com/marckohlbrugge).
 
