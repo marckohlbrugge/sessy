@@ -1,4 +1,6 @@
-# 📨 Sessy
+<img src="docs/icon.svg" height="64" alt="Sessy icon">
+
+# Sessy
 
 Open-source email observability for AWS SES by [Marc Köhlbrugge](https://x.com/marckohlbrugge).
 
@@ -12,6 +14,7 @@ That's why many people turn to overpriced email services that are often just glo
 
 Sessy is the open-source alternative. Use raw SES and still get a beautiful interface to see what happens after you hit send: deliveries, bounces, complaints, opens, clicks, and more.
 
+<img src="docs/screenshot.png" alt="Sessy screenshot">
 
 ## Running your own Sessy instance
 
