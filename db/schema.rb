@@ -10,22 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2025_12_30_112213) do
+ActiveRecord::Schema[8.1].define(version: 2025_12_31_121604) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
-
-  # Custom types defined in this database.
-  # Note that some types may not work with other database engines. Be careful if changing database.
-  create_enum "event_type", ["Send", "Delivery", "Bounce", "Complaint", "Reject", "DeliveryDelay", "RenderingFailure", "Subscription", "Open", "Click"]
 
   create_table "events", force: :cascade do |t|
     t.string "bounce_type"
     t.datetime "created_at", null: false
     t.datetime "event_at", null: false
-    t.jsonb "event_data", default: {}
-    t.enum "event_type", null: false, enum_type: "event_type"
+    t.json "event_data", default: {}
+    t.string "event_type", null: false
     t.bigint "message_id", null: false
-    t.jsonb "raw_payload", default: {}
+    t.json "raw_payload", default: {}
     t.string "recipient_email", null: false
     t.string "ses_message_id", null: false
     t.datetime "updated_at", null: false
@@ -42,7 +38,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_30_112213) do
   create_table "messages", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "events_count", default: 0, null: false
-    t.jsonb "mail_metadata", default: {}
+    t.json "mail_metadata", default: {}
     t.datetime "sent_at"
     t.string "ses_message_id", null: false
     t.string "source_email"
@@ -59,7 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_30_112213) do
     t.string "color", default: "blue"
     t.datetime "created_at", null: false
     t.string "name", null: false
-    t.uuid "token", default: -> { "gen_random_uuid()" }, null: false
+    t.string "token", null: false
     t.datetime "updated_at", null: false
     t.index ["token"], name: "index_sources_on_token", unique: true
   end
@@ -67,7 +63,7 @@ ActiveRecord::Schema[8.1].define(version: 2025_12_30_112213) do
   create_table "webhooks", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "processed_at"
-    t.jsonb "raw_payload", default: {}, null: false
+    t.json "raw_payload", default: {}, null: false
     t.string "sns_message_id", null: false
     t.datetime "sns_timestamp", null: false
     t.string "sns_type", null: false

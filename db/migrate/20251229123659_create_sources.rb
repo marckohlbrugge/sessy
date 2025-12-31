@@ -2,7 +2,7 @@ class CreateSources < ActiveRecord::Migration[8.1]
   def change
     create_table :sources do |t|
       t.string :name, null: false
-      t.uuid :token, null: false, default: "gen_random_uuid()"
+      t.string :token, null: false
 
       t.timestamps
     end

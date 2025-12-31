@@ -5,7 +5,7 @@ class CreateSesMessages < ActiveRecord::Migration[8.1]
       t.string :source_email
       t.string :subject
       t.datetime :sent_at
-      t.jsonb :mail_metadata, default: {}
+      t.json :mail_metadata, default: {}
       t.integer :events_count, default: 0, null: false
 
       t.timestamps
