@@ -12,7 +12,7 @@ gem "turbo-rails"
 # Deployment and drivers
 gem "bootsnap", require: false
 gem "kamal", require: false
-gem "pg", "~> 1.1"
+gem "sqlite3"
 gem "puma", ">= 5.0"
 gem "solid_cable"
 gem "solid_cache"
