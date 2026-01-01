@@ -52,6 +52,9 @@
         <li>
           Paste your webhook URL in the Endpoint field:
           <code class="text-xs bg-gray-100 px-1 rounded"><%= webhook_url(source_token: @source.token) %></code>
+          <% if Rails.env.development? %>
+            (in development, use a tunnel URL that points to your local server)
+          <% end %>
         </li>
         <li>Expand <strong>Subscription filter policy</strong> and leave it empty (accept all)</li>
         <li>Leave <strong>"Enable raw message delivery"</strong> unchecked (this is the default)</li>
