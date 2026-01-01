@@ -1,5 +1,6 @@
 class Source < ApplicationRecord
   include Colors
+  include RetentionPolicy
 
   has_many :messages, dependent: :destroy
   has_many :events, through: :messages

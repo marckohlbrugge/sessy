@@ -45,6 +45,6 @@ class SourcesController < ApplicationController
   end
 
   def source_params
-    params.require(:source).permit(:name, :color)
+    params.require(:source).permit(:name, :color, :retention_days)
   end
 end

@@ -20,6 +20,15 @@
         <%= render "color_picker", f: f %>
       </div>
 
+      <div class="mb-4">
+        <%= f.label :retention_days, "Data Retention", class: "block text-sm font-medium mb-1" %>
+        <div class="flex items-center gap-2">
+          <%= f.number_field :retention_days, min: 1, placeholder: "Days", class: "block w-24 border rounded px-3 py-2 text-sm" %>
+          <span class="text-sm text-gray-500">days</span>
+        </div>
+        <p class="text-xs text-gray-400 mt-1">Leave empty to keep messages forever</p>
+      </div>
+
       <div class="flex justify-between items-center">
         <%= f.submit "Save Changes", class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50 cursor-pointer" %>
 
