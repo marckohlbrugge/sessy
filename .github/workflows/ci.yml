@@ -10,7 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  scan_ruby:
+  scan-ruby:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,7 +28,7 @@ jobs:
       - name: Scan for known security vulnerabilities in gems used
         run: bin/bundler-audit
       
-  scan_js:
+  scan-js:
     runs-on: ubuntu-latest
 
     steps:
@@ -157,7 +157,7 @@ jobs:
     
   docker-push-amd64:
     runs-on: ubuntu-latest
-    needs: [lint, scan_ruby, scan_js, test, system-test]
+    needs: [lint, scan-ruby, scan-js, test, system-test]
 
     steps:
       - name: Checkout code
@@ -193,7 +193,7 @@ jobs:
           
   docker-push-arm64:
     runs-on: ubuntu-24.04-arm
-    needs: [lint, scan_ruby, scan_js, test, system-test]
+    needs: [lint, scan-ruby, scan-js, test, system-test]
 
     steps:
       - name: Checkout code
