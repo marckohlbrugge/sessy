@@ -157,7 +157,7 @@ jobs:
     
   docker-push:
     runs-on: ubuntu-latest
-    needs: [lint, scan_ruby, scan_js, test, system_test]
+    needs: [lint, scan_ruby, scan_js, test, system-test]
 
     steps:
       - name: Checkout code
