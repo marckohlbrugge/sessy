@@ -3,105 +3,105 @@
     <!-- Overview -->
     <section class="bg-gray-50 rounded-lg p-4 space-y-2">
       <p class="text-gray-600">
-        This takes about 5 minutes. You don't need to share any AWS credentials with Sessy. Instead, you'll configure AWS to push events to your webhook URL. All events are cryptographically verified by AWS before processing. The AWS console requires a few steps, but we'll walk you through each one.
+        <%= t("setups.show.overview_1") %>
       </p>
       <p class="text-gray-600">
-        This guide assumes you've already <%= link_to "set up SES for sending emails", "https://github.com/aws/aws-sdk-ruby", target: "_blank", class: "text-blue-600 hover:underline" %>.
+        <%= t("setups.show.overview_2_html", link: link_to(t("setups.show.overview_link"), "https://github.com/aws/aws-sdk-ruby", target: "_blank", class: "text-blue-600 hover:underline")) %>
       </p>
     </section>
 
     <!-- Step 1: Configuration Set -->
     <section class="bg-gray-50 rounded-lg p-5">
-      <h2 class="text-lg font-semibold mb-2">1. Create a Configuration Set</h2>
+      <h2 class="text-lg font-semibold mb-2"><%= t("setups.show.step1_title") %></h2>
       <p class="text-gray-600 mb-3">
-        A Configuration Set in SES lets you track what happens to your emails after they're sent.
+        <%= t("setups.show.step1_body") %>
       </p>
       <ol class="list-decimal list-inside space-y-2">
-        <li>Go to <strong>Amazon SES</strong> in the AWS Console (make sure you're in the correct region where your SES is configured)</li>
-        <li>Navigate to <strong>Configuration sets</strong> in the left sidebar</li>
-        <li>Click <strong>Create set</strong></li>
-        <li>Enter a name: <code class="bg-gray-100 px-1 rounded"><%= config_set_name(@source) %></code></li>
-        <li>Leave other settings as default and click <strong>Create set</strong></li>
+        <li><%= t("setups.show.step1_li_1_html") %></li>
+        <li><%= t("setups.show.step1_li_2_html") %></li>
+        <li><%= t("setups.show.step1_li_3_html") %></li>
+        <li><%= t("setups.show.step1_li_4") %> <code class="bg-gray-100 px-1 rounded"><%= config_set_name(@source) %></code></li>
+        <li><%= t("setups.show.step1_li_5_html") %></li>
       </ol>
     </section>
 
     <!-- Step 2: SNS Topic -->
     <section class="bg-gray-50 rounded-lg p-5">
-      <h2 class="text-lg font-semibold mb-2">2. Create an SNS Topic</h2>
+      <h2 class="text-lg font-semibold mb-2"><%= t("setups.show.step2_title") %></h2>
       <p class="text-gray-600 mb-3">
-        SNS (Simple Notification Service) will forward the events to your webhook.
+        <%= t("setups.show.step2_body") %>
       </p>
       <ol class="list-decimal list-inside space-y-2">
-        <li>Go to <strong>Amazon SNS</strong> in the AWS Console</li>
-        <li>Click <strong>Topics</strong> in the left sidebar, then <strong>Create topic</strong></li>
-        <li>Select <strong>Standard</strong> (not FIFO)</li>
-        <li>Enter a name: <code class="bg-gray-100 px-1 rounded"><%= sns_topic_name(@source) %></code></li>
-        <li>Click <strong>Create topic</strong></li>
+        <li><%= t("setups.show.step2_li_1_html") %></li>
+        <li><%= t("setups.show.step2_li_2_html") %></li>
+        <li><%= t("setups.show.step2_li_3_html") %></li>
+        <li><%= t("setups.show.step2_li_4") %> <code class="bg-gray-100 px-1 rounded"><%= sns_topic_name(@source) %></code></li>
+        <li><%= t("setups.show.step2_li_5_html") %></li>
       </ol>
     </section>
 
     <!-- Step 3: SNS Subscription -->
     <section class="bg-gray-50 rounded-lg p-5">
-      <h2 class="text-lg font-semibold mb-2">3. Subscribe the Webhook to SNS</h2>
+      <h2 class="text-lg font-semibold mb-2"><%= t("setups.show.step3_title") %></h2>
       <p class="text-gray-600 mb-3">
-        Create an HTTPS subscription that points to your Sessy webhook.
+        <%= t("setups.show.step3_body") %>
       </p>
       <ol class="list-decimal list-inside space-y-2">
-        <li>From your SNS topic page, click <strong>Create subscription</strong></li>
-        <li>Set Protocol to <strong>HTTPS</strong></li>
+        <li><%= t("setups.show.step3_li_1_html") %></li>
+        <li><%= t("setups.show.step3_li_2_html") %></li>
         <li>
-          Paste your webhook URL in the Endpoint field:
+          <%= t("setups.show.step3_li_3") %>
           <code class="text-xs bg-gray-100 px-1 rounded"><%= webhook_url(source_token: @source.token) %></code>
         </li>
-        <li>Expand <strong>Subscription filter policy</strong> and leave it empty (accept all)</li>
-        <li>Leave <strong>"Enable raw message delivery"</strong> unchecked (this is the default)</li>
-        <li>Click <strong>Create subscription</strong></li>
-        <li>The subscription will be confirmed automatically when Sessy receives the confirmation request</li>
+        <li><%= t("setups.show.step3_li_4_html") %></li>
+        <li><%= t("setups.show.step3_li_5_html") %></li>
+        <li><%= t("setups.show.step3_li_6_html") %></li>
+        <li><%= t("setups.show.step3_li_7") %></li>
       </ol>
     </section>
 
     <!-- Step 4: Event Destination -->
     <section class="bg-gray-50 rounded-lg p-5">
-      <h2 class="text-lg font-semibold mb-2">4. Add an Event Destination</h2>
+      <h2 class="text-lg font-semibold mb-2"><%= t("setups.show.step4_title") %></h2>
       <p class="text-gray-600 mb-3">
-        Connect your Configuration Set to the SNS topic to start receiving events.
+        <%= t("setups.show.step4_body") %>
       </p>
       <ol class="list-decimal list-inside space-y-2">
-        <li>Go back to <strong>Amazon SES → Configuration sets</strong></li>
-        <li>Click on <code class="bg-gray-100 px-1 rounded"><%= config_set_name(@source) %></code></li>
-        <li>Go to the <strong>Event destinations</strong> tab</li>
-        <li>Click <strong>Add destination</strong></li>
+        <li><%= t("setups.show.step4_li_1_html") %></li>
+        <li><%= t("setups.show.step4_li_2") %> <code class="bg-gray-100 px-1 rounded"><%= config_set_name(@source) %></code></li>
+        <li><%= t("setups.show.step4_li_3_html") %></li>
+        <li><%= t("setups.show.step4_li_4_html") %></li>
         <li>
-          Select the event types you want to track:
+          <%= t("setups.show.step4_li_5") %>
           <ul class="list-disc list-inside ml-4 mt-1 text-gray-600">
-            <li><strong>Sends</strong> – Email was sent</li>
-            <li><strong>Deliveries</strong> – Email reached the recipient's mail server</li>
-            <li><strong>Bounces</strong> – Email bounced (hard or soft)</li>
-            <li><strong>Complaints</strong> – Recipient marked as spam</li>
-            <li><strong>Opens</strong> – Email was opened (requires tracking pixel)</li>
-            <li><strong>Clicks</strong> – Link was clicked (requires link tracking)</li>
-            <li><strong>Delivery delays</strong> – Temporary delivery issues</li>
-            <li><strong>Rejections</strong> – SES rejected the email</li>
+            <li><%= t("setups.show.step4_events.sends_html") %></li>
+            <li><%= t("setups.show.step4_events.deliveries_html") %></li>
+            <li><%= t("setups.show.step4_events.bounces_html") %></li>
+            <li><%= t("setups.show.step4_events.complaints_html") %></li>
+            <li><%= t("setups.show.step4_events.opens_html") %></li>
+            <li><%= t("setups.show.step4_events.clicks_html") %></li>
+            <li><%= t("setups.show.step4_events.delivery_delays_html") %></li>
+            <li><%= t("setups.show.step4_events.rejections_html") %></li>
           </ul>
         </li>
-        <li>Click <strong>Next</strong></li>
-        <li>Select <strong>Amazon SNS</strong> as the destination type</li>
-        <li>Choose <code class="bg-gray-100 px-1 rounded"><%= sns_topic_name(@source) %></code> from the dropdown</li>
-        <li>Enable <strong>"Include original email headers"</strong> – this allows Sessy to show subject lines and other email details</li>
-        <li>Click <strong>Next</strong>, then <strong>Add destination</strong></li>
+        <li><%= t("setups.show.step4_li_6_html") %></li>
+        <li><%= t("setups.show.step4_li_7_html") %></li>
+        <li><%= t("setups.show.step4_li_8_html", name: capture { %><code class="bg-gray-100 px-1 rounded"><%= sns_topic_name(@source) %></code><% }) %></li>
+        <li><%= t("setups.show.step4_li_9_html") %></li>
+        <li><%= t("setups.show.step4_li_10_html") %></li>
       </ol>
     </section>
 
     <!-- Step 5: Use the Configuration Set -->
     <section class="bg-gray-50 rounded-lg p-5">
-      <h2 class="text-lg font-semibold mb-2">5. Use the Configuration Set When Sending</h2>
+      <h2 class="text-lg font-semibold mb-2"><%= t("setups.show.step5_title") %></h2>
       <p class="text-gray-600 mb-3">
-        When sending emails via SES, specify your Configuration Set name.
+        <%= t("setups.show.step5_body") %>
       </p>
 
       <div>
         <p class="font-medium mb-2">
-          With <%= link_to "aws-sdk-sesv2", "https://github.com/aws/aws-sdk-ruby", target: "_blank", class: "text-blue-600 hover:underline" %>:
+          <%= t("setups.show.step5_sdk_title_html", link: link_to("aws-sdk-sesv2", "https://github.com/aws/aws-sdk-ruby", target: "_blank", class: "text-blue-600 hover:underline")) %>
         </p>
         <pre class="rounded text-xs overflow-x-auto"><code class="language-ruby" data-controller="highlight">ses.send_email(
   from_email_address: "you@example.com",
@@ -113,13 +113,13 @@
 
       <div class="mt-6">
         <p class="font-medium mb-2">
-          With Rails Action Mailer using <%= link_to "aws-actionmailer-ses", "https://github.com/aws/aws-actionmailer-ses-ruby", target: "_blank", class: "text-blue-600 hover:underline" %>:
+           <%= t("setups.show.step5_rails_title_html", link: link_to("aws-actionmailer-ses", "https://github.com/aws/aws-actionmailer-ses-ruby", target: "_blank", class: "text-blue-600 hover:underline")) %>
         </p>
-        <p class="text-gray-600 mb-3">Set the header globally for all emails from a mailer:</p>
+        <p class="text-gray-600 mb-3"><%= t("setups.show.step5_rails_global") %></p>
         <pre class="rounded text-xs overflow-x-auto"><code class="language-ruby" data-controller="highlight">class ApplicationMailer < ActionMailer::Base
   default "X-SES-CONFIGURATION-SET" => "<%= config_set_name(@source) %>"
 end</code></pre>
-        <p class="text-gray-600 mt-4 mb-3">Or set it per mailer method:</p>
+        <p class="text-gray-600 mt-4 mb-3"><%= t("setups.show.step5_rails_method") %></p>
         <pre class="rounded text-xs overflow-x-auto"><code class="language-ruby" data-controller="highlight">class UserMailer < ApplicationMailer
   def welcome(user)
     headers["X-SES-CONFIGURATION-SET"] = "<%= config_set_name(@source) %>"
@@ -131,11 +131,9 @@ end</code></pre>
 
     <!-- Verification -->
     <section class="bg-gray-50 rounded-lg p-5">
-      <h2 class="text-lg font-semibold mb-2">Verify It's Working</h2>
+      <h2 class="text-lg font-semibold mb-2"><%= t("setups.show.verify_title") %></h2>
       <p class="text-gray-600">
-        Send a test email using your Configuration Set. Within seconds, you should see events appear in the
-        <%= link_to "Activity tab", source_events_path(@source), class: "text-blue-600 hover:underline" %>.
-        You'll see a "Sent" event immediately, followed by "Delivered" once the email reaches the recipient's server.
+        <%= t("setups.show.verify_body_html", link: link_to(t("setups.show.verify_link"), source_events_path(@source), class: "text-blue-600 hover:underline")) %>
       </p>
     </section>
   </div>

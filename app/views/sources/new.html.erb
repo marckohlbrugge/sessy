@@ -1,9 +1,9 @@
 <div class="max-w-5xl mx-auto px-4 py-8">
   <div class="mb-6">
     <h1 class="text-2xl font-bold flex items-center gap-2">
-      <%= link_to "Sources", sources_path, class: "text-gray-400 hover:underline" %>
+      <%= link_to t("sources.new.breadcrumb_sources"), sources_path, class: "text-gray-400 hover:underline" %>
       <span class="text-gray-300">/</span>
-      New
+      <%= t("sources.new.breadcrumb_new") %>
     </h1>
   </div>
 
@@ -21,8 +21,8 @@
         <% end %>
 
         <div class="mb-4">
-          <%= f.label :name, "Source Name", class: "block text-sm font-medium mb-1" %>
-          <%= f.text_field :name, class: "block w-full border rounded px-3 py-2 text-sm", placeholder: "e.g., BetaList, My App", autofocus: true %>
+          <%= f.label :name, t("sources.new.source_name"), class: "block text-sm font-medium mb-1" %>
+          <%= f.text_field :name, class: "block w-full border rounded px-3 py-2 text-sm", placeholder: t("sources.new.name_placeholder"), autofocus: true %>
         </div>
 
         <div class="mb-4">
@@ -30,19 +30,19 @@
         </div>
 
         <div>
-          <%= f.submit "Create Source", class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50 cursor-pointer" %>
+          <%= f.submit t("sources.new.create_source"), class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50 cursor-pointer" %>
         </div>
       <% end %>
     </div>
 
     <div class="text-sm text-gray-600 space-y-4">
       <div>
-        <h3 class="font-medium text-gray-900">What's a source?</h3>
-        <p class="mt-1">A source is a separate inbox for tracking email events. Each source has its own webhook URL that you'll configure in AWS.</p>
+        <h3 class="font-medium text-gray-900"><%= t("sources.new.whats_a_source_title") %></h3>
+        <p class="mt-1"><%= t("sources.new.whats_a_source_body") %></p>
       </div>
       <div>
-        <h3 class="font-medium text-gray-900">How many sources do I need?</h3>
-        <p class="mt-1">We suggest starting with one source per project. Later, if you want to track different types of emails separately, you can create additional sources. For example, one for transactional emails (password resets, receipts) and another for marketing emails (newsletters, promotions).</p>
+        <h3 class="font-medium text-gray-900"><%= t("sources.new.how_many_sources_title") %></h3>
+        <p class="mt-1"><%= t("sources.new.how_many_sources_body") %></p>
       </div>
     </div>
   </div>

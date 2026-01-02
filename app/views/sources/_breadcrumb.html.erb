@@ -1,6 +1,6 @@
 <div class="mb-6">
   <h1 class="text-2xl font-bold flex items-center gap-2">
-    <%= link_to "Sources", sources_path, class: "text-gray-400 hover:underline" %>
+    <%= link_to t("sources.breadcrumb.sources"), sources_path, class: "text-gray-400 hover:underline" %>
     <span class="text-gray-300">/</span>
     <%= link_to source_path(source), class: "flex items-center gap-2 hover:underline" do %>
       <span class="size-3 rounded-full <%= source.color_class %>"></span>

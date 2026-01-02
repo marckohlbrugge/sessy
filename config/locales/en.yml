@@ -1,31 +1,139 @@
-# Files in the config/locales directory are used for internationalization and
-# are automatically loaded by Rails. If you want to use locales other than
-# English, add the necessary files in this directory.
-#
-# To use the locales, use `I18n.t`:
-#
-#     I18n.t "hello"
-#
-# In views, this is aliased to just `t`:
-#
-#     <%= t("hello") %>
-#
-# To use a different locale, set it with `I18n.locale`:
-#
-#     I18n.locale = :es
-#
-# This would use the information in config/locales/es.yml.
-#
-# To learn more about the API, please read the Rails Internationalization guide
-# at https://guides.rubyonrails.org/i18n.html.
-#
-# Be aware that YAML interprets the following case-insensitive strings as
-# booleans: `true`, `false`, `on`, `off`, `yes`, `no`. Therefore, these strings
-# must be quoted to be interpreted as strings. For example:
-#
-#     en:
-#       "yes": yup
-#       enabled: "ON"
-
 en:
-  hello: "Hello world"
+  hello: 'Hello world'
+  layouts:
+    header:
+      fork_on_github: 'Fork on GitHub'
+  sources:
+    breadcrumb:
+      sources: 'Sources'
+    color_picker:
+      color_label: 'Color Label'
+    tabs:
+      overview: 'Overview'
+      activity: 'Activity'
+      setup: 'Setup'
+      settings: 'Settings'
+    edit:
+      source_name: 'Source Name'
+      delete_events_after: 'Delete events after'
+      days_placeholder: 'Days'
+      days: 'days'
+      leave_empty: 'Leave empty to keep data forever'
+      save_changes: 'Save Changes'
+      delete_source: 'Delete Source'
+      confirm_delete: 'Are you sure? This will delete all messages and events for this source.'
+    index:
+      title: 'Sources'
+      add_source: 'Add Source'
+      no_sources: 'No sources'
+      get_started: 'Get started by creating a new source.'
+      messages_count:
+        one: '1 message'
+        other: '%{count} messages'
+    new:
+      breadcrumb_sources: 'Sources'
+      breadcrumb_new: 'New'
+      source_name: 'Source Name'
+      name_placeholder: 'e.g., BetaList, My App'
+      create_source: 'Create Source'
+      whats_a_source_title: "What's a source?"
+      whats_a_source_body: "A source is a separate inbox for tracking email events. Each source has its own webhook URL that you'll configure in AWS."
+      how_many_sources_title: 'How many sources do I need?'
+      how_many_sources_body: 'We suggest starting with one source per project. Later, if you want to track different types of emails separately, you can create additional sources. For example, one for transactional emails (password resets, receipts) and another for marketing emails (newsletters, promotions).'
+    show:
+      ready_title: 'Ready to receive events'
+      ready_body: 'Configure AWS SES to send email events to your webhook URL. Once set up, events will appear automatically.'
+      view_setup: 'View Setup Instructions'
+      webhook_url: 'Webhook URL'
+      token: 'Token'
+      messages: 'Messages'
+  events:
+    event:
+      no_subject: '[no subject]'
+    index:
+      search_placeholder: 'Search by email or subject...'
+      headers:
+        event: 'Event'
+        recipient: 'Recipient'
+        subject: 'Subject'
+        date_time: 'Date & Time'
+      no_events_title: 'No email events'
+      no_events_body: "Email events will appear here once they're received from AWS SES."
+  messages:
+    show:
+      back_to_events_html: '&larr; Back to Events'
+      title: 'Email Message Details'
+      subject: 'Subject'
+      from: 'From'
+      to: 'To'
+      sent_at: 'Sent At'
+      tags: 'Tags'
+      ses_message_id: 'SES Message ID'
+      events: 'Events'
+      mail_metadata: 'Mail Metadata'
+      no_subject: '[no subject]'
+      not_available: 'N/A'
+  setups:
+    show:
+      overview_1: "This takes about 5 minutes. You don't need to share any AWS credentials with Sessy. Instead, you'll configure AWS to push events to your webhook URL. All events are cryptographically verified by AWS before processing. The AWS console requires a few steps, but we'll walk you through each one."
+      overview_2_html: "This guide assumes you've already %{link}."
+      overview_link: 'set up SES for sending emails'
+      step1_title: '1. Create a Configuration Set'
+      step1_body: "A Configuration Set in SES lets you track what happens to your emails after they're sent."
+      step1_li_1_html: "Go to <strong>Amazon SES</strong> in the AWS Console (make sure you're in the correct region where your SES is configured)"
+      step1_li_2_html: 'Navigate to <strong>Configuration sets</strong> in the left sidebar'
+      step1_li_3_html: 'Click <strong>Create set</strong>'
+      step1_li_4: 'Enter a name:'
+      step1_li_5_html: 'Leave other settings as default and click <strong>Create set</strong>'
+      step2_title: '2. Create an SNS Topic'
+      step2_body: 'SNS (Simple Notification Service) will forward the events to your webhook.'
+      step2_li_1_html: 'Go to <strong>Amazon SNS</strong> in the AWS Console'
+      step2_li_2_html: 'Click <strong>Topics</strong> in the left sidebar, then <strong>Create topic</strong>'
+      step2_li_3_html: 'Select <strong>Standard</strong> (not FIFO)'
+      step2_li_4: 'Enter a name:'
+      step2_li_5_html: 'Click <strong>Create topic</strong>'
+      step3_title: '3. Subscribe the Webhook to SNS'
+      step3_body: 'Create an HTTPS subscription that points to your Sessy webhook.'
+      step3_li_1_html: 'From your SNS topic page, click <strong>Create subscription</strong>'
+      step3_li_2_html: 'Set Protocol to <strong>HTTPS</strong>'
+      step3_li_3: 'Paste your webhook URL in the Endpoint field:'
+      step3_li_4_html: 'Expand <strong>Subscription filter policy</strong> and leave it empty (accept all)'
+      step3_li_5_html: 'Leave <strong>"Enable raw message delivery"</strong> unchecked (this is the default)'
+      step3_li_6_html: 'Click <strong>Create subscription</strong>'
+      step3_li_7: 'The subscription will be confirmed automatically when Sessy receives the confirmation request'
+      step4_title: '4. Add an Event Destination'
+      step4_body: 'Connect your Configuration Set to the SNS topic to start receiving events.'
+      step4_li_1_html: 'Go back to <strong>Amazon SES → Configuration sets</strong>'
+      step4_li_2: 'Click on'
+      step4_li_3_html: 'Go to the <strong>Event destinations</strong> tab'
+      step4_li_4_html: 'Click <strong>Add destination</strong>'
+      step4_li_5: 'Select the event types you want to track:'
+      step4_events:
+        sends_html: '<strong>Sends</strong> – Email was sent'
+        deliveries_html: "<strong>Deliveries</strong> – Email reached the recipient's mail server"
+        bounces_html: '<strong>Bounces</strong> – Email bounced (hard or soft)'
+        complaints_html: '<strong>Complaints</strong> – Recipient marked as spam'
+        opens_html: '<strong>Opens</strong> – Email was opened (requires tracking pixel)'
+        clicks_html: '<strong>Clicks</strong> – Link was clicked (requires link tracking)'
+        delivery_delays_html: '<strong>Delivery delays</strong> – Temporary delivery issues'
+        rejections_html: '<strong>Rejections</strong> – SES rejected the email'
+      step4_li_6_html: 'Click <strong>Next</strong>'
+      step4_li_7_html: 'Select <strong>Amazon SNS</strong> as the destination type'
+      step4_li_8_html: 'Choose %{name} from the dropdown'
+      step4_li_9_html: 'Enable <strong>"Include original email headers"</strong> – this allows Sessy to show subject lines and other email details'
+      step4_li_10_html: 'Click <strong>Next</strong>, then <strong>Add destination</strong>'
+      step5_title: '5. Use the Configuration Set When Sending'
+      step5_body: 'When sending emails via SES, specify your Configuration Set name.'
+      step5_sdk_title_html: 'With %{link}:'
+      step5_rails_title_html: 'With Rails Action Mailer using %{link}:'
+      step5_rails_global: 'Set the header globally for all emails from a mailer:'
+      step5_rails_method: 'Or set it per mailer method:'
+      verify_title: "Verify It's Working"
+      verify_body_html: 'Send a test email using your Configuration Set. Within seconds, you should see events appear in the %{link}. You''ll see a "Sent" event immediately, followed by "Delivered" once the email reaches the recipient''s server.'
+      verify_link: 'Activity tab'
+
+  time:
+    formats:
+      default: '%B %d, %Y'
+      long: '%B %d, %Y at %l:%M:%S %p %Z'
+      short: '%b %d, %l:%M:%S %p'

@@ -1,9 +1,9 @@
 <%
   tabs = [
-    { name: "Overview", path: source_path(source), key: :overview },
-    { name: "Activity", path: source_events_path(source), key: :activity },
-    { name: "Setup", path: source_setup_path(source), key: :setup },
-    { name: "Settings", path: edit_source_path(source), key: :settings }
+    { name: t("sources.tabs.overview"), path: source_path(source), key: :overview },
+    { name: t("sources.tabs.activity"), path: source_events_path(source), key: :activity },
+    { name: t("sources.tabs.setup"), path: source_setup_path(source), key: :setup },
+    { name: t("sources.tabs.settings"), path: edit_source_path(source), key: :settings }
   ]
 %>
 

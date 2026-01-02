@@ -3,7 +3,7 @@
   <div class="mb-6">
     <%= form_with url: source_events_path(@source), method: :get, class: "max-w-md" do |f| %>
       <%= text_field_tag :query, params[:query],
-          placeholder: "Search by email or subject...",
+          placeholder: t("events.index.search_placeholder"),
           class: "block w-full border rounded px-3 py-2 text-sm" %>
     <% end %>
   </div>
@@ -12,10 +12,10 @@
     <table class="min-w-full text-sm">
       <thead>
         <tr class="border-b">
-          <th class="py-2 text-left font-medium">Event</th>
-          <th class="py-2 text-left font-medium">Recipient</th>
-          <th class="py-2 text-left font-medium">Subject</th>
-          <th class="py-2 text-left font-medium">Date & Time</th>
+          <th class="py-2 text-left font-medium"><%= t("events.index.headers.event") %></th>
+          <th class="py-2 text-left font-medium"><%= t("events.index.headers.recipient") %></th>
+          <th class="py-2 text-left font-medium"><%= t("events.index.headers.subject") %></th>
+          <th class="py-2 text-left font-medium"><%= t("events.index.headers.date_time") %></th>
         </tr>
       </thead>
       <tbody class="divide-y">
@@ -28,8 +28,8 @@
     </div>
   <% else %>
     <div class="text-center py-12">
-      <h3 class="text-sm font-medium">No email events</h3>
-      <p class="mt-1 text-sm text-gray-500">Email events will appear here once they're received from AWS SES.</p>
+      <h3 class="text-sm font-medium"><%= t("events.index.no_events_title") %></h3>
+      <p class="mt-1 text-sm text-gray-500"><%= t("events.index.no_events_body") %></p>
     </div>
   <% end %>
 <% end %>

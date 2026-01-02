@@ -1,27 +1,27 @@
 <%= render layout: "sources/layout", locals: { source: @source, active: :overview } do %>
   <% if @source.messages.none? %>
     <div class="mb-8 p-4 border rounded">
-      <h2 class="font-semibold mb-2">Ready to receive events</h2>
+      <h2 class="font-semibold mb-2"><%= t("sources.show.ready_title") %></h2>
       <p class="text-sm text-gray-600 mb-3">
-        Configure AWS SES to send email events to your webhook URL. Once set up, events will appear automatically.
+        <%= t("sources.show.ready_body") %>
       </p>
-      <%= link_to "View Setup Instructions", source_setup_path(@source), class: "text-sm text-blue-600 hover:underline" %>
+      <%= link_to t("sources.show.view_setup"), source_setup_path(@source), class: "text-sm text-blue-600 hover:underline" %>
     </div>
   <% end %>
 
   <dl class="divide-y">
     <div class="py-3">
-      <dt class="text-sm text-gray-500">Webhook URL</dt>
+      <dt class="text-sm text-gray-500"><%= t("sources.show.webhook_url") %></dt>
       <dd class="mt-1 text-sm font-mono break-all"><%= webhook_url(source_token: @source.token) %></dd>
     </div>
 
     <div class="py-3">
-      <dt class="text-sm text-gray-500">Token</dt>
+      <dt class="text-sm text-gray-500"><%= t("sources.show.token") %></dt>
       <dd class="mt-1 text-sm font-mono"><%= @source.token %></dd>
     </div>
 
     <div class="py-3">
-      <dt class="text-sm text-gray-500">Messages</dt>
+      <dt class="text-sm text-gray-500"><%= t("sources.show.messages") %></dt>
       <dd class="mt-1 text-sm"><%= @source.messages.count %></dd>
     </div>
   </dl>

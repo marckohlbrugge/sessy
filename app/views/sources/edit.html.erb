@@ -12,7 +12,7 @@
       <% end %>
 
       <div class="mb-4">
-        <%= f.label :name, "Source Name", class: "block text-sm font-medium mb-1" %>
+        <%= f.label :name, t("sources.edit.source_name"), class: "block text-sm font-medium mb-1" %>
         <%= f.text_field :name, class: "block w-full border rounded px-3 py-2 text-sm" %>
       </div>
 
@@ -21,18 +21,18 @@
       </div>
 
       <div class="mb-4">
-        <%= f.label :retention_days, "Delete events after", class: "block text-sm font-medium mb-1" %>
+        <%= f.label :retention_days, t("sources.edit.delete_events_after"), class: "block text-sm font-medium mb-1" %>
         <div class="flex items-center gap-2">
-          <%= f.number_field :retention_days, min: 1, placeholder: "Days", class: "block w-24 border rounded px-3 py-2 text-sm" %>
-          <span class="text-sm text-gray-500">days</span>
+          <%= f.number_field :retention_days, min: 1, placeholder: t("sources.edit.days_placeholder"), class: "block w-24 border rounded px-3 py-2 text-sm" %>
+          <span class="text-sm text-gray-500"><%= t("sources.edit.days") %></span>
         </div>
-        <p class="text-xs text-gray-400 mt-1">Leave empty to keep data forever</p>
+        <p class="text-xs text-gray-400 mt-1"><%= t("sources.edit.leave_empty") %></p>
       </div>
 
       <div class="flex justify-between items-center">
-        <%= f.submit "Save Changes", class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50 cursor-pointer" %>
+        <%= f.submit t("sources.edit.save_changes"), class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50 cursor-pointer" %>
 
-        <%= button_to "Delete Source", @source, method: :delete, class: "text-sm text-red-600 hover:underline", data: { confirm: "Are you sure? This will delete all messages and events for this source." } %>
+        <%= button_to t("sources.edit.delete_source"), @source, method: :delete, class: "text-sm text-red-600 hover:underline", data: { confirm: t("sources.edit.confirm_delete") } %>
       </div>
     <% end %>
   </div>

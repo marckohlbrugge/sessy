@@ -1,7 +1,7 @@
 <div class="max-w-5xl mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-8">
-    <h1 class="text-2xl font-bold">Sources</h1>
-    <%= link_to "Add Source", new_source_path, class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50" %>
+    <h1 class="text-2xl font-bold"><%= t("sources.index.title") %></h1>
+    <%= link_to t("sources.index.add_source"), new_source_path, class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50" %>
   </div>
 
   <% if @sources.any? %>
@@ -14,7 +14,7 @@
                 <span class="size-3 rounded-full <%= source.color_class %>"></span>
                 <div>
                   <p class="font-medium"><%= source.name %></p>
-                  <p class="text-sm text-gray-500"><%= source.messages.count %> messages</p>
+                  <p class="text-sm text-gray-500"><%= t("sources.index.messages_count", count: source.messages.count) %></p>
                 </div>
               </div>
               <span class="text-gray-400">&rarr;</span>
@@ -25,10 +25,10 @@
     </ul>
   <% else %>
     <div class="text-center py-12">
-      <h3 class="text-sm font-medium">No sources</h3>
-      <p class="mt-1 text-sm text-gray-500">Get started by creating a new source.</p>
+      <h3 class="text-sm font-medium"><%= t("sources.index.no_sources") %></h3>
+      <p class="mt-1 text-sm text-gray-500"><%= t("sources.index.get_started") %></p>
       <div class="mt-4">
-        <%= link_to "Add Source", new_source_path, class: "text-blue-600 hover:underline" %>
+        <%= link_to t("sources.index.add_source"), new_source_path, class: "text-blue-600 hover:underline" %>
       </div>
     </div>
   <% end %>
