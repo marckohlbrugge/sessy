@@ -74,6 +74,12 @@ docker run \
 
 When both variables are set, Sessy will require authentication to access the dashboard. Webhook endpoints remain accessible without authentication so AWS SES can deliver events.
 
+If HTTP Basic Auth is not configured, Sessy will display a security warning banner. To disable this warning (for example, if you're using a different authentication method), set:
+
+```sh
+docker run --environment DISABLE_AUTH_WARNING=true ...
+```
+
 #### Database
 
 By default, Sessy uses SQLite and stores its database in the mounted storage volume. This is the simplest setup and works great for most use cases.
