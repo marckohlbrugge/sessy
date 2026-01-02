@@ -30,6 +30,7 @@ docker run -p 80:80 \
 See [Docker deployment docs](docs/docker-deployment.md) for full configuration options.
 
 Want to deploy your own modified version? See [Kamal deployment docs](docs/kamal-deployment.md) for deploying from a fork.
+
 Using Dokku? See [Dokku deployment docs](docs/dokku-deployment.md).
 
 ## Development
