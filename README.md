@@ -27,6 +27,7 @@ docker run -p 80:80 \
   -v sessy:/rails/storage \
   ghcr.io/marckohlbrugge/sessy:main
 ```
+
 See [Docker deployment docs](docs/docker-deployment.md) for full configuration options.
 
 Want to deploy your own modified version? See [Kamal deployment docs](docs/kamal-deployment.md) for deploying from a fork.
