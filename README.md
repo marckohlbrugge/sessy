@@ -28,7 +28,7 @@ docker run -p 80:80 \
   ghcr.io/marckohlbrugge/sessy:main
 ```
 
-See [Docker deployment docs](docs/docker-deployment.md) for full configuration options including PostgreSQL, HTTP Basic Auth, and production SSL setup.
+See [Docker deployment docs](docs/docker-deployment.md) for full configuration options.
 
 
 ## Development
