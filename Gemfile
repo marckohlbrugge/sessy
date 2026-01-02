@@ -35,6 +35,7 @@ end
 
 group :development do
   gem "web-console"
+  gem "foreman", "~> 0.90.0"
 end
 
 group :test do
