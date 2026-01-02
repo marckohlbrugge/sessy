@@ -18,9 +18,17 @@ Sessy is the open-source alternative. Use raw SES and still get a beautiful inte
 
 ## Running your own Sessy instance
 
-We'll provide more documentation on self-hosting soon. That said, Sessy is a fairly standard Rails application, so if you're familiar with Rails, you should be able to figure it out.
+The easiest way to run Sessy is with Docker:
 
-We're also considering offering a paid hosted version in the future.
+```bash
+docker run -p 80:80 \
+  -e SECRET_KEY_BASE=$(openssl rand -hex 64) \
+  -e DISABLE_SSL=true \
+  -v sessy:/rails/storage \
+  ghcr.io/marckohlbrugge/sessy:main
+```
+
+See [Docker deployment docs](docs/docker-deployment.md) for full configuration options including PostgreSQL, HTTP Basic Auth, and production SSL setup.
 
 
 ## Development
