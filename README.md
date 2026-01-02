@@ -27,31 +27,10 @@ docker run -p 80:80 \
   -v sessy:/rails/storage \
   ghcr.io/marckohlbrugge/sessy:main
 ```
-
-If you're using Dokku, you can use the following setup script which will launch Sessy on port 5081:
-```bash
-# sessy
-dokku apps:create sessy
-# configure ports of sessy
-dokku ports:add sessy http:5081:80
-# configure volumes of sessy
-sudo -u dokku mkdir -p /var/lib/dokku/data/storage/sessy/sessy
-dokku storage:mount sessy /var/lib/dokku/data/storage/sessy/sessy:/rails/storage
-
-# Manually fix mounted dir permissions since Sessy uses uid 1000 for security reasons
-sudo chown -R 1000:1000 /var/lib/dokku/data/storage/sessy/sessy
-
-# configure environment of sessy
-dokku config:set --no-restart sessy SECRET_KEY_BASE="$(openssl rand -hex 64)"
-dokku config:set --no-restart sessy DISABLE_SSL="true"
-# assign image to sessy
-dokku git:from-image sessy ghcr.io/marckohlbrugge/sessy:main
-```
-
 See [Docker deployment docs](docs/docker-deployment.md) for full configuration options.
 
 Want to deploy your own modified version? See [Kamal deployment docs](docs/kamal-deployment.md) for deploying from a fork.
-
+Using Dokku? See [Dokku deployment docs](docs/dokku-deployment.md).
 
 ## Development
 
