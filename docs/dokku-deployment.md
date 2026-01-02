@@ -1,8 +1,6 @@
 ## Deploying with Dokku
 
-If you'd like to run Sessy on your own server and you prefer imperative configuration, try [Dokku](https://dokku.com/).
-
-Dokku makes it easy to set up a server, copy an application to it, and manage its settings - all using standard bash commands.
+This guide covers deploying Sessy to a server running [Dokku](https://dokku.com/).
 
 ### 1. Install Dokku
 
@@ -45,8 +43,16 @@ For the initial deployment:
 dokku git:from-image sessy ghcr.io/marckohlbrugge/sessy:main
 ```
 
-To update sessy to another version, use the same command with a different tag:
+Configure Dokku to always pull the latest image when rebuilding:
 
 ```sh
-dokku git:from-image sessy ghcr.io/marckohlbrugge/sessy:some-other-tag
+dokku docker-options:add sessy build "--pull --no-cache"
+```
+
+### 5. Update to Latest Version
+
+To update Sessy to the latest version:
+
+```sh
+dokku ps:rebuild sessy
 ```
