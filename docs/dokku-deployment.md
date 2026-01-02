@@ -43,16 +43,12 @@ For the initial deployment:
 dokku git:from-image sessy ghcr.io/marckohlbrugge/sessy:main
 ```
 
-Configure Dokku to always pull the latest image when rebuilding:
-
-```sh
-dokku docker-options:add sessy build "--pull --no-cache"
-```
-
 ### 5. Update to Latest Version
 
-To update Sessy to the latest version:
+To update Sessy to the latest version, first find the latest version [here](https://github.com/marckohlbrugge/sessy/pkgs/container/sessy/versions?filters%5Bversion_type%5D=tagged). It will be the version at the top of the list.
+
+Then issue this command to update the deployment to a specific sha found above. For example, to update to version `sha256-8302dacf28b75c8c2e411269305ca4f3a39bd5265aa269bf3b2acbb78088c527` use:
 
 ```sh
-dokku ps:rebuild sessy
+dokku git:from-image sessy ghcr.io/marckohlbrugge/sessy:sha256-8302dacf28b75c8c2e411269305ca4f3a39bd5265aa269bf3b2acbb78088c527
 ```
