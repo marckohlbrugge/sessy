@@ -1,76 +1,42 @@
 require "test_helper"
 
 class Event::SearchableTest < ActiveSupport::TestCase
-  setup do
-    @source = Source.create!(name: "Test Source")
-  end
-
   # Search by recipient email
 
   test "search finds events by recipient email" do
-    event = create_event(recipient_email: "user@example.com")
-
-    assert_includes Event.search("user@example"), event
+    assert_includes Event.search("marc@example"), events(:welcome_send)
   end
 
   test "search finds events by partial email match" do
-    event = create_event(recipient_email: "john.doe@company.org")
-
-    assert_includes Event.search("john"), event
-    assert_includes Event.search("company"), event
+    assert_includes Event.search("john"), events(:digest_send)
+    assert_includes Event.search("example.com"), events(:digest_send)
   end
 
   # Search by message subject
 
   test "search finds events by message subject" do
-    event = create_event(recipient_email: "test@example.com", subject: "Welcome Email")
+    assert_includes Event.search("Welcome"), events(:welcome_send)
+  end
 
-    assert_includes Event.search("Welcome"), event
+  test "search finds events by partial subject match" do
+    assert_includes Event.search("Digest"), events(:digest_send)
   end
 
   # Case insensitivity
 
   test "search is case insensitive for recipient email" do
-    event = create_event(recipient_email: "User@Example.com")
-
-    assert_includes Event.search("user@example"), event
-    assert_includes Event.search("USER@EXAMPLE"), event
+    assert_includes Event.search("MARC@EXAMPLE"), events(:welcome_send)
+    assert_includes Event.search("Marc@Example"), events(:welcome_send)
   end
 
   test "search is case insensitive for subject" do
-    event = create_event(recipient_email: "test@example.com", subject: "Welcome Email")
-
-    assert_includes Event.search("welcome"), event
-    assert_includes Event.search("WELCOME"), event
+    assert_includes Event.search("welcome"), events(:welcome_send)
+    assert_includes Event.search("WELCOME"), events(:welcome_send)
   end
 
   # No matches
 
   test "search returns empty when no matches" do
-    create_event(recipient_email: "test@example.com")
-
     assert_empty Event.search("nonexistent")
-  end
-
-  private
-
-  def create_message(subject: nil)
-    Message.create!(
-      source: @source,
-      ses_message_id: SecureRandom.uuid,
-      sent_at: Time.current,
-      subject: subject
-    )
-  end
-
-  def create_event(recipient_email:, subject: nil)
-    message = create_message(subject: subject)
-    Event.create!(
-      message: message,
-      ses_message_id: message.ses_message_id,
-      event_type: "Send",
-      event_at: Time.current,
-      recipient_email: recipient_email
-    )
   end
 end
