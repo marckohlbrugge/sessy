@@ -27,6 +27,14 @@
   <body>
     <%= render "layouts/header" %>
 
+    <% if show_auth_warning? %>
+      <div class="bg-amber-500 text-amber-950 px-4 py-3 text-center text-sm">
+        <strong>Security Warning:</strong> This instance has no authentication configured. Anyone with the URL can access it.
+        Set <code class="bg-amber-600/30 px-1 rounded">HTTP_AUTH_USERNAME</code> and <code class="bg-amber-600/30 px-1 rounded">HTTP_AUTH_PASSWORD</code> to enable HTTP Basic Auth,
+        or <code class="bg-amber-600/30 px-1 rounded">DISABLE_AUTH_WARNING</code> to hide this warning.
+      </div>
+    <% end %>
+
     <%= yield %>
   </body>
 </html>

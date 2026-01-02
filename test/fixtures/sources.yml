@@ -1,0 +1,10 @@
+betalist:
+  name: BetaList
+  token: <%= SecureRandom.uuid %>
+  color: blue
+
+wip:
+  name: WIP
+  token: <%= SecureRandom.uuid %>
+  color: yellow
+  retention_days: 30

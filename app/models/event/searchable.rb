@@ -4,7 +4,7 @@ module Event::Searchable
   included do
     scope :search, ->(term) {
       left_joins(:message).where(
-        "recipient_email ILIKE ? OR messages.subject ILIKE ?",
+        "LOWER(recipient_email) LIKE LOWER(?) OR LOWER(messages.subject) LIKE LOWER(?)",
         "%#{sanitize_sql_like(term)}%",
         "%#{sanitize_sql_like(term)}%"
       )

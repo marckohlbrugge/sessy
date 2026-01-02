@@ -1,0 +1,23 @@
+welcome:
+  source: betalist
+  ses_message_id: <%= SecureRandom.uuid %>
+  subject: Welcome to BetaList
+  sent_at: <%= Time.current %>
+
+weekly_digest:
+  source: betalist
+  ses_message_id: <%= SecureRandom.uuid %>
+  subject: Weekly Startup Digest
+  sent_at: <%= 1.day.ago %>
+
+old_notification:
+  source: wip
+  ses_message_id: <%= SecureRandom.uuid %>
+  subject: Someone completed a todo
+  sent_at: <%= 60.days.ago %>
+
+recent_notification:
+  source: wip
+  ses_message_id: <%= SecureRandom.uuid %>
+  subject: New comment on your project
+  sent_at: <%= 5.days.ago %>

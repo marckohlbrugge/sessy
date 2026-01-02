@@ -1,0 +1,34 @@
+welcome_send:
+  message: welcome
+  ses_message_id: <%= ActiveRecord::FixtureSet.identify(:welcome, :uuid) %>
+  event_type: Send
+  event_at: <%= Time.current %>
+  recipient_email: marc@example.com
+
+welcome_delivery:
+  message: welcome
+  ses_message_id: <%= ActiveRecord::FixtureSet.identify(:welcome, :uuid) %>
+  event_type: Delivery
+  event_at: <%= Time.current %>
+  recipient_email: marc@example.com
+
+digest_send:
+  message: weekly_digest
+  ses_message_id: <%= ActiveRecord::FixtureSet.identify(:weekly_digest, :uuid) %>
+  event_type: Send
+  event_at: <%= 1.day.ago %>
+  recipient_email: john@example.com
+
+old_notification_send:
+  message: old_notification
+  ses_message_id: <%= ActiveRecord::FixtureSet.identify(:old_notification, :uuid) %>
+  event_type: Send
+  event_at: <%= 60.days.ago %>
+  recipient_email: jane@example.com
+
+recent_notification_send:
+  message: recent_notification
+  ses_message_id: <%= ActiveRecord::FixtureSet.identify(:recent_notification, :uuid) %>
+  event_type: Send
+  event_at: <%= 5.days.ago %>
+  recipient_email: alex@example.com
