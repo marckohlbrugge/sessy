@@ -1,0 +1,59 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  host: <%= ENV.fetch("POSTGRES_HOST", "localhost") %>
+  port: <%= ENV.fetch("POSTGRES_PORT", "5432") %>
+  username: <%= ENV.fetch("POSTGRES_USER", "postgres") %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  primary:
+    <<: *default
+    database: sessy_development
+  cache:
+    <<: *default
+    database: sessy_development_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: sessy_development_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: sessy_development_cable
+    migrations_paths: db/cable_migrate
+
+test:
+  primary:
+    <<: *default
+    database: sessy_test
+  cache:
+    <<: *default
+    database: sessy_test_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    database: sessy_test_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    database: sessy_test_cable
+    migrations_paths: db/cable_migrate
+
+production:
+  primary:
+    <<: *default
+    url: <%= ENV["DATABASE_URL"] %>
+  cache:
+    <<: *default
+    url: <%= ENV.fetch("CACHE_DATABASE_URL") { ENV["DATABASE_URL"] } %>
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *default
+    url: <%= ENV.fetch("QUEUE_DATABASE_URL") { ENV["DATABASE_URL"] } %>
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *default
+    url: <%= ENV.fetch("CABLE_DATABASE_URL") { ENV["DATABASE_URL"] } %>
+    migrations_paths: db/cable_migrate
