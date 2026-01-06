@@ -24,6 +24,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Features
 gem "aws-sdk-rails"
 gem "aws-sdk-sns"
+gem "local_time"
 gem "pagy"
 
 group :development, :test do
