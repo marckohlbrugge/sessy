@@ -9,20 +9,105 @@
     </div>
   <% end %>
 
-  <dl class="divide-y">
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">Webhook URL</dt>
-      <dd class="mt-1 text-sm font-mono break-all"><%= webhook_url(source_token: @source.token) %></dd>
-    </div>
+  <div class="space-y-10">
+    <section>
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold">Last 30 days</h2>
+        <span class="text-sm text-gray-500">Email activity overview</span>
+      </div>
 
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">Token</dt>
-      <dd class="mt-1 text-sm font-mono"><%= @source.token %></dd>
-    </div>
+      <div class="mt-4 border rounded-lg p-4 bg-white">
+        <%= render "sources/overview_chart", chart_data: @chart_data, chart_max: @chart_max %>
+      </div>
+    </section>
 
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">Messages</dt>
-      <dd class="mt-1 text-sm"><%= @source.messages.count %></dd>
-    </div>
-  </dl>
+    <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="border rounded-lg p-4">
+        <div class="text-sm text-gray-500">Emails sent</div>
+        <div class="text-2xl font-semibold"><%= number_with_delimiter(@sent_count) %></div>
+        <div class="text-xs text-gray-500 mt-1">Today: <%= number_with_delimiter(@sent_today_count) %></div>
+      </div>
+
+      <div class="border rounded-lg p-4">
+        <div class="text-sm text-gray-500">Delivered</div>
+        <div class="text-2xl font-semibold"><%= number_with_delimiter(@delivered_count) %></div>
+      </div>
+
+      <div class="border rounded-lg p-4">
+        <div class="text-sm text-gray-500">Bounces</div>
+        <div class="text-2xl font-semibold"><%= number_with_delimiter(@bounce_count) %></div>
+        <div class="text-xs text-gray-500 mt-1"><%= number_to_percentage(@bounce_rate, precision: 1) %> of sent</div>
+      </div>
+
+      <div class="border rounded-lg p-4">
+        <div class="text-sm text-gray-500">Complaints</div>
+        <div class="text-2xl font-semibold"><%= number_with_delimiter(@complaint_count) %></div>
+        <div class="text-xs text-gray-500 mt-1"><%= number_to_percentage(@complaint_rate, precision: 2) %> of sent</div>
+      </div>
+
+      <div class="border rounded-lg p-4">
+        <div class="text-sm text-gray-500">Unique opens</div>
+        <div class="text-2xl font-semibold"><%= number_with_delimiter(@unique_open_count) %></div>
+        <div class="text-xs text-gray-500 mt-1"><%= number_to_percentage(@open_rate, precision: 1) %> open rate</div>
+      </div>
+
+      <div class="border rounded-lg p-4">
+        <div class="text-sm text-gray-500">Unique clicks</div>
+        <div class="text-2xl font-semibold"><%= number_with_delimiter(@unique_click_count) %></div>
+        <div class="text-xs text-gray-500 mt-1"><%= number_to_percentage(@click_rate, precision: 2) %> click rate</div>
+      </div>
+    </section>
+
+    <section class="grid gap-6 lg:grid-cols-2">
+      <div class="border rounded-lg p-5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold">Bounces</h3>
+          <span class="text-sm text-gray-500"><%= number_to_percentage(@bounce_rate, precision: 1) %> bounce rate</span>
+        </div>
+
+        <% if @bounce_count.positive? %>
+          <div class="mt-4 space-y-3">
+            <% @bounce_breakdown.sort_by { |_, count| -count }.each do |bounce_type, count| %>
+              <% percentage = @bounce_count.positive? ? (count.to_f / @bounce_count) * 100 : 0 %>
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-700"><%= bounce_label(bounce_type) %></span>
+                <span class="text-gray-500"><%= number_with_delimiter(count) %></span>
+              </div>
+              <div class="h-1 bg-gray-100 rounded">
+                <div class="h-1 rounded bg-rose-300" style="width: <%= percentage.round(1) %>%"></div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="mt-3 text-sm text-gray-500">No bounces recorded in the last 30 days.</p>
+        <% end %>
+      </div>
+
+      <div class="border rounded-lg p-5">
+        <h3 class="text-base font-semibold">Open & link tracking</h3>
+        <% if @open_count.positive? || @click_count.positive? %>
+          <div class="mt-4 grid gap-4 sm:grid-cols-2">
+            <div class="rounded-lg bg-gray-50 p-4">
+              <div class="text-sm text-gray-500">Opens</div>
+              <div class="text-2xl font-semibold"><%= number_with_delimiter(@open_count) %></div>
+              <div class="text-xs text-gray-500 mt-1"><%= number_with_delimiter(@unique_open_count) %> unique</div>
+            </div>
+            <div class="rounded-lg bg-gray-50 p-4">
+              <div class="text-sm text-gray-500">Clicks</div>
+              <div class="text-2xl font-semibold"><%= number_with_delimiter(@click_count) %></div>
+              <div class="text-xs text-gray-500 mt-1"><%= number_with_delimiter(@unique_click_count) %> unique</div>
+            </div>
+          </div>
+          <p class="mt-4 text-xs text-gray-500">
+            Tracking data appears only when open and click events are enabled for your SES event destination.
+          </p>
+        <% else %>
+          <p class="mt-3 text-sm text-gray-500">
+            No open or click events were recorded in the last 30 days. Enable open and click tracking in SES
+            to see these metrics.
+          </p>
+        <% end %>
+      </div>
+    </section>
+  </div>
 <% end %>
