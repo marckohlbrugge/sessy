@@ -10,7 +10,7 @@ puts "Created source: #{source.name} (token: #{source.token})"
 source_email = "hello@example.com"
 
 base_time = Time.zone.local(2026, 1, 1, 9, 0, 0)
-event_offsets = [45, 120, 300, 540, 900]
+event_offsets = [ 45, 120, 300, 540, 900 ]
 
 # Create messages with events at various times
 messages = [
@@ -76,7 +76,7 @@ messages.each do |message_seed|
       subject: message_seed[:subject],
       sent_at:,
       mail_metadata: {
-        "destination" => [message_seed[:recipient]],
+        "destination" => [ message_seed[:recipient] ],
         "tags" => { "environment" => "demo", "campaign" => "seed-data" }
       }
     )
