@@ -32,7 +32,7 @@
     <!-- Sent At -->
     <div class="py-3">
       <dt class="text-sm text-gray-500">Sent At</dt>
-      <dd class="mt-1"><%= @message.sent_at ? local_time(@message.sent_at, "%B %d, %Y at %l:%M:%S %p %Z") : "N/A" %></dd>
+      <dd class="mt-1"><%= @message.sent_at ? local_time(@message.sent_at, format: :message_timestamp) : "N/A" %></dd>
     </div>
 
     <!-- Tags -->
@@ -68,7 +68,7 @@
                 <span class="text-sm"><%= event.recipient_email %></span>
               </div>
             </div>
-            <span class="text-sm text-gray-500"><%= local_time(event.event_at, "%b %d, %l:%M:%S %p") %></span>
+            <span class="text-sm text-gray-500"><%= local_time(event.event_at, format: :event_timestamp) %></span>
           </div>
         <% end %>
       </dd>

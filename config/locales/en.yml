@@ -29,3 +29,7 @@
 
 en:
   hello: "Hello world"
+  time:
+    formats:
+      event_timestamp: "%b %d, %l:%M:%S %p"
+      message_timestamp: "%B %d, %Y at %l:%M:%S %p"

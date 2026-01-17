@@ -19,6 +19,6 @@
     <% end %>
   </td>
   <td class="py-3 text-gray-500 whitespace-nowrap">
-    <%= local_time(event.event_at, "%b %d, %l:%M:%S %p") %>
+    <%= local_time(event.event_at, format: :event_timestamp) %>
   </td>
 </tr>
