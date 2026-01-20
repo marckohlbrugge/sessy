@@ -1,0 +1,30 @@
+<% series_index = chart_data[:series].index_by { |series| series[:key] } %>
+<% labels = chart_data[:dates].map { |date| date.strftime("%b %-d") } %>
+
+<div class="w-full">
+  <div class="h-64">
+    <canvas
+      data-controller="overview-chart"
+      data-overview-chart-labels-value="<%= labels.to_json %>"
+      data-overview-chart-sent-value="<%= series_index[:sent][:values].to_json %>"
+      data-overview-chart-delivered-value="<%= series_index[:delivered][:values].to_json %>"
+      data-overview-chart-bounced-value="<%= series_index[:bounced][:values].to_json %>"
+      class="w-full h-full"
+    ></canvas>
+  </div>
+
+  <div class="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
+    <div class="flex items-center gap-2">
+      <span class="h-2 w-2 rounded-full" style="background-color: #34d399"></span>
+      Sent
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="h-2 w-2 rounded-full" style="background-color: #38bdf8"></span>
+      Delivered
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="h-2 w-2 rounded-full" style="background-color: #fb7185"></span>
+      Bounced
+    </div>
+  </div>
+</div>
