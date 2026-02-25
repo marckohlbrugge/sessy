@@ -37,7 +37,22 @@ dokku config:set --no-restart sessy DISABLE_SSL="true"
 
 ### 4. Deploy
 
-The following command can be run both for the initial deployment of Sessy and for any updated versions you might want to install in the future:
+For the initial deployment:
+
 ```sh
-dokku git:from-image --force sessy ghcr.io/marckohlbrugge/sessy:main
+dokku git:from-image sessy ghcr.io/marckohlbrugge/sessy:main
+```
+
+Configure Dokku to always pull the latest image when rebuilding:
+
+```sh
+dokku docker-options:add sessy build "--pull --no-cache"
+```
+
+### 5. Update to Latest Version
+
+To update Sessy to the latest version:
+
+```sh
+dokku ps:rebuild sessy
 ```

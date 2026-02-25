@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", :as => :rails_health_check
 
+  mount MissionControl::Jobs::Engine, at: "/jobs"
+
   # Webhook for receiving SNS notifications (per source)
   post "webhooks/:source_token", to: "webhooks#create", as: :webhook
 

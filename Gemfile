@@ -18,6 +18,7 @@ gem "puma", ">= 5.0"
 gem "solid_cable"
 gem "solid_cache"
 gem "solid_queue"
+gem "mission_control-jobs"
 gem "thruster", require: false
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

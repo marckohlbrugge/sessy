@@ -34,6 +34,10 @@ Want to deploy your own modified version? See [Kamal deployment docs](docs/kamal
 
 Using Dokku? See [Dokku deployment docs](docs/dokku-deployment.md).
 
+## Jobs dashboard
+
+Sessy uses [Solid Queue](https://github.com/rails/solid_queue) for background jobs. A web dashboard is available at `/jobs` to monitor queues, retry failed jobs, and view recurring tasks.
+
 ## Development
 
 You are welcome to modify Sessy to your liking.
