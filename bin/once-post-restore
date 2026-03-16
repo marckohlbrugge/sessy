@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+# ONCE post-restore hook
+# After a restore, the backup snapshots (created by pre-backup) are the
+# consistent copies. Move them over the potentially-inconsistent originals.
+
+BACKUP_DIR="/storage/backups"
+
+if [ -d "$BACKUP_DIR" ]; then
+  for db in "${BACKUP_DIR}"/production*.sqlite3; do
+    [ -f "$db" ] || continue
+    name=$(basename "$db")
+    mv "$db" "/rails/storage/${name}"
+  done
+  rmdir "$BACKUP_DIR" 2>/dev/null || true
+fi

@@ -1,0 +1,15 @@
+#!/bin/bash -e
+
+# ONCE pre-backup hook
+# Creates consistent snapshots of SQLite databases using SQLite's backup API.
+# ONCE copies the entire /storage volume after this hook succeeds (without
+# pausing the container), so we write the snapshots into /storage/backups/.
+
+BACKUP_DIR="/storage/backups"
+mkdir -p "$BACKUP_DIR"
+
+for db in /rails/storage/production*.sqlite3; do
+  [ -f "$db" ] || continue
+  name=$(basename "$db")
+  sqlite3 "$db" ".backup '${BACKUP_DIR}/${name}'"
+done
