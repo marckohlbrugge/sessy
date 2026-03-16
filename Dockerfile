@@ -16,7 +16,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libsqlite3-0 libvips postgresql-client && \
+    apt-get install --no-install-recommends -y curl libjemalloc2 libsqlite3-0 sqlite3 libvips postgresql-client && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -58,6 +58,10 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 # Final stage for app image
 FROM base
+
+# ONCE backup hooks (must be at /hooks/ for ONCE compatibility)
+COPY --from=build /rails/bin/once-pre-backup /hooks/pre-backup
+COPY --from=build /rails/bin/once-post-restore /hooks/post-restore
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
