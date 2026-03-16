@@ -184,7 +184,7 @@ jobs:
           done <<< "$tags"
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v4.0.0
+        uses: sigstore/cosign-installer@v4.1.0
 
       - name: Cosign sign all tags (keyless OIDC)
         shell: bash
