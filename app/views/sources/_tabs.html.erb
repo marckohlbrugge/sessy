@@ -10,6 +10,7 @@
 <nav class="flex gap-5 border-b border-zinc-950/10 dark:border-white/10">
   <% tabs.each do |tab| %>
     <%= link_to tab[:name], tab[:path],
-        class: "py-2 text-sm -mb-px #{active == tab[:key] ? 'border-b border-zinc-900 dark:border-zinc-100 font-medium' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'}" %>
+        data: { text: tab[:name] },
+        class: "tab-link py-2 text-sm -mb-px #{active == tab[:key] ? 'border-b border-zinc-900 dark:border-zinc-100 font-medium' : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100'}" %>
   <% end %>
 </nav>

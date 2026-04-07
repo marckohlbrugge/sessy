@@ -9,6 +9,23 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
+/* Tabs: prevent layout shift when font-weight changes */
+.tab-link {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-link::after {
+  content: attr(data-text);
+  font-weight: 500;
+  height: 0;
+  visibility: hidden;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 /* Pagy pagination */
 .pagy.series-nav {
   display: flex;
