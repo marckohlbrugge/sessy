@@ -1,9 +1,9 @@
-<header class="bg-pink-500 text-white">
-  <nav class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
-    <%= link_to root_path, class: "flex items-center gap-2 text-2xl font-semibold" do %>
-      <%= image_tag "icon.svg", class: "size-8" %>
+<header class="border-b border-zinc-950/10 dark:border-white/10">
+  <nav class="mx-auto max-w-6xl px-4 py-3 flex justify-between items-center sm:px-6">
+    <%= link_to root_path, class: "flex items-center gap-2 text-sm font-semibold", "aria-label": "Homepage" do %>
+      <%= image_tag "icon.svg", class: "size-5" %>
       Sessy
     <% end %>
-    <%= link_to "Fork on GitHub", "https://github.com/marckohlbrugge/sessy", target: "_blank", class: "text-sm text-white hover:underline" %>
+    <%= link_to "GitHub", "https://github.com/marckohlbrugge/sessy", target: "_blank", class: "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" %>
   </nav>
 </header>

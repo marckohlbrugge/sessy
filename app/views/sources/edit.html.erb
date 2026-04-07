@@ -1,9 +1,9 @@
 <%= render layout: "sources/layout", locals: { source: @source, active: :settings } do %>
-  <div class="max-w-lg">
+  <div class="max-w-md">
     <%= form_with model: @source do |f| %>
       <% if @source.errors.any? %>
-        <div class="mb-4 p-3 border border-red-300 rounded text-sm text-red-600">
-          <ul class="list-disc list-inside">
+        <div class="mb-4 py-2 px-3 border border-red-300 dark:border-red-500/30 text-sm text-red-600 dark:text-red-400">
+          <ul role="list" class="list-disc list-inside">
             <% @source.errors.full_messages.each do |message| %>
               <li><%= message %></li>
             <% end %>
@@ -12,8 +12,8 @@
       <% end %>
 
       <div class="mb-4">
-        <%= f.label :name, "Source Name", class: "block text-sm font-medium mb-1" %>
-        <%= f.text_field :name, class: "block w-full border rounded px-3 py-2 text-sm" %>
+        <%= f.label :name, "Source name", class: "block text-sm font-medium mb-1" %>
+        <%= f.text_field :name, class: "w-full border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20" %>
       </div>
 
       <div class="mb-4">
@@ -23,17 +23,17 @@
       <div class="mb-4">
         <%= f.label :retention_days, "Delete events after", class: "block text-sm font-medium mb-1" %>
         <div class="flex items-center gap-2">
-          <%= f.number_field :retention_days, min: 1, placeholder: "Days", class: "block w-24 border rounded px-3 py-2 text-sm" %>
-          <span class="text-sm text-gray-500">days</span>
+          <%= f.number_field :retention_days, min: 1, placeholder: "Days", class: "w-20 border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm tabular-nums focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20" %>
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">days</span>
         </div>
-        <p class="text-xs text-gray-400 mt-1">Leave empty to keep data forever</p>
+        <p class="text-sm text-zinc-400 dark:text-zinc-500 mt-1">Leave empty to keep forever</p>
       </div>
 
-      <%= f.submit "Save Changes", class: "px-3 py-1.5 text-sm border rounded hover:bg-gray-50 cursor-pointer" %>
+      <%= f.submit "Save", class: "px-2.5 py-1.5 text-sm border border-zinc-950/10 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 cursor-pointer" %>
     <% end %>
 
-    <div class="mt-6 pt-4 border-t">
-      <%= button_to "Delete Source", @source, method: :delete, class: "text-sm text-red-600 hover:underline cursor-pointer", data: { turbo_confirm: "Are you sure? This will delete all messages and events for this source." } %>
+    <div class="mt-6 pt-4 border-t border-zinc-950/10 dark:border-white/10">
+      <%= button_to "Delete Source", @source, method: :delete, class: "text-sm text-red-600 dark:text-red-400 hover:underline cursor-pointer", data: { turbo_confirm: "Delete this source and all its data?" } %>
     </div>
   </div>
 <% end %>

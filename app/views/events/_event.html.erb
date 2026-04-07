@@ -1,24 +1,24 @@
-<tr class="hover:bg-gray-50">
-  <td class="py-3 pr-3">
-    <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium <%= event_badge_classes(event) %>">
+<tr class="border-b border-zinc-950/5 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
+  <td class="py-2 pr-3">
+    <span class="inline-flex items-center px-1.5 py-0.5 text-sm font-medium <%= event_badge_classes(event) %>">
       <%= event_label(event) %>
     </span>
   </td>
-  <td class="py-3 pr-3">
+  <td class="py-2 pr-3">
     <div class="flex items-center gap-2">
-      <img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-5 rounded-full">
+      <img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-4 rounded-full">
       <span><%= event.recipient_email %></span>
     </div>
   </td>
-  <td class="py-3 pr-3">
+  <td class="py-2 pr-3">
     <% if event.message %>
       <% subject = event.message.subject.presence || "[no subject]" %>
-      <%= link_to truncate(subject, length: 60), source_message_path(event.message.source, event.message), class: "text-blue-600 hover:underline" %>
+      <%= link_to truncate(subject, length: 60), source_message_path(event.message.source, event.message), class: "hover:underline" %>
     <% else %>
-      <span class="text-gray-400 italic">[no subject]</span>
+      <span class="text-zinc-400 dark:text-zinc-500">[no subject]</span>
     <% end %>
   </td>
-  <td class="py-3 text-gray-500 whitespace-nowrap">
+  <td class="py-2 text-zinc-500 dark:text-zinc-400 whitespace-nowrap tabular-nums">
     <%= local_time(event.event_at, format: :event_timestamp) %>
   </td>
 </tr>

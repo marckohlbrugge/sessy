@@ -2,23 +2,23 @@ module EventsHelper
   def event_badge_classes(event)
     case event.event_type
     when "send"
-      "bg-green-100 text-green-800"
+      "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
     when "delivery"
-      "bg-green-600 text-white"
+      "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
     when "bounce"
       event_bounce_badge_classes(event)
     when "complaint", "reject", "rendering_failure"
-      "bg-red-600 text-white"
+      "bg-red-500/15 text-red-700 dark:text-red-400"
     when "delivery_delay"
-      "bg-yellow-100 text-yellow-800"
+      "bg-amber-500/10 text-amber-700 dark:text-amber-400"
     when "subscription"
-      "bg-blue-100 text-blue-800"
+      "bg-sky-500/10 text-sky-700 dark:text-sky-400"
     when "open"
-      "bg-cyan-100 text-cyan-800"
+      "bg-cyan-500/10 text-cyan-700 dark:text-cyan-400"
     when "click"
-      "bg-purple-100 text-purple-800"
+      "bg-violet-500/10 text-violet-700 dark:text-violet-400"
     else
-      "bg-gray-100 text-gray-800"
+      "bg-zinc-500/10 text-zinc-700 dark:text-zinc-400"
     end
   end
 
@@ -62,22 +62,20 @@ module EventsHelper
 
   def event_filter_chip_classes(event_type)
     case event_type
-    when "send"
-      "text-green-800 border-green-300 bg-green-100"
-    when "delivery"
-      "text-green-800 border-green-300 bg-green-100"
+    when "send", "delivery"
+      "border-emerald-500/30 text-emerald-700 bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30 dark:bg-emerald-500/15"
     when "bounce"
-      "text-red-800 border-red-300 bg-red-100"
+      "border-red-500/30 text-red-700 bg-red-500/20 dark:text-red-400 dark:border-red-500/30 dark:bg-red-500/15"
     when "complaint", "reject"
-      "text-red-800 border-red-300 bg-red-100"
+      "border-red-500/30 text-red-700 bg-red-500/20 dark:text-red-400 dark:border-red-500/30 dark:bg-red-500/15"
     when "delivery_delay"
-      "text-yellow-800 border-yellow-300 bg-yellow-100"
+      "border-amber-500/30 text-amber-700 bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30 dark:bg-amber-500/15"
     when "open"
-      "text-cyan-800 border-cyan-300 bg-cyan-100"
+      "border-cyan-500/30 text-cyan-700 bg-cyan-500/20 dark:text-cyan-400 dark:border-cyan-500/30 dark:bg-cyan-500/15"
     when "click"
-      "text-purple-800 border-purple-300 bg-purple-100"
+      "border-violet-500/30 text-violet-700 bg-violet-500/20 dark:text-violet-400 dark:border-violet-500/30 dark:bg-violet-500/15"
     else
-      "text-gray-800 border-gray-300 bg-gray-100"
+      "border-zinc-500/30 text-zinc-700 bg-zinc-500/20 dark:text-zinc-400 dark:border-zinc-500/30 dark:bg-zinc-500/15"
     end
   end
 
@@ -102,11 +100,11 @@ module EventsHelper
   def event_bounce_badge_classes(event)
     case event.bounce_type
     when "Permanent"
-      "bg-red-600 text-white"
+      "bg-red-500/15 text-red-700 dark:text-red-400"
     when "Transient", "Undetermined"
-      "bg-red-100 text-red-800"
+      "bg-red-500/10 text-red-700 dark:text-red-400"
     else
-      "bg-red-600 text-white"
+      "bg-red-500/15 text-red-700 dark:text-red-400"
     end
   end
 end

@@ -13,6 +13,10 @@ export default class extends Controller {
     const Chart = window.Chart
     if (!Chart) return
 
+    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+    const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"
+    const tickColor = isDark ? "#71717a" : "#a1a1aa"
+
     const ctx = this.element.getContext("2d")
     this.chart = new Chart(ctx, {
       type: "line",
@@ -34,6 +38,13 @@ export default class extends Controller {
         plugins: {
           legend: { display: false },
           tooltip: {
+            backgroundColor: isDark ? "#27272a" : "#18181b",
+            titleColor: isDark ? "#d4d4d8" : "#fafafa",
+            bodyColor: isDark ? "#a1a1aa" : "#d4d4d8",
+            borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.1)",
+            borderWidth: 1,
+            cornerRadius: 0,
+            padding: 8,
             callbacks: {
               label: (context) => `${context.dataset.label}: ${this.formatNumber(context.parsed.y)}`
             }
@@ -41,13 +52,17 @@ export default class extends Controller {
         },
         scales: {
           x: {
-            grid: { display: false },
-            ticks: { color: "#6b7280", maxRotation: 0 }
+            grid: { color: gridColor },
+            border: { display: false },
+            ticks: { color: tickColor, maxRotation: 0, font: { size: 11 } }
           },
           y: {
             beginAtZero: true,
+            grid: { color: gridColor },
+            border: { display: false },
             ticks: {
-              color: "#6b7280",
+              color: tickColor,
+              font: { size: 11 },
               callback: (value) => this.formatNumber(value)
             }
           }
@@ -69,9 +84,9 @@ export default class extends Controller {
       data,
       borderColor: color,
       backgroundColor: "transparent",
-      borderWidth: 2,
+      borderWidth: 1.5,
       pointRadius: 0,
-      tension: 0.35
+      tension: 0
     }
   }
 

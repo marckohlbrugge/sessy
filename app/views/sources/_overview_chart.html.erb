@@ -2,7 +2,7 @@
 <% labels = chart_data[:dates].map { |date| date.strftime("%b %-d") } %>
 
 <div class="w-full">
-  <div class="h-64">
+  <div class="h-48">
     <canvas
       data-controller="overview-chart"
       data-overview-chart-labels-value="<%= labels.to_json %>"
@@ -13,17 +13,17 @@
     ></canvas>
   </div>
 
-  <div class="mt-4 flex flex-wrap gap-4 text-xs text-gray-500">
-    <div class="flex items-center gap-2">
-      <span class="h-2 w-2 rounded-full" style="background-color: #34d399"></span>
+  <div class="mt-3 flex flex-wrap gap-4 text-sm text-zinc-500 dark:text-zinc-400">
+    <div class="flex items-center gap-1.5">
+      <span class="size-1.5 rounded-full bg-emerald-400"></span>
       Sent
     </div>
-    <div class="flex items-center gap-2">
-      <span class="h-2 w-2 rounded-full" style="background-color: #38bdf8"></span>
+    <div class="flex items-center gap-1.5">
+      <span class="size-1.5 rounded-full bg-sky-400"></span>
       Delivered
     </div>
-    <div class="flex items-center gap-2">
-      <span class="h-2 w-2 rounded-full" style="background-color: #fb7185"></span>
+    <div class="flex items-center gap-1.5">
+      <span class="size-1.5 rounded-full bg-rose-400"></span>
       Bounced
     </div>
   </div>

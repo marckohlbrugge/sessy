@@ -1,10 +1,10 @@
 <fieldset>
-  <legend class="block text-sm font-medium mb-2">Color Label</legend>
-  <div class="flex gap-2">
+  <legend class="block text-sm font-medium mb-1.5">Color</legend>
+  <div class="flex gap-1.5">
     <% Source::Colors::ALL.each do |color| %>
       <label class="cursor-pointer">
         <%= f.radio_button :color, color, class: "peer sr-only" %>
-        <span class="block size-8 rounded-full <%= Source::Colors::CLASSES[color] %> peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-gray-400"></span>
+        <span class="block size-6 rounded-full <%= Source::Colors::CLASSES[color] %> peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-zinc-400 dark:peer-checked:ring-offset-zinc-950"></span>
       </label>
     <% end %>
   </div>

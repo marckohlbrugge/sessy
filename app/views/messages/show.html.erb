@@ -1,86 +1,76 @@
-<div class="max-w-7xl mx-auto px-4 py-8">
-  <div class="mb-6">
-    <%= link_to source_events_path(@source), class: "text-sm text-gray-600 hover:text-gray-900" do %>
-      &larr; Back to Events
+<div class="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+  <div class="mb-4">
+    <%= link_to source_events_path(@source), class: "text-sm text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-zinc-100" do %>
+      &larr; Back to Activity
     <% end %>
-    <h1 class="text-2xl font-bold mt-3">Email Message Details</h1>
+    <h1 class="text-lg font-semibold mt-2">Message details</h1>
   </div>
 
-  <dl class="divide-y">
-    <!-- Subject -->
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">Subject</dt>
-      <dd class="mt-1"><%= @message.subject || "[no subject]" %></dd>
+  <dl class="text-sm">
+    <div class="py-2.5 border-b border-zinc-950/5 dark:border-white/5 flex gap-4">
+      <dt class="w-28 shrink-0 text-zinc-500 dark:text-zinc-400">Subject</dt>
+      <dd class="font-medium"><%= @message.subject || "[no subject]" %></dd>
     </div>
 
-    <!-- From -->
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">From</dt>
-      <dd class="mt-1"><%= @message.source_email %></dd>
+    <div class="py-2.5 border-b border-zinc-950/5 dark:border-white/5 flex gap-4">
+      <dt class="w-28 shrink-0 text-zinc-500 dark:text-zinc-400">From</dt>
+      <dd><%= @message.source_email %></dd>
     </div>
 
-    <!-- To -->
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">To</dt>
-      <dd class="mt-1">
+    <div class="py-2.5 border-b border-zinc-950/5 dark:border-white/5 flex gap-4">
+      <dt class="w-28 shrink-0 text-zinc-500 dark:text-zinc-400">To</dt>
+      <dd>
         <% @message.destination_emails.each do |email| %>
           <div><%= email %></div>
         <% end %>
       </dd>
     </div>
 
-    <!-- Sent At -->
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">Sent At</dt>
-      <dd class="mt-1"><%= @message.sent_at ? local_time(@message.sent_at, format: :message_timestamp) : "N/A" %></dd>
+    <div class="py-2.5 border-b border-zinc-950/5 dark:border-white/5 flex gap-4">
+      <dt class="w-28 shrink-0 text-zinc-500 dark:text-zinc-400">Sent at</dt>
+      <dd class="tabular-nums"><%= @message.sent_at ? local_time(@message.sent_at, format: :message_timestamp) : "N/A" %></dd>
     </div>
 
-    <!-- Tags -->
     <% if @message.tags.present? %>
-      <div class="py-3">
-        <dt class="text-sm text-gray-500">Tags</dt>
-        <dd class="mt-1">
+      <div class="py-2.5 border-b border-zinc-950/5 dark:border-white/5 flex gap-4">
+        <dt class="w-28 shrink-0 text-zinc-500 dark:text-zinc-400">Tags</dt>
+        <dd class="flex flex-wrap gap-1">
           <% @message.tags.each do |key, value| %>
-            <span class="inline-flex items-center rounded bg-gray-100 px-2 py-0.5 text-xs font-mono mr-1"><%= key %>=<%= Array(value).join(", ") %></span>
+            <span class="inline-flex items-center bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 text-sm font-mono"><%= key %>=<%= Array(value).join(", ") %></span>
           <% end %>
         </dd>
       </div>
     <% end %>
 
-    <!-- SES Message ID -->
-    <div class="py-3">
-      <dt class="text-sm text-gray-500">SES Message ID</dt>
-      <dd class="mt-1 text-sm font-mono break-all"><%= @message.ses_message_id %></dd>
+    <div class="py-2.5 border-b border-zinc-950/5 dark:border-white/5 flex gap-4">
+      <dt class="w-28 shrink-0 text-zinc-500 dark:text-zinc-400">SES ID</dt>
+      <dd class="font-mono break-all text-zinc-600 dark:text-zinc-300"><%= @message.ses_message_id %></dd>
     </div>
 
-    <!-- Events -->
-    <div class="py-3">
-      <dt class="text-sm text-gray-500 mb-3">Events (<%= @message.events_count %>)</dt>
-      <dd class="mt-1 space-y-2">
+    <div class="py-2.5 border-b border-zinc-950/5 dark:border-white/5">
+      <dt class="text-zinc-500 dark:text-zinc-400 mb-2">Events (<%= @message.events_count %>)</dt>
+      <dd class="space-y-1">
         <% @message.events.reverse_chronologically.each do |event| %>
-          <div class="flex items-center justify-between py-2">
-            <div class="flex items-center gap-3">
-              <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium <%= event_badge_classes(event) %>">
+          <div class="flex items-center justify-between py-1.5">
+            <div class="flex items-center gap-2.5">
+              <span class="inline-flex items-center px-1.5 py-0.5 text-sm font-medium <%= event_badge_classes(event) %>">
                 <%= event_label(event) %>
               </span>
-              <div class="flex items-center gap-2">
-                <img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-5 rounded-full">
-                <span class="text-sm"><%= event.recipient_email %></span>
+              <div class="flex items-center gap-1.5">
+                <img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-4 rounded-full">
+                <span><%= event.recipient_email %></span>
               </div>
             </div>
-            <span class="text-sm text-gray-500"><%= local_time(event.event_at, format: :event_timestamp) %></span>
+            <span class="text-zinc-500 dark:text-zinc-400 tabular-nums"><%= local_time(event.event_at, format: :event_timestamp) %></span>
           </div>
         <% end %>
       </dd>
     </div>
 
-    <!-- Mail Metadata -->
-    <div class="py-3">
+    <div class="py-2.5">
       <details>
-        <summary class="text-sm text-gray-500 cursor-pointer">Mail Metadata</summary>
-        <div class="mt-2">
-          <pre class="text-xs p-3 border rounded overflow-x-auto"><%= JSON.pretty_generate(@message.mail_metadata) %></pre>
-        </div>
+        <summary class="text-zinc-500 dark:text-zinc-400 cursor-pointer hover:text-zinc-700 dark:hover:text-zinc-200">Mail metadata</summary>
+        <pre class="mt-2 text-sm p-3 bg-zinc-50 dark:bg-white/5 overflow-x-auto font-mono text-zinc-700 dark:text-zinc-300"><%= JSON.pretty_generate(@message.mail_metadata) %></pre>
       </details>
     </div>
   </dl>

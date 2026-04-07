@@ -1,12 +1,12 @@
 <%= render layout: "sources/layout", locals: { source: @source, active: :activity } do %>
-  <!-- Search & Filters -->
-  <div class="mb-6 space-y-3">
-    <%= form_with url: source_events_path(@source), method: :get, id: "events-filter-form" do |f| %>
+  <div class="mb-5 space-y-3">
+    <%= form_with url: source_events_path(@source), method: :get, id: "events-filter-form", class: "space-y-3" do |f| %>
       <%= text_field_tag :query, params[:query],
           placeholder: "Search by email or subject...",
-          class: "block w-full max-w-md border rounded px-3 py-2 text-sm" %>
+          class: "w-full max-w-sm border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20",
+          "aria-label": "Search events" %>
 
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-wrap items-center gap-1.5">
         <% active_types = Array(params[:event_types]).reject(&:blank?) %>
         <% EventsHelper::EVENT_TYPE_FILTERS.each do |type, label| %>
           <% count = @filter_counts.dig(:event_types, type) || 0 %>
@@ -16,48 +16,57 @@
               <%= "checked" if is_active %>
               class="peer sr-only"
               onchange="this.form.requestSubmit()">
-            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border
-              <%= is_active ? event_filter_chip_classes(type) : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300' %>
+            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-sm border
+              border-zinc-950/10 dark:border-white/10 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300
               peer-checked:hidden">
-              <%= label %><span class="text-gray-400"><%= count %></span>
+              <%= label %><span class="tabular-nums opacity-60"><%= count %></span>
             </span>
-            <span class="hidden items-center gap-1 px-2 py-1 text-xs rounded border
+            <span class="hidden items-center gap-1 px-1.5 py-0.5 text-sm border
               <%= event_filter_chip_classes(type) %>
               peer-checked:inline-flex">
-              <%= label %><span class="opacity-60"><%= count %></span>
+              <%= label %><span class="tabular-nums opacity-60"><%= count %></span>
             </span>
           </label>
         <% end %>
 
         <% if active_types.any? %>
-          <%= link_to "Clear", source_events_path(@source, query: params[:query].presence), class: "text-xs text-gray-400 hover:text-gray-600" %>
+          <%= link_to "Clear", source_events_path(@source, query: params[:query].presence), class: "text-sm text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300" %>
         <% end %>
       </div>
     <% end %>
   </div>
 
   <% if @events.any? %>
-    <table class="min-w-full text-sm">
-      <thead>
-        <tr class="border-b">
-          <th class="py-2 text-left font-medium">Event</th>
-          <th class="py-2 text-left font-medium">Recipient</th>
-          <th class="py-2 text-left font-medium">Subject</th>
-          <th class="py-2 text-left font-medium">Date & Time</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y">
-        <%= render partial: "event", collection: @events %>
-      </tbody>
-    </table>
+    <div class="-mx-4 -my-2 overflow-x-auto whitespace-nowrap sm:-mx-6">
+      <div class="inline-block min-w-full px-4 py-2 align-middle sm:px-6">
+        <table class="min-w-full text-sm table-fixed">
+          <colgroup>
+            <col class="w-28">
+            <col class="w-64">
+            <col>
+            <col class="w-40">
+          </colgroup>
+          <thead>
+            <tr class="border-b border-zinc-950/10 dark:border-white/10">
+              <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Event</th>
+              <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Recipient</th>
+              <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Subject</th>
+              <th class="py-2 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= render partial: "event", collection: @events %>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-    <div class="mt-6">
+    <div class="mt-4">
       <%== @pagy.series_nav %>
     </div>
   <% else %>
-    <div class="text-center py-12">
-      <h3 class="text-sm font-medium">No email events</h3>
-      <p class="mt-1 text-sm text-gray-500">Email events will appear here once they're received from AWS SES.</p>
+    <div class="text-center py-16">
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">No events yet.</p>
     </div>
   <% end %>
 <% end %>

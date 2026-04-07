@@ -1,1 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap");
 @import "tailwindcss";
+@source "../../helpers";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01", "ss03";
+}

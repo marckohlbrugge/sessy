@@ -1,10 +1,8 @@
-<div class="mb-6">
-  <h1 class="text-2xl font-bold flex items-center gap-2">
-    <%= link_to "Sources", sources_path, class: "text-gray-400 hover:underline" %>
-    <span class="text-gray-300">/</span>
-    <%= link_to source_path(source), class: "flex items-center gap-2 hover:underline" do %>
-      <span class="size-3 rounded-full <%= source.color_class %>"></span>
-      <%= source.name %>
-    <% end %>
-  </h1>
+<div class="mb-4 flex items-center gap-2 text-sm">
+  <%= link_to "Sources", sources_path, class: "text-zinc-400 hover:text-zinc-900 dark:text-zinc-500 dark:hover:text-zinc-100" %>
+  <span class="text-zinc-300 dark:text-zinc-600">/</span>
+  <%= link_to source_path(source), class: "flex items-center gap-2 font-medium hover:underline" do %>
+    <span class="size-2 rounded-full <%= source.color_class %>"></span>
+    <%= source.name %>
+  <% end %>
 </div>

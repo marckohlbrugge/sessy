@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="antialiased">
   <head>
     <title><%= content_for(:title) || "Sessy" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -11,30 +11,29 @@
 
     <%= yield :head %>
 
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "vendor/highlight.js/github-dark", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <%= render "layouts/header" %>
+  <body class="bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <div class="isolate">
+      <%= render "layouts/header" %>
 
-    <% if show_auth_warning? %>
-      <div class="bg-amber-500 text-amber-950 px-4 py-3 text-center text-sm">
-        <strong>Security Warning:</strong> This instance has no authentication configured. Anyone with the URL can access it.
-        Set <code class="bg-amber-600/30 px-1 rounded">HTTP_AUTH_USERNAME</code> and <code class="bg-amber-600/30 px-1 rounded">HTTP_AUTH_PASSWORD</code> to enable HTTP Basic Auth,
-        or <code class="bg-amber-600/30 px-1 rounded">DISABLE_AUTH_WARNING</code> to hide this warning.
-      </div>
-    <% end %>
+      <% if show_auth_warning? %>
+        <div class="bg-amber-500/10 text-amber-700 dark:text-amber-400 px-4 py-2 text-center text-sm border-b border-amber-500/20">
+          <strong>No auth configured.</strong>
+          Set <code class="bg-amber-500/10 px-1">HTTP_AUTH_USERNAME</code> / <code class="bg-amber-500/10 px-1">HTTP_AUTH_PASSWORD</code> to secure this instance.
+        </div>
+      <% end %>
 
-    <%= yield %>
+      <main>
+        <%= yield %>
+      </main>
+    </div>
   </body>
 </html>
