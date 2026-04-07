@@ -23,6 +23,7 @@ gem "thruster", require: false
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Features
+gem "csv"
 gem "aws-sdk-rails"
 gem "aws-sdk-sns"
 gem "local_time"

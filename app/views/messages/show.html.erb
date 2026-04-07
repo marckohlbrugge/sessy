@@ -57,7 +57,7 @@
                 <%= event_label(event) %>
               </span>
               <div class="flex items-center gap-1.5">
-                <img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-4 rounded-full">
+                <span class="size-4 rounded-full bg-zinc-200 dark:bg-zinc-700 inline-block"><img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-4 rounded-full"></span>
                 <span><%= event.recipient_email %></span>
               </div>
             </div>

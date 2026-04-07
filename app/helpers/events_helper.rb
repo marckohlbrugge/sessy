@@ -81,7 +81,7 @@ module EventsHelper
 
   def gravatar_url(email, size: 32)
     hash = Digest::MD5.hexdigest(email.to_s.downcase)
-    "https://www.gravatar.com/avatar/#{hash}?s=#{size}&d=mp"
+    "https://www.gravatar.com/avatar/#{hash}?s=#{size}&d=blank"
   end
 
   private

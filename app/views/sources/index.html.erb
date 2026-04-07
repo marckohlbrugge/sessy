@@ -12,19 +12,44 @@
             <tr class="border-b border-zinc-950/10 dark:border-white/10">
               <th class="py-2 pr-3 text-left text-sm font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Name</th>
               <th class="py-2 pr-3 text-right text-sm font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Messages</th>
+              <th class="py-2 pr-3 text-right text-sm font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">Sent <span class="font-normal text-zinc-400 dark:text-zinc-500">30d</span></th>
+              <th class="py-2 pr-3 text-right text-sm font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">Bounce rate</th>
+              <th class="py-2 pr-3 text-right text-sm font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400 hidden md:table-cell">Last activity</th>
               <th class="py-2 text-right text-sm font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400 w-8"></th>
             </tr>
           </thead>
           <tbody>
             <% @sources.each do |source| %>
-              <tr class="border-b border-zinc-950/5 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
+              <% stats = @source_stats[source.id] || {} %>
+              <tr class="border-b border-zinc-950/5 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/[0.02] cursor-pointer" onclick="Turbo.visit('<%= source_path(source) %>')">
                 <td class="py-2.5 pr-3">
-                  <%= link_to source_path(source), class: "flex items-center gap-2.5 hover:underline" do %>
+                  <%= link_to source_path(source), class: "flex items-center gap-2.5" do %>
                     <span class="size-2.5 rounded-full <%= source.color_class %>"></span>
                     <span class="font-medium"><%= source.name %></span>
                   <% end %>
                 </td>
                 <td class="py-2.5 pr-3 text-right tabular-nums text-zinc-500 dark:text-zinc-400"><%= number_with_delimiter(source.messages.count) %></td>
+                <td class="py-2.5 pr-3 text-right tabular-nums text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
+                  <% if stats[:sent_30d]&.positive? %>
+                    <%= number_with_delimiter(stats[:sent_30d]) %>
+                  <% else %>
+                    <span class="text-zinc-300 dark:text-zinc-600">&mdash;</span>
+                  <% end %>
+                </td>
+                <td class="py-2.5 pr-3 text-right tabular-nums hidden sm:table-cell">
+                  <% if stats[:bounce_rate] %>
+                    <span class="<%= stats[:bounce_rate] > 5 ? 'text-rose-600 dark:text-rose-400' : 'text-zinc-500 dark:text-zinc-400' %>"><%= number_to_percentage(stats[:bounce_rate], precision: 1) %></span>
+                  <% else %>
+                    <span class="text-zinc-300 dark:text-zinc-600">&mdash;</span>
+                  <% end %>
+                </td>
+                <td class="py-2.5 pr-3 text-right text-zinc-500 dark:text-zinc-400 whitespace-nowrap hidden md:table-cell">
+                  <% if stats[:last_event_at] %>
+                    <%= local_time(stats[:last_event_at], format: "%b %-d") %>
+                  <% else %>
+                    <span class="text-zinc-300 dark:text-zinc-600">Never</span>
+                  <% end %>
+                </td>
                 <td class="py-2.5 text-right text-zinc-400 dark:text-zinc-500">&rarr;</td>
               </tr>
             <% end %>

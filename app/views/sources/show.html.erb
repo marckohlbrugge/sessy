@@ -17,6 +17,28 @@
       <div class="mt-3 border border-zinc-950/10 dark:border-white/10 p-4">
         <%= render "sources/overview_chart", chart_data: @chart_data, chart_max: @chart_max %>
       </div>
+
+      <p class="mt-4 text-sm text-zinc-500 dark:text-zinc-400">
+        <%= number_with_delimiter(@sent_count) %> sent
+        <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
+        <%= number_with_delimiter(@delivered_count) %> delivered
+        <% if @bounce_count.positive? %>
+          <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
+          <span class="<%= @bounce_rate > 5 ? 'text-rose-600 dark:text-rose-400' : '' %>"><%= number_to_percentage(@bounce_rate, precision: 1) %> bounced</span>
+        <% end %>
+        <% if @complaint_count.positive? %>
+          <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
+          <span class="<%= @complaint_rate > 0.1 ? 'text-rose-600 dark:text-rose-400' : '' %>"><%= pluralize(@complaint_count, "complaint") %></span>
+        <% end %>
+        <% if @unique_open_count.positive? %>
+          <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
+          <%= number_to_percentage(@open_rate, precision: 1) %> opened
+        <% end %>
+        <% if @unique_click_count.positive? %>
+          <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
+          <%= number_to_percentage(@click_rate, precision: 1) %> clicked
+        <% end %>
+      </p>
     </section>
 
     <section>

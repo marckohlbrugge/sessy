@@ -1,10 +1,27 @@
 <%= render layout: "sources/layout", locals: { source: @source, active: :activity } do %>
   <div class="mb-5 space-y-3">
-    <%= form_with url: source_events_path(@source), method: :get, id: "events-filter-form", class: "space-y-3" do |f| %>
-      <%= text_field_tag :query, params[:query],
-          placeholder: "Search by email or subject...",
-          class: "w-full max-w-sm border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20",
-          "aria-label": "Search events" %>
+    <%= form_with url: source_events_path(@source), method: :get, id: "events-filter-form", class: "space-y-3", data: { controller: "debounced-submit" } do |f| %>
+      <div class="flex items-center gap-3">
+        <%= search_field_tag :query, params[:query],
+            placeholder: "Search by email or subject...",
+            class: "w-full max-w-sm border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20",
+            "aria-label": "Search events",
+            data: { action: "input->debounced-submit#submit search->debounced-submit#submit" } %>
+
+        <div class="flex items-center gap-2 ml-auto">
+          <%= link_to "Export", source_events_path(@source, format: :csv, **request.query_parameters), class: "px-2.5 py-1.5 text-sm border border-zinc-950/10 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 whitespace-nowrap" %>
+
+          <div class="relative">
+            <%= select_tag :date_range,
+                options_for_select(Event.date_range_presets.map { |k, v| [v, k] }, params[:date_range] || "all_time"),
+                class: "appearance-none border border-zinc-950/10 dark:border-white/10 bg-transparent pl-2.5 pr-7 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20 cursor-pointer",
+                onchange: "this.form.requestSubmit()" %>
+            <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-zinc-400 dark:text-zinc-500">
+              <svg class="size-3.5" viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div class="flex flex-wrap items-center gap-1.5">
         <% active_types = Array(params[:event_types]).reject(&:blank?) %>
@@ -51,7 +68,7 @@
               <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Event</th>
               <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Recipient</th>
               <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Subject</th>
-              <th class="py-2 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Time</th>
+              <th class="py-2 text-right font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Time</th>
             </tr>
           </thead>
           <tbody>

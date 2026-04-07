@@ -8,3 +8,70 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Pagy pagination */
+.pagy.series-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pagy.series-nav a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid oklch(0 0 0 / 0.1);
+  color: oklch(0.4 0 0);
+  text-decoration: none;
+}
+
+.pagy.series-nav a:hover:not([aria-disabled="true"]) {
+  background: oklch(0.97 0 0);
+}
+
+.pagy.series-nav a[aria-current="page"] {
+  background: oklch(0.15 0 0);
+  border-color: oklch(0.15 0 0);
+  color: white;
+}
+
+.pagy.series-nav a[aria-disabled="true"]:not([aria-current="page"]) {
+  color: oklch(0.7 0 0);
+  cursor: default;
+}
+
+.pagy.series-nav a[role="separator"] {
+  border-color: transparent;
+}
+
+@media (max-width: 639px) {
+  .pagy.series-nav a:not([aria-current="page"]):not([aria-label]) {
+    display: none;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .pagy.series-nav a {
+    border-color: oklch(1 0 0 / 0.1);
+    color: oklch(0.7 0 0);
+  }
+
+  .pagy.series-nav a:hover:not([aria-disabled="true"]) {
+    background: oklch(1 0 0 / 0.05);
+  }
+
+  .pagy.series-nav a[aria-current="page"] {
+    background: oklch(0.9 0 0);
+    border-color: oklch(0.9 0 0);
+    color: oklch(0.1 0 0);
+  }
+
+  .pagy.series-nav a[aria-disabled="true"]:not([aria-current="page"]) {
+    color: oklch(0.4 0 0);
+  }
+}

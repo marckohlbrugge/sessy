@@ -3,6 +3,7 @@ class SourcesController < ApplicationController
 
   def index
     @sources = Source.alphabetically
+    @source_stats = source_index_stats(@sources)
   end
 
   def show
@@ -94,6 +95,36 @@ class SourcesController < ApplicationController
     end
 
     { dates:, series: }
+  end
+
+  def source_index_stats(sources)
+    source_ids = sources.map(&:id)
+    last_30_days = 30.days.ago.beginning_of_day..Time.current.end_of_day
+
+    sent_counts = Event.joins(:message)
+      .where(messages: { source_id: source_ids })
+      .where(event_type: :send, event_at: last_30_days)
+      .group("messages.source_id").count
+
+    bounce_counts = Event.joins(:message)
+      .where(messages: { source_id: source_ids })
+      .where(event_type: :bounce, event_at: last_30_days)
+      .group("messages.source_id").count
+
+    last_event_at = Event.joins(:message)
+      .where(messages: { source_id: source_ids })
+      .group("messages.source_id")
+      .maximum(:event_at)
+
+    source_ids.index_with do |id|
+      sent = sent_counts[id] || 0
+      bounced = bounce_counts[id] || 0
+      {
+        sent_30d: sent,
+        bounce_rate: sent.positive? ? (bounced.to_f / sent * 100) : nil,
+        last_event_at: last_event_at[id]
+      }
+    end
   end
 
   def bounce_breakdown(events)
