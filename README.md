@@ -4,8 +4,6 @@
 
 Open-source email observability for AWS SES by [Marc Köhlbrugge](https://x.com/marckohlbrugge).
 
-> **Note:** Sessy is already running in production at [BetaList](https://betalist.com), but it's still in active development. Expect breaking changes, database migrations, and evolving APIs. That said, feel free to start using it!
-
 ## What is Sessy?
 
 Amazon SES is a fantastic email service: cost-effective, reliable, and great deliverability. But it's frustratingly difficult to see what's actually happening with your emails.
