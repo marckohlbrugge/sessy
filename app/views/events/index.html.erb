@@ -36,12 +36,12 @@
             <span class="inline-flex items-center gap-1 px-1.5 py-0.5 text-sm border
               border-zinc-950/10 dark:border-white/10 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300
               peer-checked:hidden">
-              <%= label %><span class="tabular-nums opacity-60"><%= count %></span>
+              <%= label %><span class="tabular-nums opacity-60"><%= number_with_delimiter(count) %></span>
             </span>
             <span class="hidden items-center gap-1 px-1.5 py-0.5 text-sm border
               <%= event_filter_chip_classes(type) %>
               peer-checked:inline-flex">
-              <%= label %><span class="tabular-nums opacity-60"><%= count %></span>
+              <%= label %><span class="tabular-nums opacity-60"><%= number_with_delimiter(count) %></span>
             </span>
           </label>
         <% end %>
