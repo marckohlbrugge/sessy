@@ -1,10 +1,38 @@
 <%= render layout: "sources/layout", locals: { source: @source, active: :activity } do %>
-  <!-- Search -->
-  <div class="mb-6">
-    <%= form_with url: source_events_path(@source), method: :get, class: "max-w-md" do |f| %>
+  <!-- Search & Filters -->
+  <div class="mb-6 space-y-3">
+    <%= form_with url: source_events_path(@source), method: :get, id: "events-filter-form" do |f| %>
       <%= text_field_tag :query, params[:query],
           placeholder: "Search by email or subject...",
-          class: "block w-full border rounded px-3 py-2 text-sm" %>
+          class: "block w-full max-w-md border rounded px-3 py-2 text-sm" %>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <% active_types = Array(params[:event_types]).reject(&:blank?) %>
+        <% EventsHelper::EVENT_TYPE_FILTERS.each do |type, label| %>
+          <% count = @filter_counts.dig(:event_types, type) || 0 %>
+          <% is_active = active_types.include?(type) %>
+          <label class="cursor-pointer">
+            <input type="checkbox" name="event_types[]" value="<%= type %>"
+              <%= "checked" if is_active %>
+              class="peer sr-only"
+              onchange="this.form.requestSubmit()">
+            <span class="inline-flex items-center gap-1 px-2 py-1 text-xs rounded border
+              <%= is_active ? event_filter_chip_classes(type) : 'border-gray-200 text-gray-400 hover:text-gray-600 hover:border-gray-300' %>
+              peer-checked:hidden">
+              <%= label %><span class="text-gray-400"><%= count %></span>
+            </span>
+            <span class="hidden items-center gap-1 px-2 py-1 text-xs rounded border
+              <%= event_filter_chip_classes(type) %>
+              peer-checked:inline-flex">
+              <%= label %><span class="opacity-60"><%= count %></span>
+            </span>
+          </label>
+        <% end %>
+
+        <% if active_types.any? %>
+          <%= link_to "Clear", source_events_path(@source, query: params[:query].presence), class: "text-xs text-gray-400 hover:text-gray-600" %>
+        <% end %>
+      </div>
     <% end %>
   </div>
 

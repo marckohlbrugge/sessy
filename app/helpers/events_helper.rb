@@ -49,6 +49,38 @@ module EventsHelper
     end
   end
 
+  EVENT_TYPE_FILTERS = {
+    "send" => "Sent",
+    "delivery" => "Delivered",
+    "bounce" => "Bounced",
+    "complaint" => "Complained",
+    "open" => "Opened",
+    "click" => "Clicked",
+    "delivery_delay" => "Delayed",
+    "reject" => "Rejected"
+  }.freeze
+
+  def event_filter_chip_classes(event_type)
+    case event_type
+    when "send"
+      "text-green-800 border-green-300 bg-green-100"
+    when "delivery"
+      "text-green-800 border-green-300 bg-green-100"
+    when "bounce"
+      "text-red-800 border-red-300 bg-red-100"
+    when "complaint", "reject"
+      "text-red-800 border-red-300 bg-red-100"
+    when "delivery_delay"
+      "text-yellow-800 border-yellow-300 bg-yellow-100"
+    when "open"
+      "text-cyan-800 border-cyan-300 bg-cyan-100"
+    when "click"
+      "text-purple-800 border-purple-300 bg-purple-100"
+    else
+      "text-gray-800 border-gray-300 bg-gray-100"
+    end
+  end
+
   def gravatar_url(email, size: 32)
     hash = Digest::MD5.hexdigest(email.to_s.downcase)
     "https://www.gravatar.com/avatar/#{hash}?s=#{size}&d=mp"
