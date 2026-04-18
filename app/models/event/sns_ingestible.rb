@@ -13,6 +13,7 @@ module Event::SnsIngestible
           event_at: event_payload.timestamp
         ) do |event|
           event.message = message
+          event.source = source
           event.webhook = webhook
           event.event_data = event_payload.event_data
           event.raw_payload = event_payload.raw

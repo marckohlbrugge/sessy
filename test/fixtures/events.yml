@@ -1,5 +1,6 @@
 welcome_send:
   message: welcome
+  source: betalist
   ses_message_id: <%= ActiveRecord::FixtureSet.identify(:welcome, :uuid) %>
   event_type: Send
   event_at: <%= Time.current %>
@@ -7,6 +8,7 @@ welcome_send:
 
 welcome_delivery:
   message: welcome
+  source: betalist
   ses_message_id: <%= ActiveRecord::FixtureSet.identify(:welcome, :uuid) %>
   event_type: Delivery
   event_at: <%= Time.current %>
@@ -14,6 +16,7 @@ welcome_delivery:
 
 digest_send:
   message: weekly_digest
+  source: betalist
   ses_message_id: <%= ActiveRecord::FixtureSet.identify(:weekly_digest, :uuid) %>
   event_type: Send
   event_at: <%= 1.day.ago %>
@@ -21,6 +24,7 @@ digest_send:
 
 old_notification_send:
   message: old_notification
+  source: wip
   ses_message_id: <%= ActiveRecord::FixtureSet.identify(:old_notification, :uuid) %>
   event_type: Send
   event_at: <%= 60.days.ago %>
@@ -28,6 +32,7 @@ old_notification_send:
 
 recent_notification_send:
   message: recent_notification
+  source: wip
   ses_message_id: <%= ActiveRecord::FixtureSet.identify(:recent_notification, :uuid) %>
   event_type: Send
   event_at: <%= 5.days.ago %>

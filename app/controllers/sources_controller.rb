@@ -12,15 +12,7 @@ class SourcesController < ApplicationController
     @overview_range = range_start.beginning_of_day..range_end.end_of_day
     @overview_events = @source.events.where(event_at: @overview_range)
 
-    @sent_count = @overview_events.event_type_send.count
-    @sent_today_count = @source.events.event_type_send.where(event_at: Time.zone.today.all_day).count
-    @delivered_count = @overview_events.event_type_delivery.count
-    @bounce_count = @overview_events.event_type_bounce.count
-    @complaint_count = @overview_events.event_type_complaint.count
-    @open_count = @overview_events.event_type_open.count
-    @click_count = @overview_events.event_type_click.count
-    @unique_open_count = unique_event_count(@overview_events.event_type_open)
-    @unique_click_count = unique_event_count(@overview_events.event_type_click)
+    assign_overview_counts(@overview_events)
 
     @bounce_rate = percent(@bounce_count, @sent_count)
     @complaint_rate = percent(@complaint_count, @sent_count)
@@ -28,6 +20,7 @@ class SourcesController < ApplicationController
     @click_rate = percent(@unique_click_count, @sent_count)
 
     @chart_data = build_chart_data(@overview_events, range_start, range_end)
+    @sent_today_count = @chart_data[:series].find { |s| s[:key] == :sent }[:values].last || 0
     @bounce_breakdown = bounce_breakdown(@overview_events)
   end
 
@@ -77,20 +70,41 @@ class SourcesController < ApplicationController
     (value.to_f / total) * 100
   end
 
-  def unique_event_count(scope)
-    scope.select(:recipient_email, :ses_message_id).distinct.count
+  def assign_overview_counts(events)
+    row = events.pick(
+      Arel.sql("SUM(CASE WHEN event_type = 'Send' THEN 1 ELSE 0 END)"),
+      Arel.sql("SUM(CASE WHEN event_type = 'Delivery' THEN 1 ELSE 0 END)"),
+      Arel.sql("SUM(CASE WHEN event_type = 'Bounce' THEN 1 ELSE 0 END)"),
+      Arel.sql("SUM(CASE WHEN event_type = 'Complaint' THEN 1 ELSE 0 END)"),
+      Arel.sql("SUM(CASE WHEN event_type = 'Open' THEN 1 ELSE 0 END)"),
+      Arel.sql("SUM(CASE WHEN event_type = 'Click' THEN 1 ELSE 0 END)"),
+      Arel.sql("COUNT(DISTINCT CASE WHEN event_type = 'Open' THEN recipient_email || '|' || ses_message_id END)"),
+      Arel.sql("COUNT(DISTINCT CASE WHEN event_type = 'Click' THEN recipient_email || '|' || ses_message_id END)")
+    ) || Array.new(8, 0)
+
+    @sent_count, @delivered_count, @bounce_count, @complaint_count,
+      @open_count, @click_count, @unique_open_count, @unique_click_count = row.map(&:to_i)
   end
 
   def build_chart_data(events, range_start, range_end)
-    dates = (range_start..range_end).to_a
-    series = {
-      sent: events.event_type_send,
-      delivered: events.event_type_delivery,
-      bounced: events.event_type_bounce
-    }.map do |key, scope|
-      counts = scope.group(Arel.sql("DATE(event_at)")).count
-      values = dates.map { |date| counts[date] || counts[date.to_s] || 0 }
+    rows = events
+      .where(event_type: [ :send, :delivery, :bounce ])
+      .group(Arel.sql("DATE(event_at)"))
+      .pluck(
+        Arel.sql("DATE(event_at)"),
+        Arel.sql("SUM(CASE WHEN event_type = 'Send' THEN 1 ELSE 0 END)"),
+        Arel.sql("SUM(CASE WHEN event_type = 'Delivery' THEN 1 ELSE 0 END)"),
+        Arel.sql("SUM(CASE WHEN event_type = 'Bounce' THEN 1 ELSE 0 END)")
+      )
 
+    by_date = rows.each_with_object({}) do |(day, sent, delivered, bounced), hash|
+      key = day.is_a?(Date) ? day : Date.parse(day.to_s)
+      hash[key] = { sent: sent.to_i, delivered: delivered.to_i, bounced: bounced.to_i }
+    end
+
+    dates = (range_start..range_end).to_a
+    series = %i[sent delivered bounced].map do |key|
+      values = dates.map { |date| by_date.dig(date, key) || 0 }
       { key:, values: }
     end
 
@@ -101,24 +115,19 @@ class SourcesController < ApplicationController
     source_ids = sources.map(&:id)
     last_30_days = 30.days.ago.beginning_of_day..Time.current.end_of_day
 
-    sent_counts = Event.joins(:message)
-      .where(messages: { source_id: source_ids })
-      .where(event_type: :send, event_at: last_30_days)
-      .group("messages.source_id").count
+    counts = Event.where(source_id: source_ids, event_at: last_30_days)
+      .group(:source_id)
+      .pluck(
+        Arel.sql("source_id"),
+        Arel.sql("SUM(CASE WHEN event_type = 'Send' THEN 1 ELSE 0 END)"),
+        Arel.sql("SUM(CASE WHEN event_type = 'Bounce' THEN 1 ELSE 0 END)")
+      ).to_h { |source_id, sent, bounced| [ source_id, { sent: sent.to_i, bounced: bounced.to_i } ] }
 
-    bounce_counts = Event.joins(:message)
-      .where(messages: { source_id: source_ids })
-      .where(event_type: :bounce, event_at: last_30_days)
-      .group("messages.source_id").count
-
-    last_event_at = Event.joins(:message)
-      .where(messages: { source_id: source_ids })
-      .group("messages.source_id")
-      .maximum(:event_at)
+    last_event_at = Event.where(source_id: source_ids).group(:source_id).maximum(:event_at)
 
     source_ids.index_with do |id|
-      sent = sent_counts[id] || 0
-      bounced = bounce_counts[id] || 0
+      sent = counts.dig(id, :sent) || 0
+      bounced = counts.dig(id, :bounced) || 0
       {
         sent_30d: sent,
         bounce_rate: sent.positive? ? (bounced.to_f / sent * 100) : nil,

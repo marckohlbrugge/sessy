@@ -10,10 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_01_090207) do
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_catalog.plpgsql"
-
+ActiveRecord::Schema[8.1].define(version: 2026_04_18_120000) do
   create_table "events", force: :cascade do |t|
     t.string "bounce_type"
     t.datetime "created_at", null: false
@@ -24,6 +21,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090207) do
     t.json "raw_payload", default: {}
     t.string "recipient_email", null: false
     t.string "ses_message_id", null: false
+    t.integer "source_id"
     t.datetime "updated_at", null: false
     t.bigint "webhook_id"
     t.index ["bounce_type"], name: "index_events_on_bounce_type"
@@ -32,6 +30,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090207) do
     t.index ["message_id"], name: "index_events_on_message_id"
     t.index ["recipient_email"], name: "index_events_on_recipient_email"
     t.index ["ses_message_id", "event_type", "recipient_email", "event_at"], name: "index_ses_events_on_deduplication_key", unique: true
+    t.index ["source_id", "event_at"], name: "index_events_on_source_id_and_event_at"
     t.index ["webhook_id"], name: "index_events_on_webhook_id"
   end
 
@@ -74,6 +73,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_01_090207) do
   end
 
   add_foreign_key "events", "messages"
+  add_foreign_key "events", "sources"
   add_foreign_key "events", "webhooks"
   add_foreign_key "messages", "sources"
 end

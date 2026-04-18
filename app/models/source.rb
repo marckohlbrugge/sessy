@@ -3,7 +3,7 @@ class Source < ApplicationRecord
   include RetentionPolicy
 
   has_many :messages, dependent: :destroy
-  has_many :events, through: :messages
+  has_many :events
 
   validates :name, presence: true
   validates :token, uniqueness: true
