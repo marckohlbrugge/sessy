@@ -2,12 +2,12 @@
 service: sessy
 
 # Name of the container image (use your-user/app-name on external registries).
-image: sessy
+image: hlidacky/sessy
 
 # Deploy to these servers.
 servers:
   web:
-    - 51.20.103.150
+    - 13.48.138.13
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -26,15 +26,10 @@ servers:
 
 # Where you keep your container images.
 registry:
-  # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
-  server: localhost:5555
-
-  # Needed for authenticated registries.
-  # username: your-user
-
-  # Always use an access token rather than real password when possible.
-  # password:
-  #   - KAMAL_REGISTRY_PASSWORD
+  server: registry-1.docker.io
+  username: hlidacky
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:

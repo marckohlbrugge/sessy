@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -e
+
+# Ensure the ubuntu user is in the docker group on all servers.
+# Group membership takes effect on the next SSH connection, which is
+# exactly what Kamal opens for the deploy commands that follow.
+IFS=',' read -ra HOSTS <<< "$KAMAL_HOSTS"
+for host in "${HOSTS[@]}"; do
+  ssh -i ~/.ssh/hlidacky-dev-sessy-key.pem \
+      -o StrictHostKeyChecking=no \
+      ubuntu@"$host" \
+      "id -nG | grep -qw docker || sudo usermod -aG docker \$USER"
+done
