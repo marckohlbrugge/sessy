@@ -7,7 +7,7 @@ image: hlidacky/sessy
 # Deploy to these servers.
 servers:
   web:
-    - 13.48.138.13
+    - 16.171.225.45
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -78,7 +78,7 @@ asset_path: /rails/public/assets
 # Configure the image builder.
 builder:
   arch: amd64
-  remote: ssh://ubuntu@13.48.138.13
+  remote: ssh://ubuntu@16.171.225.45
 
 # EC2 Ubuntu AMI uses 'ubuntu' as the default SSH user
 ssh:
