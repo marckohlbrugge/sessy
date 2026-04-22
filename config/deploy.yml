@@ -37,6 +37,7 @@ env:
     - RAILS_MASTER_KEY
     - HTTP_AUTH_USERNAME
     - HTTP_AUTH_PASSWORD
+    - KAMAL_REGISTRY_PASSWORD
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
