@@ -42,3 +42,5 @@
 
 # Ignore SaaS secrets (but keep the template)
 /.kamal/secrets.saas
+/.kamal/secrets
+.idea
