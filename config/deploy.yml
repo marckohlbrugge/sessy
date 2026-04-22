@@ -7,7 +7,7 @@ image: sessy
 # Deploy to these servers.
 servers:
   web:
-    - 192.168.0.1
+    - 51.20.103.150
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -22,7 +22,7 @@ servers:
 #
 # proxy:
 #   ssl: true
-#   host: app.example.com
+#   host: YOUR_DOMAIN
 
 # Where you keep your container images.
 registry:
@@ -40,6 +40,8 @@ registry:
 env:
   secret:
     - RAILS_MASTER_KEY
+    - HTTP_AUTH_USERNAME
+    - HTTP_AUTH_PASSWORD
   clear:
     # Run the Solid Queue Supervisor inside the web server's Puma process to do jobs.
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
@@ -91,9 +93,11 @@ builder:
   #   - GITHUB_TOKEN
   #   - RAILS_MASTER_KEY
 
-# Use a different ssh user than root
-# ssh:
-#   user: app
+# EC2 Ubuntu AMI uses 'ubuntu' as the default SSH user
+ssh:
+  user: ubuntu
+  keys:
+    - ~/.ssh/hlidacky-dev-sessy-key.pem
 
 # Use accessory services (secrets come from .kamal/secrets).
 # accessories:
