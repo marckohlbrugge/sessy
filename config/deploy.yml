@@ -20,9 +20,9 @@ servers:
 #
 # Don't use this when deploying to multiple web servers (then you have to terminate SSL at your load balancer).
 #
-# proxy:
-#   ssl: true
-#   host: YOUR_DOMAIN
+proxy:
+  ssl: true
+  host: 16.171.225.45.sslip.io
 
 # Where you keep your container images.
 registry:
