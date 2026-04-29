@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_18_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_29_150000) do
   create_table "events", force: :cascade do |t|
     t.string "bounce_type"
     t.datetime "created_at", null: false
@@ -31,6 +31,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_18_120000) do
     t.index ["recipient_email"], name: "index_events_on_recipient_email"
     t.index ["ses_message_id", "event_type", "recipient_email", "event_at"], name: "index_ses_events_on_deduplication_key", unique: true
     t.index ["source_id", "event_at"], name: "index_events_on_source_id_and_event_at"
+    t.index ["source_id", "event_type"], name: "index_events_on_source_id_and_event_type"
     t.index ["webhook_id"], name: "index_events_on_webhook_id"
   end
 

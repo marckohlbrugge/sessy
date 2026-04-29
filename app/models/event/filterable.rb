@@ -68,7 +68,7 @@ module Event::Filterable
     end
 
     def date_range_from_params(params)
-      preset = params[:date_range].presence || "all_time"
+      preset = params[:date_range].presence || "last_30_days"
 
       return [ parse_date(params[:from_date]), parse_date(params[:to_date]) ] if preset == "custom"
 
