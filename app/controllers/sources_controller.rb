@@ -123,7 +123,7 @@ class SourcesController < ApplicationController
         Arel.sql("SUM(CASE WHEN event_type = 'Bounce' THEN 1 ELSE 0 END)")
       ).to_h { |source_id, sent, bounced| [ source_id, { sent: sent.to_i, bounced: bounced.to_i } ] }
 
-    last_event_at = Event.where(source_id: source_ids).group(:source_id).maximum(:event_at)
+    last_event_at = source_ids.index_with { |id| Event.where(source_id: id).maximum(:event_at) }
 
     source_ids.index_with do |id|
       sent = counts.dig(id, :sent) || 0
