@@ -32,6 +32,10 @@ Want to deploy your own modified version? See [Kamal deployment docs](docs/kamal
 
 Using Dokku? See [Dokku deployment docs](docs/dokku-deployment.md).
 
+Need help configuring AWS SES itself? See [AWS SES setup guide](docs/aws-ses-setup.md).
+
+For hardening recommendations, see [SES security and deliverability best practices](docs/ses-security-best-practices.md).
+
 ## Jobs dashboard
 
 Sessy uses [Solid Queue](https://github.com/rails/solid_queue) for background jobs. A web dashboard is available at `/jobs` to monitor queues, retry failed jobs, and view recurring tasks.

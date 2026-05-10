@@ -2,7 +2,15 @@
   <div class="space-y-6 text-sm">
     <section class="text-zinc-500 dark:text-zinc-400 space-y-1">
       <p>Takes about 5 minutes. No AWS credentials shared with Sessy — you configure AWS to push events to your webhook URL. All events are cryptographically verified.</p>
-      <p>Assumes you've already <%= link_to "set up SES", "https://github.com/aws/aws-sdk-ruby", target: "_blank", class: "underline" %>.</p>
+      <p>
+        New to SES?
+        <%= link_to "Follow the full AWS SES setup guide", "https://github.com/marckohlbrugge/sessy/blob/main/docs/aws-ses-setup.md", target: "_blank", class: "underline" %>
+        before continuing.
+      </p>
+      <p>
+        Running in production?
+        <%= link_to "Review security and deliverability best practices", "https://github.com/marckohlbrugge/sessy/blob/main/docs/ses-security-best-practices.md", target: "_blank", class: "underline" %>.
+      </p>
     </section>
 
     <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
@@ -15,6 +23,10 @@
         <li>Name: <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(@source) %></code></li>
         <li>Leave defaults, click <strong>Create set</strong></li>
       </ol>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
+      <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws ses create-configuration-set \
+  --configuration-set '{"Name":"<%= config_set_name(@source) %>"}' \
+  --region &lt;region&gt;</code></pre>
     </section>
 
     <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
@@ -27,6 +39,10 @@
         <li>Name: <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= sns_topic_name(@source) %></code></li>
         <li>Click <strong>Create topic</strong></li>
       </ol>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
+      <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sns create-topic \
+  --name "<%= sns_topic_name(@source) %>" \
+  --region &lt;region&gt;</code></pre>
     </section>
 
     <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
@@ -41,6 +57,12 @@
         <li>Click <strong>Create subscription</strong></li>
         <li>Confirmation is automatic</li>
       </ol>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
+      <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sns subscribe \
+  --topic-arn arn:aws:sns:&lt;region&gt;:&lt;account-id&gt;:<%= sns_topic_name(@source) %> \
+  --protocol https \
+  --notification-endpoint "<%= webhook_url(source_token: @source.token) %>" \
+  --region &lt;region&gt;</code></pre>
     </section>
 
     <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
@@ -59,6 +81,16 @@
         <li>Enable <strong>"Include original email headers"</strong></li>
         <li>Click <strong>Add destination</strong></li>
       </ol>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
+      <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws ses create-configuration-set-event-destination \
+  --configuration-set-name "<%= config_set_name(@source) %>" \
+  --event-destination '{
+    "Name":"<%= sns_topic_name(@source) %>",
+    "Enabled":true,
+    "MatchingEventTypes":["bounce","click","complaint","delivery","deliveryDelay","open","reject","renderingFailure","send","subscription"],
+    "SNSDestination":{"TopicARN":"arn:aws:sns:&lt;region&gt;:&lt;account-id&gt;:<%= sns_topic_name(@source) %>"}
+  }' \
+  --region &lt;region&gt;</code></pre>
     </section>
 
     <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
@@ -101,6 +133,15 @@ end</code></pre>
         Send a test email with the Configuration Set. Events should appear in
         <%= link_to "Activity", source_events_path(@source), class: "underline" %> within seconds.
       </p>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">CLI checks:</p>
+      <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sns list-subscriptions-by-topic \
+  --topic-arn arn:aws:sns:&lt;region&gt;:&lt;account-id&gt;:<%= sns_topic_name(@source) %> \
+  --region &lt;region&gt;
+
+aws ses describe-configuration-set \
+  --configuration-set-name "<%= config_set_name(@source) %>" \
+  --configuration-set-attribute-names eventDestinations \
+  --region &lt;region&gt;</code></pre>
     </section>
   </div>
 <% end %>
