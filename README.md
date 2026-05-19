@@ -32,6 +32,8 @@ Want to deploy your own modified version? See [Kamal deployment docs](docs/kamal
 
 Using Dokku? See [Dokku deployment docs](docs/dokku-deployment.md).
 
+Using devopsellence? See [devopsellence deployment docs](docs/devopsellence-deployment.md).
+
 Need help configuring AWS SES itself? See [AWS SES setup guide](docs/aws-ses-setup.md).
 
 For hardening recommendations, see [SES security and deliverability best practices](docs/ses-security-best-practices.md).
