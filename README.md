@@ -59,6 +59,7 @@ We welcome contributions! Since we're still in a very early stage, please keep t
 - **Typos and obvious bugs:** Feel free to submit a PR directly.
 - **Code changes:** Please try to match our existing style.
 - **New features:** Please open an issue first to discuss before implementing.
+- **Deployment docs:** We keep first-party deployment docs focused on broad, open, self-hosted paths we actively use (for example Docker, Kamal, and Dokku). We generally do not add provider-specific deployment guides to this repository.
 
 For anything beyond small fixes, please open an issue first so no one wastes their time on something we might not merge.
 
