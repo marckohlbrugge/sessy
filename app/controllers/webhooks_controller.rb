@@ -1,4 +1,9 @@
 class WebhooksController < ApplicationController
+  # Shared across requests so the verifier's signing-cert cache is effective.
+  # A fresh instance per request re-downloads the cert from AWS every time
+  # (~600ms), which dominated this endpoint's latency.
+  SNS_MESSAGE_VERIFIER = Aws::SNS::MessageVerifier.new
+
   skip_before_action :verify_authenticity_token
   skip_before_action :authenticate
   before_action :set_source
@@ -49,10 +54,9 @@ class WebhooksController < ApplicationController
   def verify_sns_signature
     return true if Rails.env.local?
 
-    verifier = Aws::SNS::MessageVerifier.new
     message_body = request.raw_post
 
-    unless verifier.authentic?(message_body)
+    unless SNS_MESSAGE_VERIFIER.authentic?(message_body)
       Rails.logger.error("SNS signature verification failed")
       head :forbidden
       return false
