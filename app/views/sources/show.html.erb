@@ -60,13 +60,13 @@
           <div class="text-sm text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_to_percentage(@bounce_rate, precision: 1) %></div>
         </div>
 
-        <div class="border-b border-zinc-950/5 dark:border-white/5 py-3 lg:pr-4 lg:border-b-0 lg:border-r">
+        <div class="border-b border-zinc-950/5 dark:border-white/5 py-3 pl-4 lg:pl-0 lg:pr-4 lg:border-b-0 lg:border-r">
           <div class="text-sm text-zinc-500 dark:text-zinc-400">Complaints</div>
           <div class="text-xl font-semibold tabular-nums mt-0.5"><%= number_with_delimiter(@complaint_count) %></div>
           <div class="text-sm text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_to_percentage(@complaint_rate, precision: 2) %></div>
         </div>
 
-        <div class="border-b border-r border-zinc-950/5 dark:border-white/5 py-3 pl-4 lg:border-b-0 lg:pr-4">
+        <div class="border-b border-r border-zinc-950/5 dark:border-white/5 py-3 pr-4 lg:pl-4 lg:border-b-0 lg:pr-4">
           <div class="text-sm text-zinc-500 dark:text-zinc-400">Opens</div>
           <div class="text-xl font-semibold tabular-nums mt-0.5"><%= number_with_delimiter(@unique_open_count) %></div>
           <div class="text-sm text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_to_percentage(@open_rate, precision: 1) %> rate</div>
