@@ -28,7 +28,7 @@
                     <span class="font-medium"><%= source.name %></span>
                   <% end %>
                 </td>
-                <td class="py-2.5 pr-3 text-right tabular-nums text-zinc-500 dark:text-zinc-400"><%= number_with_delimiter(source.messages.count) %></td>
+                <td class="py-2.5 pr-3 text-right tabular-nums text-zinc-500 dark:text-zinc-400"><%= number_with_delimiter(source.messages_count) %></td>
                 <td class="py-2.5 pr-3 text-right tabular-nums text-zinc-500 dark:text-zinc-400 hidden sm:table-cell">
                   <% if stats[:sent_30d]&.positive? %>
                     <%= number_with_delimiter(stats[:sent_30d]) %>

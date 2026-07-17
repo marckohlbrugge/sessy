@@ -1,5 +1,5 @@
 class Message < ApplicationRecord
-  belongs_to :source
+  belongs_to :source, counter_cache: true
   has_many :events, dependent: :destroy
 
   validates :ses_message_id, presence: true

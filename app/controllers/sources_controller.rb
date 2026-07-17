@@ -117,19 +117,15 @@ class SourcesController < ApplicationController
     source_ids = sources.map(&:id)
     last_30_days = 30.days.ago.beginning_of_day..Time.current.end_of_day
 
-    counts = Event.where(source_id: source_ids, event_at: last_30_days)
-      .group(:source_id)
-      .pluck(
-        Arel.sql("source_id"),
-        Arel.sql("SUM(CASE WHEN event_type = 'Send' THEN 1 ELSE 0 END)"),
-        Arel.sql("SUM(CASE WHEN event_type = 'Bounce' THEN 1 ELSE 0 END)")
-      ).to_h { |source_id, sent, bounced| [ source_id, { sent: sent.to_i, bounced: bounced.to_i } ] }
+    counts = Event.where(source_id: source_ids, event_at: last_30_days, event_type: %i[send bounce])
+      .group(:source_id, :event_type)
+      .count
 
     last_event_at = source_ids.index_with { |id| Event.where(source_id: id).maximum(:event_at) }
 
     source_ids.index_with do |id|
-      sent = counts.dig(id, :sent) || 0
-      bounced = counts.dig(id, :bounced) || 0
+      sent = counts[[ id, "send" ]] || 0
+      bounced = counts[[ id, "bounce" ]] || 0
       {
         sent_30d: sent,
         bounce_rate: sent.positive? ? (bounced.to_f / sent * 100) : nil,

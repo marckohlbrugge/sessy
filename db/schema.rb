@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_17_153126) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_17_160445) do
   create_table "events", force: :cascade do |t|
     t.string "bounce_type"
     t.datetime "created_at", null: false
@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_17_153126) do
   create_table "sources", force: :cascade do |t|
     t.string "color", default: "blue"
     t.datetime "created_at", null: false
+    t.integer "messages_count", default: 0, null: false
     t.string "name", null: false
     t.integer "retention_days"
     t.string "token", null: false
