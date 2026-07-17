@@ -71,19 +71,21 @@ class SourcesController < ApplicationController
   end
 
   def assign_overview_counts(events)
-    row = events.pick(
-      Arel.sql("SUM(CASE WHEN event_type = 'Send' THEN 1 ELSE 0 END)"),
-      Arel.sql("SUM(CASE WHEN event_type = 'Delivery' THEN 1 ELSE 0 END)"),
-      Arel.sql("SUM(CASE WHEN event_type = 'Bounce' THEN 1 ELSE 0 END)"),
-      Arel.sql("SUM(CASE WHEN event_type = 'Complaint' THEN 1 ELSE 0 END)"),
-      Arel.sql("SUM(CASE WHEN event_type = 'Open' THEN 1 ELSE 0 END)"),
-      Arel.sql("SUM(CASE WHEN event_type = 'Click' THEN 1 ELSE 0 END)"),
-      Arel.sql("COUNT(DISTINCT CASE WHEN event_type = 'Open' THEN recipient_email || '|' || ses_message_id END)"),
-      Arel.sql("COUNT(DISTINCT CASE WHEN event_type = 'Click' THEN recipient_email || '|' || ses_message_id END)")
-    ) || Array.new(8, 0)
+    counts = events.group(:event_type).count
 
-    @sent_count, @delivered_count, @bounce_count, @complaint_count,
-      @open_count, @click_count, @unique_open_count, @unique_click_count = row.map(&:to_i)
+    @sent_count = counts["send"] || 0
+    @delivered_count = counts["delivery"] || 0
+    @bounce_count = counts["bounce"] || 0
+    @complaint_count = counts["complaint"] || 0
+    @open_count = counts["open"] || 0
+    @click_count = counts["click"] || 0
+
+    unique_counts = events.where(event_type: %i[open click])
+      .group(:event_type)
+      .count(Arel.sql("DISTINCT recipient_email || '|' || ses_message_id"))
+
+    @unique_open_count = unique_counts["open"] || 0
+    @unique_click_count = unique_counts["click"] || 0
   end
 
   def build_chart_data(events, range_start, range_end)

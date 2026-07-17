@@ -42,7 +42,7 @@ jobs:
       IMAGE_NAME: ${{ github.repository }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.2.0
@@ -65,7 +65,7 @@ jobs:
 
       - name: Extract Docker metadata (tags, labels) with arch suffix
         id: meta
-        uses: docker/metadata-action@v6.0.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: ${{ steps.vars.outputs.canonical }}
           tags: |
@@ -83,7 +83,7 @@ jobs:
 
       - name: Build and push (${{ matrix.platform }})
         id: build
-        uses: docker/build-push-action@v7.2.0
+        uses: docker/build-push-action@v7.3.0
         with:
           context: .
           file: Dockerfile
@@ -138,7 +138,7 @@ jobs:
 
       - name: Compute base tags (no suffix)
         id: meta
-        uses: docker/metadata-action@v6.0.0
+        uses: docker/metadata-action@v6.2.0
         with:
           images: ${{ steps.vars.outputs.canonical }}
           tags: |
