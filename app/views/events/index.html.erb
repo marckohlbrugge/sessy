@@ -6,7 +6,7 @@
             placeholder: "Search by email or subject...",
             class: "w-full max-w-sm border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20",
             "aria-label": "Search events",
-            data: { action: "input->debounced-submit#submit search->debounced-submit#submit" } %>
+            data: { turbo_permanent: true, debounced_submit_target: "input", action: "input->debounced-submit#submit search->debounced-submit#submit" } %>
 
         <div class="flex items-center gap-2 ml-auto">
           <%= link_to "Export", source_events_path(@source, format: :csv, **request.query_parameters), class: "px-2.5 py-1.5 text-sm border border-zinc-950/10 dark:border-white/10 hover:bg-zinc-50 dark:hover:bg-white/5 whitespace-nowrap" %>
