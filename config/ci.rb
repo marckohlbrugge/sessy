@@ -6,10 +6,16 @@ CI.run do
   step "Style: Ruby", "bin/rubocop"
 
   step "Security: Gem audit", "bin/bundler-audit"
+  step "Security: SaaS gem audit", "bin/bundler-audit check --gemfile-lock Gemfile.saas.lock"
   step "Security: Importmap vulnerability audit", "bin/importmap audit"
-  step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error"
+  step "Security: Brakeman code analysis", "bin/brakeman --quiet --no-pager --exit-on-warn --exit-on-error --add-engines-path saas"
+
+  step "Gemfile: Drift check", "bin/bundle-drift --check"
 
   step "Tests: Rails", "bin/rails test"
+  # bin/ci runs before Bundler.require, so Sessy.saas? can't see the engine
+  # here; the env var is the sanctioned pre-boot mode signal.
+  step "Tests: SaaS engine", "bin/rails test saas/test" if ENV["SESSY_MODE"] == "saas"
   step "Tests: System", "bin/rails test:system"
   step "Tests: Seeds", "env RAILS_ENV=test bin/rails db:seed:replant"
 

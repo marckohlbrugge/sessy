@@ -1,0 +1,46 @@
+# Dependabot only updates Gemfile.lock; this carries the changes over to
+# Gemfile.saas.lock so the SaaS CI leg's frozen install keeps passing.
+#
+# The push authenticates with SAAS_LOCKFILE_SYNC_TOKEN, a fine-grained PAT
+# with contents:write on this repo, stored as both an Actions secret and a
+# Dependabot secret. The default GITHUB_TOKEN cannot be used: commits it
+# pushes trigger no workflow runs (required checks would hang forever), and
+# dependabot-triggered runs get a read-only default token anyway.
+name: Sync SaaS lockfile
+
+on:
+  pull_request:
+    paths: [ "Gemfile", "Gemfile.lock" ]
+
+# The default GITHUB_TOKEN needs no write scope: the push authenticates with
+# the PAT via the checkout token input.
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.SAAS_LOCKFILE_SYNC_TOKEN }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+
+      - name: Sync Gemfile.saas.lock
+        run: bin/bundle-drift
+
+      - name: Commit and push if changed
+        run: |
+          if ! git diff --quiet Gemfile.saas.lock; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add Gemfile.saas.lock
+            git commit -m "Sync Gemfile.saas.lock with Gemfile.lock"
+            git push
+          fi
