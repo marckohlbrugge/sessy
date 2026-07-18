@@ -36,6 +36,12 @@ Need help configuring AWS SES itself? See [AWS SES setup guide](docs/aws-ses-set
 
 For hardening recommendations, see [SES security and deliverability best practices](docs/ses-security-best-practices.md).
 
+## Hosted version
+
+We're working on a managed version of Sessy for those who'd rather not run their own instance.
+
+You'll notice references to it in this codebase: a `saas/` directory, `Gemfile.saas`, and the occasional `Sessy.saas?` check. These power the hosted version and are intentionally kept in this repository for simplicity, rather than maintaining separate repos. None of it affects self-hosting: the default bundle ignores the `saas/` engine entirely, and the test suite verifies the open-source version behaves identically without it.
+
 ## Jobs dashboard
 
 Sessy uses [Solid Queue](https://github.com/rails/solid_queue) for background jobs. A web dashboard is available at `/jobs` to monitor queues, retry failed jobs, and view recurring tasks.
