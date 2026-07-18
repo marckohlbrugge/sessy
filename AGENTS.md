@@ -66,7 +66,23 @@ Uses Solid Queue. Recurring jobs defined in `config/recurring.yml`:
 
 Uses Minitest. Tests run in parallel. Fixtures in `test/fixtures/`.
 
-CI runs tests against both SQLite and PostgreSQL via matrix strategy.
+CI runs tests against both SQLite and PostgreSQL via matrix strategy, plus one SaaS-mode leg (PostgreSQL).
+
+## SaaS Mode
+
+The `saas/` directory holds `sessy-saas`, a companion Rails engine for the hosted version of Sessy. It is loaded only when bundling with `Gemfile.saas`; the default `Gemfile` ignores it entirely, so open-source installs carry no hosted-only code. `Sessy.saas?` reports at runtime whether the engine is loaded.
+
+`SESSY_MODE=saas` selects `Gemfile.saas` in the pre-boot entry points (`config/boot.rb`, `bin/setup`, `bin/ci`):
+
+```bash
+SESSY_MODE=saas bin/setup            # set up with the SaaS bundle
+SESSY_MODE=saas bin/rails test test saas/test  # core + engine suites in SaaS mode
+SESSY_MODE=saas bin/ci               # full local pipeline in SaaS mode
+```
+
+`Gemfile.saas.lock` must stay in sync with `Gemfile.lock`; run `bin/bundle-drift` to check and repair after changing the Gemfile.
+
+Contributor policy: if the SaaS CI leg fails on an external contribution, fixing it is the maintainer's responsibility, not the contributor's.
 
 ## Event Types
 
