@@ -13,7 +13,7 @@ def versions(lockfile)
   Bundler::LockfileParser.new(File.read(lockfile)).specs.to_h { |spec| [ spec.name, spec.version.to_s ] }
 end
 
-SAAS_ONLY_GEMS = %w[ sessy-saas ]
+SAAS_ONLY_GEMS = %w[ sessy-saas aws-actionmailer-ses aws-sdk-ses aws-sdk-sesv2 ]
 
 oss = versions("Gemfile.lock")
 saas = versions("Gemfile.saas.lock")
