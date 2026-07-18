@@ -2,7 +2,7 @@ require "test_helper"
 
 class Sessy::Saas::EditionHeadersTest < ActionDispatch::IntegrationTest
   test "responses carry the hosted edition header" do
-    get root_path
+    get saas_info_path
     assert_response :success
     assert_equal "hosted", response.headers["X-Sessy-Edition"]
   end
@@ -11,14 +11,11 @@ class Sessy::Saas::EditionHeadersTest < ActionDispatch::IntegrationTest
     assert ApplicationController.include?(Sessy::Saas::EditionHeaders)
   end
 
-  test "auth challenges carry the edition header" do
-    ENV["HTTP_AUTH_USERNAME"] = "user"
-    ENV["HTTP_AUTH_PASSWORD"] = "secret"
+  test "the header is stamped before auth halts the chain" do
+    # Unauthenticated tenant request redirects to sign-in but still carries the
+    # edition marker (set via prepend_before_action, ahead of authenticate).
     get root_path
-    assert_response :unauthorized
+    assert_redirected_to new_session_path
     assert_equal "hosted", response.headers["X-Sessy-Edition"]
-  ensure
-    ENV.delete("HTTP_AUTH_USERNAME")
-    ENV.delete("HTTP_AUTH_PASSWORD")
   end
 end

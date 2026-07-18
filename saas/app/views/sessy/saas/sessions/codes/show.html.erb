@@ -1,0 +1,20 @@
+<% content_for :title, "Enter your code" %>
+
+<h1 class="text-lg font-semibold">Check your email</h1>
+<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">We sent a sign-in code to your inbox. Enter it below.</p>
+
+<% if Rails.env.development? && flash[:magic_code].present? %>
+  <div class="mt-3 rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+    Dev code: <code class="font-mono font-semibold"><%= flash[:magic_code] %></code>
+  </div>
+<% end %>
+
+<%= form_with url: session_code_path, method: :post, class: "mt-6 space-y-3" do |form| %>
+  <%= form.text_field :code, required: true, autofocus: true, autocomplete: "one-time-code",
+        placeholder: "ABC123", inputmode: "text",
+        class: "w-full rounded-md border border-zinc-950/10 bg-white px-3 py-2 text-center font-mono text-lg uppercase tracking-widest dark:border-white/10 dark:bg-zinc-900" %>
+  <%= form.submit "Sign in",
+        class: "w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200" %>
+<% end %>
+
+<%= link_to "Use a different email", new_session_path, class: "mt-4 block text-center text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" %>
