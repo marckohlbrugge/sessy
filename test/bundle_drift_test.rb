@@ -33,7 +33,11 @@ class BundleDriftTest < ActiveSupport::TestCase
       Dir.mktmpdir do |dir|
         File.write(File.join(dir, "Gemfile.lock"), lockfile(oss))
         File.write(File.join(dir, "Gemfile.saas.lock"), lockfile(saas))
-        out = IO.popen([ RbConfig.ruby, Rails.root.join("bin/bundle-drift").to_s, "--check" ], chdir: dir, err: [ :child, :out ], &:read)
+        # Unbundled env: CI's job-level RUBYOPT/BUNDLE_GEMFILE would otherwise
+        # make the child resolve a Gemfile relative to the temp dir and crash.
+        out = Bundler.with_unbundled_env do
+          IO.popen([ RbConfig.ruby, Rails.root.join("bin/bundle-drift").to_s, "--check" ], chdir: dir, err: [ :child, :out ], &:read)
+        end
         [ out, $? ]
       end
     end
