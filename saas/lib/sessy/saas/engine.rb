@@ -13,7 +13,8 @@ module Sessy
       end
 
       initializer "sessy_saas.action_mailer", after: "action_mailer.set_configs" do
-        ActionMailer::Base.default from: ENV.fetch("MAILER_FROM_ADDRESS", "Sessy <hello@sessy.do>")
+        # From address is set on Sessy::Saas::ApplicationMailer (the core
+        # ApplicationMailer's own default would shadow it here).
         ActionMailer::Base.default_url_options = {
           host: ENV.fetch("APP_HOST", "app.sessy.do"),
           protocol: "https"

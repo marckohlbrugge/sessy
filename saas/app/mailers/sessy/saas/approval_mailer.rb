@@ -1,4 +1,4 @@
-class Sessy::Saas::ApprovalMailer < ApplicationMailer
+class Sessy::Saas::ApprovalMailer < Sessy::Saas::ApplicationMailer
   def approved(account)
     @account = account
     user = account.users.first
