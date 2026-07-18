@@ -1,0 +1,12 @@
+<% content_for :title, "Sign in" %>
+
+<h1 class="text-lg font-semibold">Sign in to Sessy</h1>
+<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Enter your email and we'll send you a sign-in code.</p>
+
+<%= form_with url: session_path, method: :post, class: "mt-6 space-y-3" do |form| %>
+  <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "email",
+        placeholder: "you@example.com",
+        class: "w-full rounded-md border border-zinc-950/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-zinc-900" %>
+  <%= form.submit "Email me a code",
+        class: "w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200" %>
+<% end %>

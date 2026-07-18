@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html class="antialiased">
+  <head>
+    <title><%= content_for(:title) || "Sessy" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="icon" href="<%= asset_path("icon.svg") %>" type="image/svg+xml">
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <main class="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-6">
+      <%= image_tag "wordmark.svg", class: "mb-8 h-6 w-auto dark:invert", alt: "Sessy" %>
+
+      <% if alert = flash[:alert] %>
+        <div class="mb-4 rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400"><%= alert %></div>
+      <% end %>
+      <% if notice = flash[:notice] %>
+        <div class="mb-4 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400"><%= notice %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

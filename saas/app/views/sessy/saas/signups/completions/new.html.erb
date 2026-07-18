@@ -1,0 +1,15 @@
+<% content_for :title, "Finish signing up" %>
+
+<h1 class="text-lg font-semibold">One more thing</h1>
+<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">What should we call you?</p>
+
+<%= form_with url: signup_completion_path, method: :post, class: "mt-6 space-y-3" do |form| %>
+  <% if @signup.errors.any? %>
+    <div class="rounded-md bg-red-500/10 px-3 py-2 text-sm text-red-700 dark:text-red-400">Please enter your name.</div>
+  <% end %>
+  <%= form.text_field :name, required: true, autofocus: true, autocomplete: "name",
+        placeholder: "Your name",
+        class: "w-full rounded-md border border-zinc-950/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-zinc-900" %>
+  <%= form.submit "Continue",
+        class: "w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200" %>
+<% end %>

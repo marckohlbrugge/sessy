@@ -1,3 +1,7 @@
 eval_gemfile "Gemfile"
 
 gem "sessy-saas", path: "saas"
+
+# Hosted transactional email (magic codes, approval notices) via SES. aws-sdk-rails
+# no longer ships an ActionMailer delivery method; this gem provides it.
+gem "aws-actionmailer-ses"

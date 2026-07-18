@@ -17,3 +17,7 @@ production:
   delete_expired_data:
     class: DeleteExpiredDataJob
     schedule: every day at 4am
+
+  magic_link_cleanup:
+    command: "MagicLink.cleanup"
+    schedule: every day at 3am

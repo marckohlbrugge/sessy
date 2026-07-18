@@ -1,0 +1,53 @@
+class MagicLink < ApplicationRecord
+  CODE_LENGTH = 6
+  EXPIRATION_TIME = 15.minutes
+
+  belongs_to :user
+
+  enum :purpose, %w[ sign_in sign_up ], prefix: :for, default: :sign_in
+
+  scope :active, -> { where(expires_at: Time.current...) }
+  scope :stale, -> { where(expires_at: ..Time.current) }
+
+  before_validation :generate_code, on: :create
+  before_validation :set_expiration, on: :create
+
+  validates :code, uniqueness: true, presence: true
+
+  class << self
+    def consume(code)
+      active.find_by(code: Code.sanitize(code))&.consume
+    end
+
+    # Verifies the browser-bound email before consuming, so a code submitted
+    # from the wrong browser is rejected without being destroyed (no burn-DoS).
+    def authenticate(code, email:)
+      link = active.find_by(code: Code.sanitize(code))
+      return unless link && ActiveSupport::SecurityUtils.secure_compare(email.to_s, link.user.email_address)
+
+      link.consume
+    end
+
+    def cleanup
+      stale.delete_all
+    end
+  end
+
+  def consume
+    destroy
+    self
+  end
+
+  private
+
+  def generate_code
+    self.code ||= loop do
+      candidate = Code.generate(CODE_LENGTH)
+      break candidate unless self.class.exists?(code: candidate)
+    end
+  end
+
+  def set_expiration
+    self.expires_at ||= EXPIRATION_TIME.from_now
+  end
+end
