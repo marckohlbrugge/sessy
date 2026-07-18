@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# Keeps Gemfile.saas.lock in sync with Gemfile.lock. Dependabot and manual
+# bundle updates only touch Gemfile.lock; this script carries the shared-gem
+# changes over to the SaaS lockfile.
+#
+#   bin/bundle-drift          repair drift and commit-ready the SaaS lockfile
+#   bin/bundle-drift --check  exit non-zero if drifted (used by CI)
+
+require "bundler"
+require "fileutils"
+
+def versions(lockfile)
+  Bundler::LockfileParser.new(File.read(lockfile)).specs.to_h { |spec| [ spec.name, spec.version.to_s ] }
+end
+
+SAAS_ONLY_GEMS = %w[ sessy-saas ]
+
+oss = versions("Gemfile.lock")
+saas = versions("Gemfile.saas.lock")
+
+drifted = (oss.keys & saas.keys).reject { |name| oss[name] == saas[name] }
+missing = oss.keys - saas.keys
+stale = saas.keys - oss.keys - SAAS_ONLY_GEMS
+
+if drifted.empty? && missing.empty? && stale.empty?
+  puts "Gemfile.saas.lock is in sync with Gemfile.lock"
+elsif ARGV.include?("--check")
+  drifted.each { |name| puts "#{name}: #{oss[name]} (Gemfile.lock) vs #{saas[name]} (Gemfile.saas.lock)" }
+  missing.each { |name| puts "#{name}: in Gemfile.lock but not in Gemfile.saas.lock" }
+  stale.each { |name| puts "#{name}: no longer in Gemfile.lock but still in Gemfile.saas.lock" }
+  abort "Gemfile.saas.lock has drifted from Gemfile.lock. Run bin/bundle-drift and commit the result."
+else
+  # Regenerate from Gemfile.lock so shared gems land on exactly its pins.
+  # A conservative `bundle lock` keeps every copied version and only resolves
+  # the sessy-saas path gem; `--update` would overshoot to latest-allowed.
+  FileUtils.cp "Gemfile.lock", "Gemfile.saas.lock"
+  system({ "BUNDLE_GEMFILE" => "Gemfile.saas" }, "bundle", "lock", exception: true)
+  puts "Regenerated Gemfile.saas.lock (#{(drifted + missing + stale).join(", ")})"
+end

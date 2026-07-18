@@ -20,8 +20,13 @@ RUN apt-get update -qq && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
+# Build with --build-arg BUNDLE_GEMFILE=Gemfile.saas for the hosted edition;
+# the default produces the pure open-source image.
+ARG BUNDLE_GEMFILE=Gemfile
+
 # Set production environment variables and enable jemalloc for reduced memory usage and latency.
 ENV RAILS_ENV="production" \
+    BUNDLE_GEMFILE=$BUNDLE_GEMFILE \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
@@ -35,8 +40,11 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
-# Install application gems
-COPY Gemfile Gemfile.lock vendor ./
+# Install application gems. The sessy-saas path gem must be present before
+# bundle install; a separate COPY keeps the directory (multi-source COPY
+# into ./ would flatten its contents).
+COPY Gemfile Gemfile.lock Gemfile.saas Gemfile.saas.lock vendor ./
+COPY saas saas/
 
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
@@ -45,6 +53,10 @@ RUN bundle install && \
 
 # Copy application code
 COPY . .
+
+# The open-source image ships without the hosted-edition engine; only the
+# Gemfile.saas build keeps it.
+RUN if [ "$BUNDLE_GEMFILE" = "Gemfile" ]; then rm -rf saas Gemfile.saas Gemfile.saas.lock; fi
 
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495

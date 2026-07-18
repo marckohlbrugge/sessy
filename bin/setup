@@ -3,6 +3,10 @@ require "fileutils"
 
 APP_ROOT = File.expand_path("..", __dir__)
 
+# Mirror config/boot.rb: SESSY_MODE=saas selects the SaaS bundle for the
+# direct `bundle` calls below, which don't go through boot.rb.
+ENV["BUNDLE_GEMFILE"] ||= File.join(APP_ROOT, "Gemfile.saas") if ENV["SESSY_MODE"] == "saas"
+
 def system!(*args)
   system(*args, exception: true)
 end

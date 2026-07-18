@@ -7,6 +7,14 @@ module Sessy
         }
       )
     end
+
+    # True when the sessy-saas engine is in the bundle (Gemfile.saas). The
+    # SESSY_MODE env var only selects the gemfile in pre-boot entry points;
+    # at runtime, engine presence is the single source of truth.
+    def saas?
+      return @saas if defined?(@saas)
+      @saas = defined?(Sessy::Saas) ? true : false
+    end
   end
 
   class DbAdapter

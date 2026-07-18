@@ -19,10 +19,16 @@ jobs:
           bundler-cache: true
 
       - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
+        run: bin/brakeman --no-pager --add-engines-path saas
 
       - name: Scan for known security vulnerabilities in gems used
         run: bin/bundler-audit
+
+      - name: Scan the SaaS lockfile for known security vulnerabilities
+        run: bin/bundler-audit check --gemfile-lock Gemfile.saas.lock
+
+      - name: Check Gemfile.saas.lock is in sync with Gemfile.lock
+        run: bin/bundle-drift --check
 
   scan_js:
     runs-on: ubuntu-latest
@@ -66,17 +72,21 @@ jobs:
         run: bin/rubocop -f github
 
   test:
-    name: test (${{ matrix.database }})
+    name: test (${{ matrix.label }})
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - database: SQLite
+          - label: SQLite
             database_adapter: sqlite
-          - database: PostgreSQL
+          - label: PostgreSQL
             database_adapter: postgresql
+          - label: PostgreSQL SaaS
+            database_adapter: postgresql
+            bundle_gemfile: Gemfile.saas
+            sessy_mode: saas
 
     services:
       postgres:
@@ -91,6 +101,8 @@ jobs:
     env:
       RAILS_ENV: test
       DATABASE_ADAPTER: ${{ matrix.database_adapter }}
+      BUNDLE_GEMFILE: ${{ matrix.bundle_gemfile || 'Gemfile' }}
+      SESSY_MODE: ${{ matrix.sessy_mode || '' }}
       POSTGRES_HOST: localhost
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
@@ -111,6 +123,10 @@ jobs:
       - name: Run tests
         run: bin/rails db:test:prepare test
 
+      - name: Run engine tests
+        if: matrix.sessy_mode == 'saas'
+        run: bin/rails test saas/test
+
       - name: Run system tests
         run: bin/rails test:system
 
@@ -118,6 +134,6 @@ jobs:
         uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: screenshots-${{ matrix.database }}
+          name: screenshots-${{ matrix.label }}
           path: ${{ github.workspace }}/tmp/screenshots
           if-no-files-found: ignore

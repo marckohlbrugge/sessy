@@ -134,3 +134,21 @@ services:
 volumes:
   sessy:
 ```
+
+## Hosted edition (maintainer)
+
+The same Dockerfile builds the hosted edition, which layers the `saas/` engine via `Gemfile.saas`:
+
+```bash
+docker build --build-arg BUNDLE_GEMFILE=Gemfile.saas -t sessy-saas .
+```
+
+The build arg is promoted to a runtime `ENV`, so the container boots with the engine loaded — no extra runtime configuration needed. The default build (no arg) produces the open-source image with the `saas/` engine stripped out entirely; that is what `ghcr.io/marckohlbrugge/sessy` ships.
+
+For the Kamal-managed hosted instance, add the build arg to the (gitignored) `config/deploy.saas.yml`:
+
+```yaml
+builder:
+  args:
+    BUNDLE_GEMFILE: Gemfile.saas
+```
