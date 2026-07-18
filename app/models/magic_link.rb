@@ -19,6 +19,15 @@ class MagicLink < ApplicationRecord
       active.find_by(code: Code.sanitize(code))&.consume
     end
 
+    # Verifies the browser-bound email before consuming, so a code submitted
+    # from the wrong browser is rejected without being destroyed (no burn-DoS).
+    def authenticate(code, email:)
+      link = active.find_by(code: Code.sanitize(code))
+      return unless link && ActiveSupport::SecurityUtils.secure_compare(email.to_s, link.user.email_address)
+
+      link.consume
+    end
+
     def cleanup
       stale.delete_all
     end

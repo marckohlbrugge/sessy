@@ -24,6 +24,36 @@ class Sessy::Saas::SessionsTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
   end
 
+  test "a wrong-browser submission does not burn the real user's code" do
+    create_member
+    post session_path, params: { email_address: "member@example.com" }
+    code = MagicLink.last.code
+
+    # Attacker's browser (own pending cookie for a different email) submits the code.
+    reset!
+    post session_path, params: { email_address: "attacker@example.com" }
+    post session_code_path, params: { code: code }
+    assert_redirected_to session_code_path
+
+    # The member's code is still valid — it wasn't consumed by the failed attempt.
+    assert MagicLink.exists?(code: code)
+  end
+
+  test "an idle-expired session is rejected and requires re-auth" do
+    user = create_member
+    post session_path, params: { email_address: user.email_address }
+    post session_code_path, params: { code: MagicLink.last.code }
+    get root_path
+    assert_response :success
+
+    Session.last.update_column(:updated_at, 31.days.ago)
+
+    assert_difference -> { Session.count }, -1 do
+      get root_path
+    end
+    assert_redirected_to new_session_path
+  end
+
   test "a code cannot be reused" do
     user = create_member
     post session_path, params: { email_address: user.email_address }

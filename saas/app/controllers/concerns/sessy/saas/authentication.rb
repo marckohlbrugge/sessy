@@ -31,8 +31,15 @@ module Sessy::Saas::Authentication
 
   def resume_session
     if session_record = find_session_by_cookie
-      set_current_session(session_record)
-      true
+      if session_record.expired?
+        session_record.destroy
+        cookies.delete(:session_token)
+        nil
+      else
+        session_record.touch_if_stale
+        set_current_session(session_record)
+        true
+      end
     end
   end
 
