@@ -2,7 +2,7 @@ class SourcesController < ApplicationController
   before_action :set_source, only: %i[show edit update destroy]
 
   def index
-    @sources = Source.alphabetically
+    @sources = Current.account.sources.alphabetically
     @source_stats = source_index_stats(@sources)
   end
 
@@ -25,11 +25,11 @@ class SourcesController < ApplicationController
   end
 
   def new
-    @source = Source.new(color: Source.next_available_color)
+    @source = Current.account.sources.new(color: Source.next_available_color)
   end
 
   def create
-    @source = Source.new(source_params)
+    @source = Current.account.sources.new(source_params)
 
     if @source.save
       redirect_to @source, notice: "Source created successfully."
@@ -57,7 +57,7 @@ class SourcesController < ApplicationController
   private
 
   def set_source
-    @source = Source.find(params[:id])
+    @source = Current.account.sources.find(params[:id])
   end
 
   def source_params

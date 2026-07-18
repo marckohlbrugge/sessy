@@ -2,6 +2,7 @@ class Source < ApplicationRecord
   include Colors
   include RetentionPolicy
 
+  belongs_to :account, default: -> { Account.instance }
   has_many :messages, dependent: :destroy
   has_many :events
 

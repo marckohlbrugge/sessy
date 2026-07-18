@@ -4,13 +4,25 @@ module Source::RetentionPolicy
   included do
     validates :retention_days, numericality: { only_integer: true, greater_than: 0, allow_nil: true }
 
-    scope :with_retention_policy, -> { where.not(retention_days: nil) }
+    # Reaches sources with a per-source override AND sources relying on their
+    # account's default. The old per-source-only scope silently skipped the
+    # account-default case, so the daily job never enforced it.
+    scope :with_retention_policy, -> {
+      left_joins(:account)
+        .where("sources.retention_days IS NOT NULL OR accounts.retention_days IS NOT NULL")
+    }
+  end
+
+  # Per source first, then the owning account. nil means keep forever.
+  def effective_retention_days
+    retention_days || account&.retention_days
   end
 
   def delete_expired_data
-    return 0 unless retention_days
+    days = effective_retention_days
+    return 0 unless days
 
-    expired_messages = messages.where(sent_at: ..retention_days.days.ago)
+    expired_messages = messages.where(sent_at: ..days.days.ago)
     return 0 unless expired_messages.exists?
 
     Event.where(message_id: expired_messages.select(:id)).delete_all

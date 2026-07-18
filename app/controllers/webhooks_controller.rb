@@ -35,6 +35,10 @@ class WebhooksController < ApplicationController
 
   def set_source
     @source = Source.find_by!(token: params[:source_token])
+    # Ingest kill switch: un-approving an account (nulling approved_at) stops
+    # its sources accepting webhooks. In OSS the instance account is always
+    # approved, so this is a no-op there.
+    head :not_found unless @source.account.approved?
   rescue ActiveRecord::RecordNotFound
     head :not_found
   end

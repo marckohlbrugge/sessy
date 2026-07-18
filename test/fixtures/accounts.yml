@@ -1,0 +1,4 @@
+instance:
+  name: Sessy
+  instance: true
+  approved_at: <%= Time.current.iso8601 %>

@@ -8,6 +8,6 @@ module SourceScoped
   private
 
   def set_source
-    @source = Source.find(params[:source_id])
+    @source = Current.account.sources.find(params[:source_id])
   end
 end

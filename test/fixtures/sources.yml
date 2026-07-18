@@ -2,9 +2,11 @@ betalist:
   name: BetaList
   token: <%= SecureRandom.uuid %>
   color: blue
+  account: instance
 
 wip:
   name: WIP
   token: <%= SecureRandom.uuid %>
   color: yellow
   retention_days: 30
+  account: instance
