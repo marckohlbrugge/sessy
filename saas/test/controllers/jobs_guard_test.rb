@@ -9,6 +9,13 @@ class Sessy::Saas::JobsGuardTest < ActionDispatch::IntegrationTest
     assert MissionControl::Jobs.http_basic_auth_password.present?
   end
 
+  test "an unauthenticated jobs request redirects to sign-in, not 500" do
+    # /jobs is a mounted engine; the auth redirect must resolve against main_app
+    # or URL generation blows up inside the engine routing context.
+    get "/jobs"
+    assert_redirected_to "/session/new"
+  end
+
   test "a signed-in user without operator credentials cannot open jobs" do
     user = User.create!(email_address: "jobs@example.com")
     accounts(:instance).memberships.create!(user: user)
@@ -16,6 +23,6 @@ class Sessy::Saas::JobsGuardTest < ActionDispatch::IntegrationTest
     post session_code_path, params: { code: MagicLink.last.code }
 
     get "/jobs"
-    assert_not_equal 200, response.status
+    assert_response :unauthorized
   end
 end

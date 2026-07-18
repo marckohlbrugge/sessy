@@ -54,14 +54,16 @@ module Sessy::Saas::Authentication
 
   def request_authentication
     session[:return_to_after_authenticating] = request.url if request.get? || request.head?
-    redirect_to new_session_path
+    # main_app. so the helper resolves against the app's routes even when the
+    # request is inside a mounted engine (e.g. Mission Control at /jobs).
+    redirect_to main_app.new_session_path
   end
 
   # A signed-in user with no membership (mid-signup or abandoned completion)
   # must finish signup before reaching any tenant surface.
   def require_signup_completion
     if Current.user.present? && Current.account.nil?
-      redirect_to new_signup_completion_path
+      redirect_to main_app.new_signup_completion_path
     end
   end
 

@@ -18,7 +18,7 @@ module Sessy::Saas::ApprovalGate
 
   def require_approved_account
     if Current.account.present? && !Current.account.approved?
-      redirect_to pending_path
+      redirect_to main_app.pending_path
     end
   end
 end
