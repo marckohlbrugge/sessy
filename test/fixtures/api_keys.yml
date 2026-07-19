@@ -1,0 +1,7 @@
+# Digests of well-known plaintext tokens so tests can authenticate:
+#   instance_key  -> sessy_instance_test_key
+instance_key:
+  account: instance
+  name: Test agent
+  token_digest: <%= OpenSSL::Digest::SHA256.hexdigest("sessy_instance_test_key") %>
+  token_prefix: sessy_ins

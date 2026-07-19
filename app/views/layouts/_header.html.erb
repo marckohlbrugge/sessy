@@ -4,6 +4,9 @@
       <%= image_tag "wordmark.svg", class: "h-5 w-auto dark:invert", alt: "Sessy" %>
     <% end %>
     <%= render "layouts/saas_badge" if Sessy.saas? %>
-    <%= link_to "GitHub", "https://github.com/marckohlbrugge/sessy", target: "_blank", class: "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" %>
+    <div class="flex items-center gap-4">
+      <%= link_to "API keys", api_keys_path, class: "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" %>
+      <%= link_to "GitHub", "https://github.com/marckohlbrugge/sessy", target: "_blank", class: "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" %>
+    </div>
   </nav>
 </header>

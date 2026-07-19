@@ -2,6 +2,7 @@ class Account < ApplicationRecord
   has_many :memberships, dependent: :destroy
   has_many :users, through: :memberships
   has_many :sources, dependent: :destroy
+  has_many :api_keys, dependent: :destroy
 
   # The self-hosted singleton: every OSS install lives inside one instance
   # account that owns all data. Created lazily so fresh schema-loaded installs

@@ -36,6 +36,22 @@ Need help configuring AWS SES itself? See [AWS SES setup guide](docs/aws-ses-set
 
 For hardening recommendations, see [SES security and deliverability best practices](docs/ses-security-best-practices.md).
 
+## MCP server for AI agents
+
+Sessy ships an [MCP](https://modelcontextprotocol.io) server at `/mcp`, so AI coding agents (Claude Code, Cursor, Codex) can query your email data: search events, inspect a message's full delivery timeline with bounce diagnostics, and pull aggregate stats. All tools are read-only.
+
+Create an API key on the **API keys** page in the web UI, then follow the connect instructions at `/docs/mcp` on your instance. For example, for Claude Code:
+
+```bash
+claude mcp add --transport http sessy https://your-sessy-host/mcp \
+  --header "Authorization: Bearer YOUR_API_KEY"
+```
+
+Two things worth knowing:
+
+- **Cloudflare / CDN users:** bot protection (managed challenges) blocks MCP clients. Exempt the `/mcp` path from bot protection or agent requests will fail.
+- **HTTP Basic auth:** `/mcp` authenticates with API keys only and ignores `HTTP_AUTH_*`. Enabling HTTP Basic later does not revoke previously created API keys — review the API keys page after locking down an install.
+
 ## Hosted version
 
 We're working on a managed version of Sessy for those who'd rather not run their own instance.

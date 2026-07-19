@@ -1,0 +1,82 @@
+<% content_for :title, "MCP server · Sessy" %>
+
+<div class="mx-auto max-w-6xl px-4 py-6 sm:px-6">
+  <h1 class="text-lg font-semibold">MCP server</h1>
+  <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl">
+    Connect AI agents like Claude Code, Cursor, and Codex to this Sessy instance over the
+    Model Context Protocol. Agents can search email events, inspect message timelines with
+    bounce diagnostics, and pull delivery stats &mdash; read-only.
+  </p>
+
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="space-y-6">
+      <div>
+        <h2 class="text-sm font-medium">Endpoint</h2>
+        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code class="select-all"><%= @endpoint_url %></code></pre>
+        <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          Authentication uses an API key as a bearer token.
+          <%= link_to "Create one here", api_keys_path, class: "underline hover:text-zinc-900 dark:hover:text-zinc-100" %>.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="text-sm font-medium">Claude Code</h2>
+        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code>claude mcp add --transport http sessy <%= @endpoint_url %> \
+  --header "Authorization: Bearer YOUR_API_KEY"</code></pre>
+      </div>
+
+      <div>
+        <h2 class="text-sm font-medium">Cursor</h2>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Add to <code>~/.cursor/mcp.json</code>:</p>
+        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code>{
+  "mcpServers": {
+    "sessy": {
+      "url": "<%= @endpoint_url %>",
+      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+    }
+  }
+}</code></pre>
+      </div>
+
+      <div>
+        <h2 class="text-sm font-medium">Codex</h2>
+        <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Add to <code>~/.codex/config.toml</code> (with <code>SESSY_API_KEY</code> exported in your shell):</p>
+        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code>[mcp_servers.sessy]
+url = "<%= @endpoint_url %>"
+bearer_token_env_var = "SESSY_API_KEY"</code></pre>
+      </div>
+
+      <p class="text-sm text-zinc-400 dark:text-zinc-500">
+        ChatGPT custom connectors require OAuth, which Sessy doesn't support yet &mdash; planned for a future release.
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      <div>
+        <h2 class="text-sm font-medium">Tools</h2>
+        <table class="mt-2 min-w-full text-sm">
+          <tbody>
+            <% @tools.each do |tool| %>
+              <tr class="border-b border-zinc-950/5 dark:border-white/5 align-top">
+                <td class="py-2.5 pr-3 whitespace-nowrap"><code class="font-medium"><%= tool.name_value %></code></td>
+                <td class="py-2.5 text-zinc-500 dark:text-zinc-400"><%= tool.description_value %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="text-sm text-zinc-500 dark:text-zinc-400 space-y-4">
+        <div>
+          <h3 class="font-medium text-zinc-900 dark:text-zinc-100">Running behind Cloudflare or a CDN?</h3>
+          <p class="mt-1">Bot protection (like Cloudflare's managed challenge) blocks MCP clients &mdash; they can't solve challenges. Add a WAF rule that skips bot protection for the <code>/mcp</code> path, or requests from your agents will silently fail.</p>
+        </div>
+        <div>
+          <h3 class="font-medium text-zinc-900 dark:text-zinc-100">Security notes</h3>
+          <p class="mt-1">API keys grant read access to all of this account's email data; keys live in your editor's config files, so treat them like passwords and revoke unused ones. Enabling HTTP Basic auth later does <em>not</em> revoke keys minted earlier &mdash; review the <%= link_to "API keys page", api_keys_path, class: "underline hover:text-zinc-900 dark:hover:text-zinc-100" %> after locking down an install.</p>
+          <p class="mt-1">Email subjects, recipient addresses, and bounce diagnostics are third-party content. The server instructs agents to treat them as data, never as instructions, and tools are read-only by design.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
