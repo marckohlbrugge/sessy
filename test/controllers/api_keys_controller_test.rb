@@ -18,7 +18,7 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
     assert_no_match "sessy_instance_test_key", response.body
   end
 
-  test "create shows the token once and never again" do
+  test "create shows the token once with ready-to-paste connect snippets" do
     assert_difference "ApiKey.count", 1 do
       post api_keys_path, params: { api_key: { name: "Claude Code" } }
     end
@@ -27,9 +27,14 @@ class ApiKeysControllerTest < ActionDispatch::IntegrationTest
     follow_redirect!
     token = ApiKey.order(:created_at).last
     assert_match(/sessy_\w+/, response.body)
+    assert_match "claude mcp add --transport http sessy", response.body
+    assert_match "~/.cursor/mcp.json", response.body
+    assert_match "~/.codex/config.toml", response.body
+    assert_operator response.body.scan(/Bearer sessy_\w{20,}/).size, :>=, 3, "each snippet embeds the key"
 
     get api_keys_path
     assert_no_match(/sessy_\w{20,}/, response.body)
+    assert_no_match(/claude mcp add/, response.body)
     assert_equal accounts(:instance), token.account
   end
 

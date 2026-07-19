@@ -14,6 +14,27 @@
     <div class="mt-4 border border-emerald-500/30 bg-emerald-500/5 px-3 py-2.5 text-sm">
       <p class="font-medium text-emerald-700 dark:text-emerald-400">API key created. Copy it now &mdash; it won't be shown again.</p>
       <code class="mt-1 block select-all break-all text-zinc-900 dark:text-zinc-100"><%= flash[:api_key_token] %></code>
+
+      <p class="mt-4 font-medium text-zinc-900 dark:text-zinc-100">Or connect your editor in one paste:</p>
+
+      <p class="mt-3 text-zinc-500 dark:text-zinc-400">Claude Code</p>
+      <pre class="mt-1 border border-zinc-950/10 dark:border-white/10 bg-white dark:bg-zinc-950 px-3 py-2 overflow-x-auto"><code class="select-all">claude mcp add --transport http sessy <%= mcp_endpoint_url %> \
+  --header "Authorization: Bearer <%= flash[:api_key_token] %>"</code></pre>
+
+      <p class="mt-3 text-zinc-500 dark:text-zinc-400">Cursor &mdash; add to <code>~/.cursor/mcp.json</code></p>
+      <pre class="mt-1 border border-zinc-950/10 dark:border-white/10 bg-white dark:bg-zinc-950 px-3 py-2 overflow-x-auto"><code class="select-all">{
+  "mcpServers": {
+    "sessy": {
+      "url": "<%= mcp_endpoint_url %>",
+      "headers": { "Authorization": "Bearer <%= flash[:api_key_token] %>" }
+    }
+  }
+}</code></pre>
+
+      <p class="mt-3 text-zinc-500 dark:text-zinc-400">Codex &mdash; add to <code>~/.codex/config.toml</code></p>
+      <pre class="mt-1 border border-zinc-950/10 dark:border-white/10 bg-white dark:bg-zinc-950 px-3 py-2 overflow-x-auto"><code class="select-all">[mcp_servers.sessy]
+url = "<%= mcp_endpoint_url %>"
+http_headers = { "Authorization" = "Bearer <%= flash[:api_key_token] %>" }</code></pre>
     </div>
   <% end %>
 
