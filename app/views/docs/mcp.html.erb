@@ -12,7 +12,7 @@
     <div class="space-y-6">
       <div>
         <h2 class="text-sm font-medium">Endpoint</h2>
-        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code class="select-all"><%= @endpoint_url %></code></pre>
+        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code class="select-all"><%= mcp_endpoint_url %></code></pre>
         <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
           Authentication uses an API key as a bearer token.
           <%= link_to "Create one here", api_keys_path, class: "underline hover:text-zinc-900 dark:hover:text-zinc-100" %>.
@@ -21,7 +21,7 @@
 
       <div>
         <h2 class="text-sm font-medium">Claude Code</h2>
-        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code>claude mcp add --transport http sessy <%= @endpoint_url %> \
+        <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code>claude mcp add --transport http sessy <%= mcp_endpoint_url %> \
   --header "Authorization: Bearer YOUR_API_KEY"</code></pre>
       </div>
 
@@ -31,7 +31,7 @@
         <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code>{
   "mcpServers": {
     "sessy": {
-      "url": "<%= @endpoint_url %>",
+      "url": "<%= mcp_endpoint_url %>",
       "headers": { "Authorization": "Bearer YOUR_API_KEY" }
     }
   }
@@ -42,7 +42,7 @@
         <h2 class="text-sm font-medium">Codex</h2>
         <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Add to <code>~/.codex/config.toml</code> (with <code>SESSY_API_KEY</code> exported in your shell):</p>
         <pre class="mt-2 border border-zinc-950/10 dark:border-white/10 px-3 py-2 text-sm overflow-x-auto"><code>[mcp_servers.sessy]
-url = "<%= @endpoint_url %>"
+url = "<%= mcp_endpoint_url %>"
 bearer_token_env_var = "SESSY_API_KEY"</code></pre>
       </div>
 
