@@ -1,5 +1,10 @@
 require_relative "boot"
 
+# Loaded explicitly (and ignored by the autoloader below): the Sessy constant
+# is already defined as the app namespace, so a bare Sessy.saas? call would
+# never trigger an autoload of lib/sessy.rb in a lazy (non-eager) boot.
+require_relative "../lib/sessy"
+
 require "rails/all"
 
 # Require the gems listed in Gemfile, including any gems
@@ -14,7 +19,7 @@ module Sessy
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
-    config.autoload_lib(ignore: %w[assets tasks])
+    config.autoload_lib(ignore: %w[assets tasks sessy.rb])
 
     config.active_storage.variant_processor = :disabled
 
