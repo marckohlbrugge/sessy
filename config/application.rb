@@ -21,6 +21,11 @@ module Sessy
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks sessy.rb])
 
+    # Display-only host for the MCP endpoint URL shown in docs and connect
+    # snippets. Hosted sets it to the api subdomain; self-hosted leaves it
+    # unset and the docs fall back to the request host.
+    config.x.api_host = ENV["API_HOST"]
+
     config.active_storage.variant_processor = :disabled
 
     # Configuration for the application, engines, and railties goes here.
