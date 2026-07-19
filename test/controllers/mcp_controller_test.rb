@@ -125,6 +125,42 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert_equal "text", result["content"].first["type"]
   end
 
+  test "a configured API host serves only the MCP endpoint and bounces everything else" do
+    with_api_host("api.sessy.test", app_host: "app.sessy.test") do
+      host! "api.sessy.test"
+
+      call_tool "list_sources"
+      assert_response :success, "MCP endpoint must answer on the API host"
+
+      get rails_health_check_path
+      assert_response :success, "health check must answer on the API host"
+
+      get "/sources"
+      assert_redirected_to "https://app.sessy.test/sources"
+
+      get "/docs/mcp"
+      assert_redirected_to "https://app.sessy.test/docs/mcp"
+
+      get "/"
+      assert_redirected_to "https://app.sessy.test"
+
+      get mcp_endpoint_path, headers: { "Accept" => "text/html" }
+      assert_equal "https://app.sessy.test/docs/mcp", response.headers["Location"],
+        "browser GET on the API host must land on the app host's docs"
+
+      host! "app.sessy.test"
+      call_tool "list_sources"
+      assert_response :success, "MCP endpoint still answers on the app host"
+    end
+  end
+
+  test "without API_HOST no host constraint applies" do
+    host! "anything.example.org"
+
+    call_tool "list_sources"
+    assert_response :success
+  end
+
   test "browser GET redirects to the docs page on the app host" do
     get mcp_endpoint_path, headers: { "Accept" => "text/html", "Authorization" => "Bearer #{INSTANCE_TOKEN}" }
 
@@ -453,6 +489,17 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Bounce",
       event_at: 30.minutes.ago, recipient_email: "intruder@example.com", bounce_type: "Permanent")
     [ account, api_key.token ]
+  end
+
+  def with_api_host(api_host, app_host:)
+    original_api = Rails.configuration.x.api_host
+    original_app = Rails.configuration.x.app_host
+    Rails.configuration.x.api_host = api_host
+    Rails.configuration.x.app_host = app_host
+    yield
+  ensure
+    Rails.configuration.x.api_host = original_api
+    Rails.configuration.x.app_host = original_app
   end
 
   def with_env(vars)

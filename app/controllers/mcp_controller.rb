@@ -99,6 +99,6 @@ class McpController < ActionController::API
   end
 
   def app_base_url
-    @app_base_url ||= ENV["APP_HOST"].present? ? "https://#{ENV["APP_HOST"]}" : request.base_url
+    @app_base_url ||= Rails.configuration.x.app_host.present? ? "https://#{Rails.configuration.x.app_host}" : request.base_url
   end
 end
