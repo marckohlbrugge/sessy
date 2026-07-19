@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_120500) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_000100) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "approved_at"
     t.datetime "created_at", null: false
@@ -19,6 +19,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_120500) do
     t.integer "retention_days"
     t.datetime "updated_at", null: false
     t.index ["instance"], name: "index_accounts_on_instance", unique: true, where: "instance"
+  end
+
+  create_table "api_keys", force: :cascade do |t|
+    t.integer "account_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "last_used_at"
+    t.string "name", null: false
+    t.string "token_digest", null: false
+    t.string "token_prefix", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_api_keys_on_account_id"
+    t.index ["token_digest"], name: "index_api_keys_on_token_digest", unique: true
   end
 
   create_table "events", force: :cascade do |t|
@@ -125,6 +137,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_120500) do
     t.index ["sns_message_id"], name: "index_webhooks_on_sns_message_id", unique: true
   end
 
+  add_foreign_key "api_keys", "accounts"
   add_foreign_key "events", "messages"
   add_foreign_key "events", "sources"
   add_foreign_key "events", "webhooks"
