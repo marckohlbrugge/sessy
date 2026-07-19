@@ -42,6 +42,29 @@ module Event::Filterable
       }
     end
 
+    def date_range_from_params(params)
+      preset = params[:date_range].presence || "last_30_days"
+
+      return [ parse_date(params[:from_date]), parse_date(params[:to_date]) ] if preset == "custom"
+
+      case preset
+      when "today"
+        [ Time.current.beginning_of_day, Time.current.end_of_day ]
+      when "yesterday"
+        [ 1.day.ago.beginning_of_day, 1.day.ago.end_of_day ]
+      when "last_7_days"
+        [ 7.days.ago.beginning_of_day, Time.current.end_of_day ]
+      when "last_30_days"
+        [ 30.days.ago.beginning_of_day, Time.current.end_of_day ]
+      when "last_45_days"
+        [ 45.days.ago.beginning_of_day, Time.current.end_of_day ]
+      when "last_90_days"
+        [ 90.days.ago.beginning_of_day, Time.current.end_of_day ]
+      else
+        [ nil, nil ]
+      end
+    end
+
     private
 
     def base_filtered_scope(params)
@@ -64,29 +87,6 @@ module Event::Filterable
         end
       else
         scope.with_event_types(event_types)
-      end
-    end
-
-    def date_range_from_params(params)
-      preset = params[:date_range].presence || "last_30_days"
-
-      return [ parse_date(params[:from_date]), parse_date(params[:to_date]) ] if preset == "custom"
-
-      case preset
-      when "today"
-        [ Time.current.beginning_of_day, Time.current.end_of_day ]
-      when "yesterday"
-        [ 1.day.ago.beginning_of_day, 1.day.ago.end_of_day ]
-      when "last_7_days"
-        [ 7.days.ago.beginning_of_day, Time.current.end_of_day ]
-      when "last_30_days"
-        [ 30.days.ago.beginning_of_day, Time.current.end_of_day ]
-      when "last_45_days"
-        [ 45.days.ago.beginning_of_day, Time.current.end_of_day ]
-      when "last_90_days"
-        [ 90.days.ago.beginning_of_day, Time.current.end_of_day ]
-      else
-        [ nil, nil ]
       end
     end
 

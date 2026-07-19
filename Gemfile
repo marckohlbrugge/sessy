@@ -24,6 +24,8 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Features
 gem "csv"
+gem "mcp", "~> 0.25" # official MCP Ruby SDK, serves /mcp
+gem "cloudflare-rails" # resolve real client IPs behind Cloudflare (rate limiting keys on remote_ip); inert without Cloudflare
 gem "aws-sdk-rails"
 gem "aws-sdk-sns"
 gem "local_time"
