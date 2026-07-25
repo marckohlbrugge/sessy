@@ -1,0 +1,18 @@
+<% content_for :title, "Approve account" %>
+
+<h1 class="text-lg font-semibold"><%= @account.name %></h1>
+<p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+  <%= @account.users.first&.email_address %> &middot; signed up <%= time_ago_in_words(@account.created_at) %> ago
+</p>
+
+<% if @account.approved? %>
+  <p class="mt-6 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
+    Approved <%= time_ago_in_words(@account.approved_at) %> ago.
+  </p>
+<% else %>
+  <%= button_to "Approve account", admin_approval_path(token: params[:token]),
+        class: "mt-6 w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300" %>
+  <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+    Approving emails them a welcome message with getting-started instructions.
+  </p>
+<% end %>

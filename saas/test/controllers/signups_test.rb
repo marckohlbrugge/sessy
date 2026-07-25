@@ -9,7 +9,11 @@ class Sessy::Saas::SignupsTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_difference -> { Account.where(instance: false).count }, 1 do
-      post signup_completion_path, params: { name: "Casey" }
+      # Block form: the sign-in code job enqueued above no longer deserializes
+      # (its magic link was consumed), so only jobs from this block may be scanned.
+      assert_enqueued_email_with Sessy::Saas::AdminMailer, :new_signup, args: ->(args) { args.first.name == "Casey's Sessy" } do
+        post signup_completion_path, params: { name: "Casey" }
+      end
     end
 
     account = Account.where(instance: false).last

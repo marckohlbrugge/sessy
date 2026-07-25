@@ -1,0 +1,4 @@
+<p><strong><%= @user.email_address %></strong> just signed up as “<%= @account.name %>”.</p>
+<p>The account is pending until you approve it:</p>
+<p><%= link_to "Review and approve", @approval_url %></p>
+<p style="color: #71717a; font-size: 14px;">Approving sends them a welcome email with getting-started instructions. This link works for 30 days; after that, approve from the console.</p>

@@ -1,5 +1,10 @@
 You're in!
 
-Your Sessy account has been approved. Sign in to add your first source and start watching your SES activity:
+Your Sessy account has been approved. Here's how to start watching your SES activity:
 
-<%= new_session_url %>
+1. Sign in with this email address — we'll send you a one-time code:
+   <%= new_session_url %>
+2. Create a source for each SES configuration set you want to track. Each source gets its own webhook URL.
+3. Point your configuration set's event destination (SNS) at that webhook URL — deliveries, bounces, complaints, opens, and clicks show up moments later.
+
+Stuck or have questions? Just reply to this email.

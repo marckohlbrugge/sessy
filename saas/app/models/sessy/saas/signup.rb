@@ -15,11 +15,15 @@ class Sessy::Saas::Signup
   def complete
     return false unless valid?
 
-    ActiveRecord::Base.transaction do
-      account = Account.create!(name: account_name, retention_days: HOSTED_RETENTION_DAYS)
-      account.memberships.create!(user: user, role: "owner")
-      account
+    account = ActiveRecord::Base.transaction do
+      Account.create!(name: account_name, retention_days: HOSTED_RETENTION_DAYS).tap do |account|
+        account.memberships.create!(user: user, role: "owner")
+      end
     end
+
+    # After the transaction, so the job can't race an uncommitted account.
+    Sessy::Saas::AdminMailer.new_signup(account).deliver_later
+    account
   end
 
   private
