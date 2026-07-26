@@ -35,6 +35,12 @@ Console fallback:
 Account.find_by!(name: "Casey's Sessy").approve!   # sends the approval email
 ```
 
+To re-send the notification for every account still pending (signed up before `ADMIN_EMAIL` was set, or the email got lost):
+
+```bash
+kamal app exec -c config/deploy.saas.yml "bin/rails saas:notify_pending"
+```
+
 ## Abuse response
 
 Approval is otherwise permanent; to cut off an abusive account:
