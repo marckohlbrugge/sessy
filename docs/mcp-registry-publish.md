@@ -29,13 +29,12 @@ Sessy uses bearer API keys, not OAuth. A bare publish against `/mcp` makes Smith
 
 ```bash
 npx @smithery/cli auth login
-# Qualified name must use a namespace you own (login output). Example: subscriptions/sessy
-# Optional branded namespace: npx @smithery/cli namespace create sessy
+# Qualified name must use a namespace you own. Branded namespace: sessy
 
 # Config schema: Smithery reserves Authorization for its own OAuth, so the
 # Sessy key is collected/forwarded as x-api-key (Sessy accepts that header).
 npx @smithery/cli mcp publish "https://api.sessy.do/mcp" \
-  -n subscriptions/sessy \
+  -n sessy/mcp \
   --config-schema '{
     "type": "object",
     "properties": {
@@ -50,8 +49,25 @@ npx @smithery/cli mcp publish "https://api.sessy.do/mcp" \
   }'
 ```
 
-`marckohlbrugge/sessy` fails with `Namespace not found` unless that Smithery namespace exists and is owned by the logged-in account.
+Use `-n sessy/<slug>` (e.g. `sessy/mcp`). Older personal namespace was `subscriptions`; `marckohlbrugge/sessy` 404s unless that namespace exists.
 
+**Live:** https://smithery.ai/servers/sessy/mcp (gateway: `https://mcp--sessy.run.tools`)
+
+After publish, set listing metadata (display name defaults to the slug `mcp`):
+
+```bash
+# API key from ~/.smithery or Library/Application Support/smithery/settings.json
+curl -X PATCH "https://api.smithery.ai/servers/sessy%2Fmcp" \
+  -H "Authorization: Bearer $SMITHERY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "displayName": "Sessy",
+    "description": "Read-only Amazon SES observability: search events, inspect bounces, pull delivery stats. Point Claude Code, Cursor, or Codex at your Sessy instance — agents cannot send email or change SES settings.",
+    "homepage": "https://sessy.do/blog/amazon-ses-mcp",
+    "repositoryUrl": "https://github.com/marckohlbrugge/sessy",
+    "unlisted": false
+  }'
+```
 
 Fallback: https://smithery.ai/new with the same URL once the server card is live.
 
