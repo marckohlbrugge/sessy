@@ -3,7 +3,7 @@
 # https://glama.ai/mcp/schemas/connector.json
 class GlamaCardsController < ActionController::API
   def show
-    email = ENV["ADMIN_EMAIL"].presence
+    email = ENV["GLAMA_MAINTAINER_EMAIL"].presence
     return head :not_found if email.blank?
 
     render json: {
