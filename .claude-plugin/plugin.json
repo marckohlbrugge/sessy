@@ -1,0 +1,22 @@
+{
+  "name": "sessy",
+  "description": "Read-only Amazon SES observability via MCP: search events, inspect bounces and complaints, pull delivery stats. Requires a Sessy API key — agents cannot send email or change SES settings.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Marc Köhlbrugge",
+    "email": "subscriptions@marckohlbrugge.com"
+  },
+  "homepage": "https://sessy.do/docs/mcp",
+  "repository": "https://github.com/marckohlbrugge/sessy",
+  "license": "MIT",
+  "keywords": [
+    "amazon-ses",
+    "aws-ses",
+    "email",
+    "observability",
+    "deliverability",
+    "bounces",
+    "mcp",
+    "claude-code"
+  ]
+}
