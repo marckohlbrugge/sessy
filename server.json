@@ -1,0 +1,36 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.marckohlbrugge/sessy",
+  "title": "Sessy — Amazon SES observability",
+  "description": "Read-only Amazon SES observability: search events, inspect bounces, pull delivery stats.",
+  "version": "1.0.0",
+  "websiteUrl": "https://sessy.do/blog/amazon-ses-mcp",
+  "repository": {
+    "url": "https://github.com/marckohlbrugge/sessy",
+    "source": "github",
+    "id": "1125135266"
+  },
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/marckohlbrugge/sessy/main/app/assets/images/icon.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": ["any"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.sessy.do/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer token from your Sessy API keys page (https://app.sessy.do/api_keys). Self-hosters: point the URL at your own instance's /mcp endpoint instead of api.sessy.do. Setup: https://sessy.do/docs/mcp",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string",
+          "placeholder": "Bearer YOUR_API_KEY"
+        }
+      ]
+    }
+  ]
+}
