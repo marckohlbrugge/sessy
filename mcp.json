@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "sessy": {
+      "type": "http",
+      "url": "https://api.sessy.do/mcp",
+      "headers": {
+        "Authorization": "Bearer ${SESSY_API_KEY}"
+      }
+    }
+  }
+}
