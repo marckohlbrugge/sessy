@@ -2,14 +2,14 @@ require "test_helper"
 
 class GlamaCardsControllerTest < ActionDispatch::IntegrationTest
   test "glama claim file is public when GLAMA_MAINTAINER_EMAIL is set" do
-    with_glama_maintainer_email("subscriptions@example.com") do
+    with_glama_maintainer_email("owner@example.com") do
       get "/.well-known/glama.json"
 
       assert_response :success
       card = JSON.parse(response.body)
 
       assert_equal "https://glama.ai/mcp/schemas/connector.json", card["$schema"]
-      assert_equal [ { "email" => "subscriptions@example.com" } ], card["maintainers"]
+      assert_equal [ { "email" => "owner@example.com" } ], card["maintainers"]
     end
   end
 
@@ -27,12 +27,12 @@ class GlamaCardsControllerTest < ActionDispatch::IntegrationTest
     Rails.configuration.x.api_host = "api.sessy.test"
     Rails.configuration.x.app_host = "app.sessy.test"
 
-    with_glama_maintainer_email("subscriptions@example.com") do
+    with_glama_maintainer_email("owner@example.com") do
       host! "api.sessy.test"
       get "/.well-known/glama.json"
 
       assert_response :success
-      assert_equal "subscriptions@example.com", JSON.parse(response.body).dig("maintainers", 0, "email")
+      assert_equal "owner@example.com", JSON.parse(response.body).dig("maintainers", 0, "email")
     end
   ensure
     Rails.configuration.x.api_host = original_api
