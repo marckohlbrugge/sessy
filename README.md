@@ -88,7 +88,7 @@ For anything beyond small fixes, please open an issue first so no one wastes the
 
 ## License
 
-Sessy is released under the [O'Saasy License](LICENSE.md).
+Sessy is released under the [O'Saasy License](LICENSE.md), except where a subdirectory specifies otherwise (for example, the Claude and Cursor plugin packages are [MIT](.claude-plugin/LICENSE)).
 
 
 ## Inspiration
