@@ -25,14 +25,35 @@ After changing listing copy or the endpoint, bump `version` in `server.json` and
 
 ## Smithery
 
+Sessy uses bearer API keys, not OAuth. A bare publish against `/mcp` makes Smithery try RFC 9728 OAuth discovery and fail. After deploy, `https://api.sessy.do/.well-known/mcp/server-card.json` supplies tool metadata without OAuth (do **not** add OAuth well-known — Cursor then ignores configured bearer headers).
+
 ```bash
 npx @smithery/cli auth login
+# Qualified name must use a namespace you own (login output). Example: subscriptions/sessy
+# Optional branded namespace: npx @smithery/cli namespace create sessy
+
+# Config schema: Smithery reserves Authorization for its own OAuth, so the
+# Sessy key is collected/forwarded as x-api-key (Sessy accepts that header).
 npx @smithery/cli mcp publish "https://api.sessy.do/mcp" \
-  -n marckohlbrugge/sessy \
-  --config-schema '{"type":"object","properties":{"apiKey":{"type":"string","description":"Sessy API key (Bearer token from app.sessy.do/api_keys)"}},"required":["apiKey"]}'
+  -n subscriptions/sessy \
+  --config-schema '{
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "title": "API Key",
+        "description": "Sessy API key from https://app.sessy.do/api_keys",
+        "x-from": { "header": "x-api-key" }
+      }
+    },
+    "required": ["apiKey"]
+  }'
 ```
 
-If their scanner can't list tools (auth-gated initialize), fall back to https://smithery.ai/new and paste the URL, or add a static server card later.
+`marckohlbrugge/sessy` fails with `Namespace not found` unless that Smithery namespace exists and is owned by the logged-in account.
+
+
+Fallback: https://smithery.ai/new with the same URL once the server card is live.
 
 ## PulseMCP
 

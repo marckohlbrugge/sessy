@@ -46,4 +46,31 @@ module McpServer
       McpServer::EmailStats
     ]
   end
+
+  # Static metadata for directory scanners (Smithery, etc.) that can't complete
+  # tools/list behind bearer auth. Served at /.well-known/mcp/server-card.json.
+  # Deliberately not OAuth — publishing RFC 9728 metadata would make Cursor
+  # ignore configured Authorization headers (see MCP plan assumptions).
+  def self.server_card
+    {
+      serverInfo: {
+        name: "sessy",
+        title: "Sessy",
+        version: VERSION
+      },
+      authentication: {
+        required: true,
+        schemes: [ "bearer" ]
+      },
+      tools: tools.map { |tool|
+        {
+          name: tool.name_value,
+          description: tool.description_value,
+          inputSchema: tool.input_schema_value.to_h.except("$schema", :"$schema")
+        }
+      },
+      resources: [],
+      prompts: []
+    }
+  end
 end

@@ -10,13 +10,20 @@ Rails.application.routes.draw do
   # the main host with no extra configuration.
   match "mcp", to: "mcp#handle", via: %i[get post delete], as: :mcp_endpoint
 
+  # Directory scanners (Smithery) fetch this without auth when /mcp is
+  # bearer-gated. Must stay on the API host — declared above the bounce rule.
+  get ".well-known/mcp/server-card", to: "mcp_server_cards#show", defaults: { format: :json }
+  get ".well-known/mcp/server-card.json", to: "mcp_server_cards#show"
+
   # When a dedicated API host is configured (hosted: api.sessy.do), it serves
-  # nothing but the MCP endpoint and the health check above — everything else
-  # bounces to the app host, so sign-in and app pages never answer there.
+  # nothing but the MCP endpoint, the server card, and the health check above —
+  # everything else bounces to the app host, so sign-in and app pages never
+  # answer there.
   constraints Routes::ApiHost do
     match "*path", to: redirect { |_params, request| "https://#{Routes::ApiHost.app_host}#{request.fullpath}" }, via: :all, format: false
     match "/", to: redirect { "https://#{Routes::ApiHost.app_host}" }, via: :all
   end
+
 
   get "docs/mcp", to: "docs#mcp", as: :mcp_docs
 
