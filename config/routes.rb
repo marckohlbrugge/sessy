@@ -15,10 +15,14 @@ Rails.application.routes.draw do
   get ".well-known/mcp/server-card", to: "mcp_server_cards#show", defaults: { format: :json }
   get ".well-known/mcp/server-card.json", to: "mcp_server_cards#show"
 
+  # Glama connector ownership claim (email must match the Glama account).
+  get ".well-known/glama", to: "glama_cards#show", defaults: { format: :json }
+  get ".well-known/glama.json", to: "glama_cards#show"
+
   # When a dedicated API host is configured (hosted: api.sessy.do), it serves
-  # nothing but the MCP endpoint, the server card, and the health check above —
-  # everything else bounces to the app host, so sign-in and app pages never
-  # answer there.
+  # nothing but the MCP endpoint, well-known claim/card files, and the health
+  # check above — everything else bounces to the app host, so sign-in and app
+  # pages never answer there.
   constraints Routes::ApiHost do
     match "*path", to: redirect { |_params, request| "https://#{Routes::ApiHost.app_host}#{request.fullpath}" }, via: :all, format: false
     match "/", to: redirect { "https://#{Routes::ApiHost.app_host}" }, via: :all
