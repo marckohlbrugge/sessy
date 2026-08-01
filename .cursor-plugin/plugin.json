@@ -1,0 +1,27 @@
+{
+  "name": "sessy",
+  "displayName": "Sessy — AWS SES Observability",
+  "version": "1.0.0",
+  "description": "Track AWS SES bounces, complaints, and delivery stats from your coding agent. Requires a Sessy API key from https://app.sessy.do/api_keys. Does not send email or change SES settings.",
+  "author": {
+    "name": "Marc Köhlbrugge",
+    "email": "hello@sessy.do"
+  },
+  "homepage": "https://sessy.do/docs/mcp",
+  "repository": "https://github.com/marckohlbrugge/sessy",
+  "license": "MIT",
+  "logo": "docs/icon.svg",
+  "keywords": [
+    "amazon-ses",
+    "aws-ses",
+    "ses",
+    "email",
+    "observability",
+    "deliverability",
+    "bounces",
+    "complaints",
+    "transactional-email",
+    "mcp"
+  ],
+  "mcpServers": "./mcp.json"
+}
