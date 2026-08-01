@@ -27,10 +27,18 @@ Steps to turn app.sessy.do into the multi-tenant hosted edition. Maintainer-run;
 
 ## Approving new signups
 
-New accounts land pending. Approve from the console:
+New accounts land pending. With `ADMIN_EMAIL` set on the hosted env, each signup emails the operator a one-click approval link (`/admin/approval?token=...`, a signed token valid for 30 days). Approving — via the link or the console — sends the user a welcome email with getting-started instructions.
+
+Console fallback:
 
 ```ruby
 Account.find_by!(name: "Casey's Sessy").approve!   # sends the approval email
+```
+
+To re-send the notification for every account still pending (signed up before `ADMIN_EMAIL` was set, or the email got lost):
+
+```bash
+kamal app exec -c config/deploy.saas.yml "bin/rails saas:notify_pending"
 ```
 
 ## Abuse response

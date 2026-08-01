@@ -9,6 +9,7 @@ module Sessy
           resource :session_code, only: [ :show, :create ], controller: "sessy/saas/sessions/codes", path: "session/code"
           resource :signup_completion, only: [ :new, :create ], controller: "sessy/saas/signups/completions", path: "signup/complete"
           resource :pending, only: :show, controller: "sessy/saas/pendings"
+          resource :admin_approval, only: [ :show, :create ], controller: "sessy/saas/admin/approvals", path: "admin/approval"
         end
       end
 

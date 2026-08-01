@@ -13,6 +13,25 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert result["instructions"].present?
   end
 
+  test "X-Api-Key authenticates when Authorization is absent" do
+    post mcp_endpoint_path,
+      params: {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name: "list_sources", arguments: {} }
+      }.to_json,
+      headers: {
+        "Content-Type" => "application/json",
+        "Accept" => "application/json, text/event-stream",
+        "MCP-Protocol-Version" => PROTOCOL_VERSION,
+        "X-Api-Key" => INSTANCE_TOKEN
+      }
+
+    assert_response :success
+    assert_kind_of Array, tool_payload["sources"]
+  end
+
   test "notifications return 202" do
     rpc "notifications/initialized", {}, id: nil
 
@@ -134,6 +153,9 @@ class McpControllerTest < ActionDispatch::IntegrationTest
 
       get rails_health_check_path
       assert_response :success, "health check must answer on the API host"
+
+      get "/.well-known/mcp/server-card.json"
+      assert_response :success, "MCP server card must answer on the API host"
 
       get "/sources"
       assert_redirected_to "https://app.sessy.test/sources"

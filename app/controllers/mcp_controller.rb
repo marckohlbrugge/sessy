@@ -57,9 +57,14 @@ class McpController < ActionController::API
   def current_api_key
     return @current_api_key if defined?(@current_api_key)
 
+    # Bearer is the primary scheme (Claude Code / Cursor / Codex snippets).
+    # X-Api-Key is accepted so gateways that reserve Authorization for their
+    # own OAuth (Smithery) can still forward a Sessy key.
     token = request.authorization.to_s[/\ABearer (.+)\z/, 1]
+    token = request.headers["X-Api-Key"].presence if token.blank?
     @current_api_key = ApiKey.find_by_token(token)
   end
+
 
   # Missing, unknown, and revoked tokens all take this one path, so the 401 is
   # byte-identical in every case and never echoes the presented token.
