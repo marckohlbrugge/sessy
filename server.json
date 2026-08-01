@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.marckohlbrugge/sessy",
-  "title": "Sessy — Amazon SES observability",
-  "description": "Read-only Amazon SES observability: search events, inspect bounces, pull delivery stats.",
-  "version": "1.0.0",
+  "title": "Sessy — AWS SES Observability",
+  "description": "Track AWS SES bounces, deliveries, and complaints via MCP. Not for sending email.",
+  "version": "1.0.1",
   "websiteUrl": "https://sessy.do/blog/amazon-ses-mcp",
   "repository": {
     "url": "https://github.com/marckohlbrugge/sessy",

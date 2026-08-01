@@ -61,8 +61,8 @@ curl -X PATCH "https://api.smithery.ai/servers/sessy%2Fmcp" \
   -H "Authorization: Bearer $SMITHERY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "displayName": "Sessy",
-    "description": "Read-only Amazon SES observability: search events, inspect bounces, pull delivery stats. Point Claude Code, Cursor, or Codex at your Sessy instance — agents cannot send email or change SES settings.",
+    "displayName": "Sessy — AWS SES Observability",
+    "description": "Track AWS SES bounces, complaints, and delivery stats from Claude Code, Cursor, or Codex. Does not send email or change SES settings.",
     "homepage": "https://sessy.do/blog/amazon-ses-mcp",
     "repositoryUrl": "https://github.com/marckohlbrugge/sessy",
     "unlisted": false
@@ -77,7 +77,7 @@ After the official registry publish, email hello@pulsemcp.com:
 
 > Subject: Please index Sessy SES observability MCP
 >
-> We published `io.github.marckohlbrugge/sessy` to the official MCP Registry (remote: https://api.sessy.do/mcp). It's read-only Amazon SES observability (bounces/deliveries/stats) — not a send MCP. Homepage: https://sessy.do/blog/amazon-ses-mcp
+> We published `io.github.marckohlbrugge/sessy` to the official MCP Registry (remote: https://api.sessy.do/mcp). It tracks AWS SES bounces, deliveries, and complaints — not a send MCP. Homepage: https://sessy.do/blog/amazon-ses-mcp
 
 ## Notes
 
