@@ -14,6 +14,17 @@ class McpServerCardsControllerTest < ActionDispatch::IntegrationTest
     assert_equal %w[list_sources search_events get_message email_stats],
       card["tools"].map { |tool| tool["name"] }
     assert_not_includes card.dig("authentication", "schemes"), "oauth2"
+
+    # Smithery and similar scanners can't auth through /mcp, so annotations and
+    # output schemas must be on the public card — not only on tools/list.
+    card["tools"].each do |tool|
+      assert_equal true, tool.dig("annotations", "readOnlyHint"), "#{tool["name"]} card annotations"
+      assert_equal false, tool.dig("annotations", "destructiveHint"), "#{tool["name"]} card annotations"
+      assert tool["outputSchema"].present?, "#{tool["name"]} card outputSchema"
+      assert tool.dig("outputSchema", "properties").present?, "#{tool["name"]} card outputSchema fields"
+      assert_nil tool.dig("outputSchema", "$schema")
+      assert_nil tool.dig("inputSchema", "$schema")
+    end
   end
 
   test "a configured API host serves the server card without redirecting" do

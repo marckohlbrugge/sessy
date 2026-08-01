@@ -11,6 +11,50 @@ class McpServer::GetMessage < McpServer::BaseTool
     required: [ "ses_message_id" ],
     additionalProperties: false
   )
+  output_schema(
+    properties: {
+      message: {
+        type: "object",
+        properties: {
+          ses_message_id: { type: "string" },
+          subject: { type: [ "string", "null" ] },
+          from: { type: [ "string", "null" ] },
+          destinations: { type: "array", items: { type: "string" } },
+          tags: { type: "object", additionalProperties: true },
+          source: {
+            type: "object",
+            properties: {
+              id: { type: [ "integer", "null" ] },
+              name: { type: [ "string", "null" ] }
+            },
+            required: %w[id name],
+            additionalProperties: false
+          },
+          sent_at: { type: [ "string", "null" ] }
+        },
+        required: %w[ses_message_id subject from destinations tags source sent_at],
+        additionalProperties: false
+      },
+      events: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            event_type: { type: "string" },
+            bounce_type: { type: "string" },
+            recipient_email: { type: "string" },
+            event_at: { type: "string" },
+            details: { type: "object", description: "Event-type-specific SES diagnostics (truncated); omit raw_payload" }
+          },
+          required: %w[event_type recipient_email event_at],
+          additionalProperties: false
+        }
+      },
+      events_truncated: { type: "boolean", description: "True when more than #{EVENTS_LIMIT} events exist for this message" }
+    },
+    required: %w[message events],
+    additionalProperties: false
+  )
 
   def self.perform(account:, ses_message_id:, **)
     message = account_messages(account).find_by(ses_message_id: ses_message_id)

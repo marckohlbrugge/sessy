@@ -4,6 +4,19 @@ class McpServer::BaseTool < MCP::Tool
   # error: raw exception text never reaches programmatic callers.
   class ToolError < StandardError; end
 
+  # Shared by search_events / email_stats so scanners see one shape for the
+  # date window the tool actually applied.
+  APPLIED_DATE_RANGE_SCHEMA = {
+    type: "object",
+    properties: {
+      preset: { type: "string" },
+      from: { type: [ "string", "null" ] },
+      to: { type: [ "string", "null" ] }
+    },
+    required: [ "preset", "from", "to" ],
+    additionalProperties: false
+  }.freeze
+
   class << self
     # Every tool on this server reads the account's own closed dataset, so
     # declare the full set of behavior hints once.
