@@ -15,6 +15,74 @@ class McpServer::EmailStats < McpServer::BaseTool
     required: [],
     additionalProperties: false
   )
+  output_schema(
+    properties: {
+      scope: {
+        type: "object",
+        properties: {
+          source_id: { type: [ "integer", "null" ] },
+          source_name: { type: "string" }
+        },
+        required: %w[source_id source_name],
+        additionalProperties: false
+      },
+      applied_date_range: APPLIED_DATE_RANGE_SCHEMA,
+      counts: {
+        type: "object",
+        properties: {
+          sent: { type: "integer" },
+          delivered: { type: "integer" },
+          bounced: { type: "integer" },
+          complaints: { type: "integer" },
+          opens: { type: "integer" },
+          clicks: { type: "integer" },
+          unique_opens: { type: "integer" },
+          unique_clicks: { type: "integer" }
+        },
+        required: %w[sent delivered bounced complaints opens clicks unique_opens unique_clicks],
+        additionalProperties: false
+      },
+      rates_percent: {
+        type: "object",
+        properties: {
+          bounce: { type: "number" },
+          complaint: { type: "number" },
+          open: { type: "number" },
+          click: { type: "number" }
+        },
+        required: %w[bounce complaint open click],
+        additionalProperties: false
+      },
+      bounce_breakdown: {
+        type: "object",
+        description: "Counts keyed by bounce subtype (Permanent, Transient, Undetermined, Unknown)",
+        additionalProperties: { type: "integer" }
+      },
+      daily_series: {
+        type: "object",
+        properties: {
+          dates: { type: "array", items: { type: "string" } },
+          series: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                key: { type: "string" },
+                values: { type: "array", items: { type: "integer" } }
+              },
+              required: %w[key values],
+              additionalProperties: false
+            }
+          }
+        },
+        required: %w[dates series],
+        additionalProperties: false
+      },
+      hint: { type: "string", description: "Present when there were no sends in the applied window" }
+    },
+    required: %w[scope applied_date_range counts rates_percent bounce_breakdown],
+    additionalProperties: false
+  )
 
   def self.perform(account:, source_id: nil, date_range: nil, from_date: nil, to_date: nil, include_daily_series: false, **)
     date_params = resolve_date_params(date_range: date_range, from_date: from_date, to_date: to_date)

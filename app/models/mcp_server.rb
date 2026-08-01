@@ -4,7 +4,7 @@
 # untrusted third-party input flowing into agent context, and a read-only
 # surface caps what a prompt-injected agent can do to more reads.
 module McpServer
-  VERSION = "1.0.0"
+  VERSION = "1.1.0"
 
   INSTRUCTIONS = <<~TEXT
     Sessy observes email sent through AWS SES: deliveries, bounces, complaints,
@@ -63,11 +63,18 @@ module McpServer
         schemes: [ "bearer" ]
       },
       tools: tools.map { |tool|
-        {
+        card = {
           name: tool.name_value,
           description: tool.description_value,
           inputSchema: tool.input_schema_value.to_h.except("$schema", :"$schema")
         }
+        if (output = tool.output_schema_value)
+          card[:outputSchema] = output.to_h.except("$schema", :"$schema")
+        end
+        if (annotations = tool.annotations_value)
+          card[:annotations] = annotations.to_h
+        end
+        card
       },
       resources: [],
       prompts: []

@@ -82,7 +82,7 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil api_key.reload.last_used_at
   end
 
-  test "tools/list shows tools with titles and readOnlyHint" do
+  test "tools/list shows tools with titles, readOnlyHint, and output schemas" do
     rpc "tools/list"
 
     assert_response :success
@@ -95,6 +95,10 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert_equal false, list_sources.dig("annotations", "destructiveHint")
     tools.each do |tool|
       assert_equal false, tool.dig("inputSchema", "additionalProperties"), "#{tool["name"]} schema must forbid unknown params"
+      assert tool["outputSchema"].present?, "#{tool["name"]} must declare an outputSchema"
+      assert tool.dig("outputSchema", "properties").present?, "#{tool["name"]} outputSchema needs named fields"
+      assert_equal true, tool.dig("annotations", "readOnlyHint"), "#{tool["name"]} must be read-only"
+      assert_equal false, tool.dig("annotations", "destructiveHint"), "#{tool["name"]} must not be destructive"
     end
   end
 

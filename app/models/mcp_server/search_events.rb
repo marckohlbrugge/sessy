@@ -20,6 +20,32 @@ class McpServer::SearchEvents < McpServer::BaseTool
     required: [],
     additionalProperties: false
   )
+  output_schema(
+    properties: {
+      events: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            event_type: { type: "string" },
+            bounce_type: { type: "string" },
+            recipient_email: { type: "string" },
+            subject: { type: "string" },
+            ses_message_id: { type: "string" },
+            event_at: { type: "string" }
+          },
+          required: %w[event_type recipient_email ses_message_id event_at],
+          additionalProperties: false
+        }
+      },
+      has_more: { type: "boolean" },
+      next_cursor: { type: [ "string", "null" ] },
+      applied_date_range: APPLIED_DATE_RANGE_SCHEMA,
+      hint: { type: "string", description: "Present when the page is empty and a wider date window may help" }
+    },
+    required: %w[events has_more next_cursor applied_date_range],
+    additionalProperties: false
+  )
 
   def self.perform(account:, source_id: nil, query: nil, event_types: nil, bounce_types: nil,
     date_range: nil, from_date: nil, to_date: nil, limit: DEFAULT_LIMIT, cursor: nil, **)
