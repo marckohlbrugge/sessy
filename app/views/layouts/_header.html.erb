@@ -7,6 +7,11 @@
     <div class="flex items-center gap-4">
       <%= link_to "API keys", api_keys_path, class: "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" %>
       <%= link_to "GitHub", "https://github.com/marckohlbrugge/sessy", target: "_blank", class: "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100" %>
+      <% if Sessy.saas? && Current.user %>
+        <%= button_to "Sign out", session_path, method: :delete,
+              class: "text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
+              form: { class: "inline" } %>
+      <% end %>
     </div>
   </nav>
 </header>
