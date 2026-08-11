@@ -101,7 +101,7 @@ jobs:
 
       - name: Attest image provenance (per-arch)
         if: github.event_name != 'pull_request'
-        uses: actions/attest-build-provenance@v4.1.1
+        uses: actions/attest-build-provenance@v4.2.2
         with:
           subject-name: ${{ steps.vars.outputs.canonical }}
           subject-digest: ${{ steps.build.outputs.digest }}
