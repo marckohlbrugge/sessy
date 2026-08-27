@@ -104,7 +104,7 @@ GEM
     aws-sdk-ses (1.102.0)
       aws-sdk-core (~> 3, >= 3.254.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-sesv2 (1.105.0)
+    aws-sdk-sesv2 (1.106.0)
       aws-sdk-core (~> 3, >= 3.254.0)
       aws-sigv4 (~> 1.5)
     aws-sdk-sns (1.118.0)
@@ -196,7 +196,7 @@ GEM
     loofah (2.25.2)
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
-    mail (2.9.0)
+    mail (2.9.1)
       logger
       mini_mime (>= 0.1.1)
       net-imap
@@ -221,12 +221,12 @@ GEM
       stimulus-rails
       turbo-rails
     msgpack (1.8.4)
-    net-imap (0.6.4.1)
+    net-imap (0.6.6)
       date
       net-protocol
     net-pop (0.1.2)
       net-protocol
-    net-protocol (0.2.2)
+    net-protocol (0.3.0)
       timeout
     net-scp (4.1.0)
       net-ssh (>= 2.6.5, < 8.0.0)
@@ -385,13 +385,13 @@ GEM
       fugit (~> 1.11)
       railties (>= 7.1)
       thor (>= 1.3.1)
-    sqlite3 (2.9.5-aarch64-linux-gnu)
-    sqlite3 (2.9.5-aarch64-linux-musl)
-    sqlite3 (2.9.5-arm-linux-gnu)
-    sqlite3 (2.9.5-arm-linux-musl)
-    sqlite3 (2.9.5-arm64-darwin)
-    sqlite3 (2.9.5-x86_64-linux-gnu)
-    sqlite3 (2.9.5-x86_64-linux-musl)
+    sqlite3 (2.9.6-aarch64-linux-gnu)
+    sqlite3 (2.9.6-aarch64-linux-musl)
+    sqlite3 (2.9.6-arm-linux-gnu)
+    sqlite3 (2.9.6-arm-linux-musl)
+    sqlite3 (2.9.6-arm64-darwin)
+    sqlite3 (2.9.6-x86_64-linux-gnu)
+    sqlite3 (2.9.6-x86_64-linux-musl)
     sshkit (1.25.0)
       base64
       logger
@@ -510,7 +510,7 @@ CHECKSUMS
   aws-sdk-core (3.254.0) sha256=ee3e3220b8468a3c9e59daba18e6ec897bf5c7ce8adcc0670cfa2f1f092112fe
   aws-sdk-rails (5.1.0) sha256=8cffd3b60142e12a6747c91a7a609f668276b1082fc0c10810d5da3d14b13189
   aws-sdk-ses (1.102.0) sha256=02bca66d12b856c37fce614f0f2ed68198af1ae938f41e08c53afac3bda2618f
-  aws-sdk-sesv2 (1.105.0) sha256=d6c52b1ffb44686718f7fa62d87635932995a4774691f039931c75798098ab4f
+  aws-sdk-sesv2 (1.106.0) sha256=f0a3d18d1e6bf2a621defcaa215831176fb40c42810be44d7448d95b693ee766
   aws-sdk-sns (1.118.0) sha256=46786eb1a27f8031163572043ed750cd292a1ca408527c5589ba5ecd43a0d2b9
   aws-sigv4 (1.12.1) sha256=6973ff95cb0fd0dc58ba26e90e9510a2219525d07620c8babeb70ef831826c00
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
@@ -551,7 +551,7 @@ CHECKSUMS
   local_time (3.0.3) sha256=c69a8974d993fdf6e60db02977ed23c070f203dcb3a1ff0de52ad3d2393f8303
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   loofah (2.25.2) sha256=2007f746959ac65552456e04b433e83deb22759ab38c838b4445c70e43425918
-  mail (2.9.0) sha256=6fa6673ecd71c60c2d996260f9ee3dd387d4673b8169b502134659ece6d34941
+  mail (2.9.1) sha256=06574eca475253d6c18145dd70af80d0eb970182d55053497c5f4d797ea160e8
   marcel (1.2.1) sha256=1678e9360e32f9eafa917c80029e2f6d10b2715c66a4b87b6d0da9b9cd1f859f
   matrix (0.4.3) sha256=a0d5ab7ddcc1973ff690ab361b67f359acbb16958d1dc072b8b956a286564c5b
   mcp (1.1.0) sha256=930dafc0a8f34941d210ad907dd70bf93c1763fa60b98cb9162c77263e5dac32
@@ -559,9 +559,9 @@ CHECKSUMS
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   mission_control-jobs (1.1.0) sha256=b13da9cde3344fec7c744b79d2a34c3ecd454f45d4d593d4c968ba762315e84c
   msgpack (1.8.4) sha256=4411c22d350dd1c20250f7eada3cca2695438c2f769cf0782f0cd065d90a3e7b
-  net-imap (0.6.4.1) sha256=29f0360d75a7efd3539f16ac1957dea5c0a51ddeceb348db4553c3120914ea0d
+  net-imap (0.6.6) sha256=96aa4ee50df3060203e649efc341f53480b791d49e150f2fdebf68beb141a8df
   net-pop (0.1.2) sha256=848b4e982013c15b2f0382792268763b748cce91c9e91e36b0f27ed26420dff3
-  net-protocol (0.2.2) sha256=aa73e0cba6a125369de9837b8d8ef82a61849360eba0521900e2c3713aa162a8
+  net-protocol (0.3.0) sha256=ba310c3d4f1cad46bb1ab20336b06669b1ff8f7c568d9cb9342b32a718547472
   net-scp (4.1.0) sha256=a99b0b92a1e5d360b0de4ffbf2dc0c91531502d3d4f56c28b0139a7c093d1a5d
   net-sftp (4.0.0) sha256=65bb91c859c2f93b09826757af11b69af931a3a9155050f50d1b06d384526364
   net-smtp (0.5.1) sha256=ed96a0af63c524fceb4b29b0d352195c30d82dd916a42f03c62a3a70e5b70736
@@ -621,13 +621,13 @@ CHECKSUMS
   solid_cable (4.0.2) sha256=084636a67679ad00d23088b33c84047e614bcf41ee559db24b414d83cdc42d03
   solid_cache (1.0.10) sha256=bc05a2fb3ac78a6f43cbb5946679cf9db67dd30d22939ededc385cb93e120d41
   solid_queue (1.6.0) sha256=b5fc3bb34162e09d8f960df6400d0f9304dc80fe66c2cfface31c32b228de6a1
-  sqlite3 (2.9.5-aarch64-linux-gnu) sha256=78075b6337d3d182c6d2b4691049ed45cd220826160c9ea18946bf6a1de200dc
-  sqlite3 (2.9.5-aarch64-linux-musl) sha256=18c801185deb4adc01ddb281e8f672a39e3d1729979ca91e39439cd3eac0402d
-  sqlite3 (2.9.5-arm-linux-gnu) sha256=1bdfca0c7d63998c60b0f4a8e3c8df2d33800ccc4abd2d612eddbbbc92a4c48b
-  sqlite3 (2.9.5-arm-linux-musl) sha256=bae1109d12b2e9f588455967729b008e1ff4feb7761749df695019c9079913c6
-  sqlite3 (2.9.5-arm64-darwin) sha256=d0cf444a70fc9395d513cfbcc1e6719e224aa645314e3824cb0474c721425aa2
-  sqlite3 (2.9.5-x86_64-linux-gnu) sha256=233dbcb6714148dd23bc5aeb33e8efd6eac974969564ddd5794c23d5f52b231e
-  sqlite3 (2.9.5-x86_64-linux-musl) sha256=e7d3a7474e8af0f96150c21abc203fbab5437206bfcdf11deab7741c0ca516f2
+  sqlite3 (2.9.6-aarch64-linux-gnu) sha256=d8b1f7d23efd7abac285775a9566562fc7debfef79d594e3a20354406fb7907c
+  sqlite3 (2.9.6-aarch64-linux-musl) sha256=3579e1c98cdc7ff5c3722847bb63ed4e1efb7ff675cb5e1e48ef2d4da5fb3bc9
+  sqlite3 (2.9.6-arm-linux-gnu) sha256=33541500e3615da02afe54a9cc38b17a6985d3cf9d8b76d6d0a83002f114e7ec
+  sqlite3 (2.9.6-arm-linux-musl) sha256=c5490af48bb228fefa54314e9541375c3907e70f8109f3881b5ff97e1c93ae33
+  sqlite3 (2.9.6-arm64-darwin) sha256=849b5d7f795e60fe25076d62c72dd722beb45b3850b516ad978d60ee848ec15b
+  sqlite3 (2.9.6-x86_64-linux-gnu) sha256=613188ce02f614126ddbc38c5e217ccffd6306d0dcd9adca9764547aa890a634
+  sqlite3 (2.9.6-x86_64-linux-musl) sha256=d493b11818a3573387a1d56e1ee8fa00da23a683a7a1cc063e7a0feeed843abf
   sshkit (1.25.0) sha256=c8c6543cdb60f91f1d277306d585dd11b6a064cb44eab0972827e4311ff96744
   stimulus-rails (1.3.4) sha256=765676ffa1f33af64ce026d26b48e8ffb2e0b94e0f50e9119e11d6107d67cb06
   tailwindcss-rails (4.6.0) sha256=d99512867173d55c5ef8890427682299d8539f550cec1408b3d8667a538bd365
