@@ -80,6 +80,16 @@ If HTTP Basic Auth is not configured, Sessy will display a security warning bann
 docker run --environment DISABLE_AUTH_WARNING=true ...
 ```
 
+#### Update checks
+
+Self-hosted installs periodically check GitHub's public API for newer commits on `main` and show a banner when your image is at least one day behind. The check runs at most once per day (cached), only from authenticated dashboard page loads, and only phones GitHub — not Sessy's servers.
+
+Your image's git revision is baked in at build time. To turn the banner off:
+
+```sh
+docker run --environment DISABLE_UPDATE_CHECKS=true ...
+```
+
 #### Database
 
 By default, Sessy uses SQLite and stores its database in the mounted storage volume. This is the simplest setup and works great for most use cases.

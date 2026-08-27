@@ -31,6 +31,17 @@
         </div>
       <% end %>
 
+      <% if show_update_banner? %>
+        <% status = update_check_status %>
+        <div class="bg-sky-500/10 text-sky-800 dark:text-sky-300 px-4 py-2 text-center text-sm border-b border-sky-500/20">
+          <strong>Update available.</strong>
+          This install is <%= pluralize(status.days_behind, "day") %> behind.
+          Pull <code class="bg-sky-500/10 px-1">ghcr.io/marckohlbrugge/sessy:main</code>
+          or
+          <%= link_to "see what changed", status.compare_url, class: "underline underline-offset-2", target: "_blank", rel: "noopener" %>.
+        </div>
+      <% end %>
+
       <main>
         <%= yield %>
       </main>
