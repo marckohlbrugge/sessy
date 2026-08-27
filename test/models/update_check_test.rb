@@ -54,6 +54,7 @@ class UpdateCheckTest < ActiveSupport::TestCase
       assert_equal 9, status.days_behind
       assert_equal "def5678", status.latest_sha
       assert_includes status.compare_url, "#{Sessy.revision}...main"
+      assert_equal "ghcr.io/marckohlbrugge/sessy:main", status.docker_image
     end
   end
 
@@ -79,6 +80,23 @@ class UpdateCheckTest < ActiveSupport::TestCase
     end
   end
 
+  test "current uses author date when committer date is missing" do
+    with_build_metadata do
+      UpdateCheck.fetcher = ->(_uri) {
+        {
+          "sha" => "def5678",
+          "commit" => {
+            "author" => { "date" => "2026-08-10T12:00:00Z" }
+          }
+        }
+      }
+
+      status = UpdateCheck.current
+
+      assert_equal 9, status.days_behind
+    end
+  end
+
   test "current caches successful responses" do
     with_build_metadata do
       calls = 0
@@ -94,12 +112,56 @@ class UpdateCheckTest < ActiveSupport::TestCase
     end
   end
 
-  test "current returns nil and caches failure briefly on API errors" do
+  test "current returns nil and skips fetcher while failure is cached" do
     with_build_metadata do
-      UpdateCheck.fetcher = ->(_uri) { raise Timeout::Error, "timed out" }
+      calls = 0
+      UpdateCheck.fetcher = ->(_uri) {
+        calls += 1
+        raise Timeout::Error, "timed out"
+      }
 
       assert_nil UpdateCheck.current
-      assert_equal :unavailable, Rails.cache.read(UpdateCheck::CACHE_KEY)
+      assert_equal :unavailable, Rails.cache.read(UpdateCheck.cache_key)
+
+      assert_nil UpdateCheck.current
+      assert_equal 1, calls
+    end
+  end
+
+  test "cache is scoped to the running revision after an image upgrade" do
+    with_build_metadata("SESSY_GIT_SHA" => "oldrev") do
+      stub_github_commit(sha: "newrev", date: "2026-08-10T12:00:00Z")
+      stale = UpdateCheck.current
+      assert stale.outdated?
+    end
+
+    with_build_metadata("SESSY_GIT_SHA" => "newrev", "SESSY_GIT_COMMITTED_AT" => "2026-08-10T12:00:00Z") do
+      calls = 0
+      UpdateCheck.fetcher = ->(_uri) {
+        calls += 1
+        github_payload(sha: "newrev", date: "2026-08-10T12:00:00Z")
+      }
+
+      status = UpdateCheck.current
+
+      assert_not status.outdated?
+      assert_equal 1, calls
+      assert_equal 0, status.days_behind
+    end
+  end
+
+  test "status_from_cache recomputes days_behind for the current revision" do
+    with_build_metadata("SESSY_GIT_SHA" => "abc1234", "SESSY_GIT_COMMITTED_AT" => "2026-08-01T12:00:00Z") do
+      Rails.cache.write(
+        UpdateCheck.cache_key,
+        { "latest_sha" => "abc1234full", "latest_committed_at" => "2026-08-20T12:00:00Z" },
+        expires_in: UpdateCheck::CACHE_TTL
+      )
+
+      status = UpdateCheck.current
+
+      assert_not status.outdated?
+      assert_equal 0, status.days_behind
     end
   end
 
@@ -128,13 +190,28 @@ class UpdateCheckTest < ActiveSupport::TestCase
     assert_equal 0, calls
   end
 
+  test "repo and ref fall back to defaults when env values are invalid" do
+    with_env("SESSY_GITHUB_REPO" => "not a repo", "SESSY_GITHUB_REF" => "bad ref?") do
+      assert_equal UpdateCheck::DEFAULT_REPO, UpdateCheck.repo
+      assert_equal UpdateCheck::DEFAULT_REF, UpdateCheck.ref
+    end
+  end
+
+  test "docker_image follows configured repo and ref" do
+    with_env("SESSY_GITHUB_REPO" => "acme/sessy-fork", "SESSY_GITHUB_REF" => "stable") do
+      assert_equal "ghcr.io/acme/sessy-fork:stable", UpdateCheck.docker_image
+    end
+  end
+
   private
 
   def with_build_metadata(extra = {})
     defaults = {
       "SESSY_GIT_SHA" => "abc1234",
       "SESSY_GIT_COMMITTED_AT" => "2026-08-01T12:00:00Z",
-      "DISABLE_UPDATE_CHECKS" => nil
+      "DISABLE_UPDATE_CHECKS" => nil,
+      "SESSY_GITHUB_REPO" => nil,
+      "SESSY_GITHUB_REF" => nil
     }
     with_env(defaults.merge(extra)) { yield }
   end

@@ -82,9 +82,9 @@ docker run --environment DISABLE_AUTH_WARNING=true ...
 
 #### Update checks
 
-Self-hosted installs periodically check GitHub's public API for newer commits on `main` and show a banner when your image is at least one day behind. The check runs at most once per day (cached), only from authenticated dashboard page loads, and only phones GitHub — not Sessy's servers.
+Self-hosted installs periodically check GitHub's public API for newer commits on `main` and show a banner when your image is at least one day behind. The check runs at most once per day (cached) when someone loads the dashboard HTML, and only phones GitHub — not Sessy's servers. If the dashboard is open without HTTP Basic Auth, any visitor who can load a page may trigger the check.
 
-Your image's git revision is baked in at build time. To turn the banner off:
+Your image's git revision is baked in at build time. Cache entries are scoped to that revision, so pulling a newer image starts a fresh check. To turn the banner off:
 
 ```sh
 docker run --environment DISABLE_UPDATE_CHECKS=true ...
