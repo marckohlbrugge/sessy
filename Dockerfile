@@ -84,6 +84,15 @@ USER 1000:1000
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --chown=rails:rails --from=build /rails /rails
 
+# Bake the source revision so self-hosted installs can detect when they are
+# behind upstream (see UpdateCheck). Empty when building locally without args.
+ARG GIT_SHA=
+ARG GIT_COMMITTED_AT=
+ENV SESSY_GIT_SHA=$GIT_SHA \
+    SESSY_GIT_COMMITTED_AT=$GIT_COMMITTED_AT
+RUN printf '%s' "$GIT_SHA" > /rails/REVISION && \
+    printf '%s' "$GIT_COMMITTED_AT" > /rails/COMMITTED_AT
+
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 

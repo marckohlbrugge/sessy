@@ -12,4 +12,12 @@ module ApplicationHelper
       ENV["HTTP_AUTH_PASSWORD"].blank? &&
       ENV["DISABLE_AUTH_WARNING"].blank?
   end
+
+  def update_check_status
+    @update_check_status ||= UpdateCheck.current
+  end
+
+  def show_update_banner?
+    update_check_status&.outdated?
+  end
 end
