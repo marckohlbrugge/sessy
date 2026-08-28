@@ -18,12 +18,21 @@ module Event::Filterable
     end
 
     def filter_counts(params = {})
-      base = base_filtered_scope(params)
+      { event_types: base_filtered_scope(params).group(:event_type).count }
+    end
 
-      {
-        event_types: base.group(:event_type).count,
-        bounce_types: base.where(event_type: "bounce").group(:bounce_type).count
-      }
+    # Derives the total matching filter_by_params from already-computed
+    # filter_counts, so pagination doesn't need its own COUNT query.
+    # Returns nil when the total isn't derivable (bounce subtype filters).
+    def total_count_from(counts, params)
+      event_types = Array(params[:event_types]).reject(&:blank?)
+      bounce_types = Array(params[:bounce_types]).reject(&:blank?)
+      return nil if event_types.include?("bounce") && bounce_types.present?
+
+      totals = counts[:event_types]
+      return totals.values.sum if event_types.blank?
+
+      totals.slice(*event_types).values.sum
     end
 
     def bounce_types
@@ -42,26 +51,33 @@ module Event::Filterable
       }
     end
 
-    def date_range_from_params(params)
+    # Validates the date_range param against the known presets so unrecognized
+    # values can't select the all-time window (or mint junk cache keys).
+    def normalized_date_range_preset(params)
       preset = params[:date_range].presence || "last_30_days"
+      return preset if preset == "custom" || date_range_presets.key?(preset)
 
-      return [ parse_date(params[:from_date]), parse_date(params[:to_date]) ] if preset == "custom"
+      "last_30_days"
+    end
 
-      case preset
+    def date_range_from_params(params)
+      case normalized_date_range_preset(params)
+      when "custom"
+        [ parse_date(params[:from_date]), parse_date(params[:to_date]) ]
+      when "all_time"
+        [ nil, nil ]
       when "today"
         [ Time.current.beginning_of_day, Time.current.end_of_day ]
       when "yesterday"
         [ 1.day.ago.beginning_of_day, 1.day.ago.end_of_day ]
       when "last_7_days"
         [ 7.days.ago.beginning_of_day, Time.current.end_of_day ]
-      when "last_30_days"
-        [ 30.days.ago.beginning_of_day, Time.current.end_of_day ]
       when "last_45_days"
         [ 45.days.ago.beginning_of_day, Time.current.end_of_day ]
       when "last_90_days"
         [ 90.days.ago.beginning_of_day, Time.current.end_of_day ]
-      else
-        [ nil, nil ]
+      else # last_30_days
+        [ 30.days.ago.beginning_of_day, Time.current.end_of_day ]
       end
     end
 
