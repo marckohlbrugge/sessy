@@ -35,6 +35,9 @@ class McpController < ActionController::API
       McpServer.server(account: Current.account, api_key: current_api_key, app_base_url: app_base_url),
       stateless: true,
       enable_json_response: true,
+      # Each request builds a fresh transport and renders a buffered body, so
+      # the subscriptions/listen SSE stream cannot be held open.
+      serve_subscriptions_listen: false,
       # Host/Origin validation guards local loopback servers against DNS
       # rebinding; this is a public endpoint behind a proxy, and with no
       # anonymous tier a rebound browser request carries no credentials.

@@ -3,6 +3,7 @@ require "test_helper"
 class McpControllerTest < ActionDispatch::IntegrationTest
   INSTANCE_TOKEN = "sessy_instance_test_key"
   PROTOCOL_VERSION = "2025-06-18"
+  MODERN_PROTOCOL_VERSION = "2026-07-28"
 
   test "initialize handshake succeeds with a valid key" do
     rpc "initialize", { protocolVersion: PROTOCOL_VERSION, capabilities: {}, clientInfo: { name: "test", version: "1.0" } }
@@ -80,6 +81,23 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     call_tool "list_sources", token: api_key.token
     assert_response :success
     assert_not_nil api_key.reload.last_used_at
+  end
+
+  # The modern lifecycle has no initialize handshake: every request carries its
+  # protocol version and capabilities in _meta (SEP-2575) and its method in an
+  # Mcp-Method header.
+  test "the sessionless 2026-07-28 lifecycle stamps resultType and declines subscriptions/listen" do
+    modern_rpc "tools/list"
+    assert_response :success
+    assert_equal "complete", rpc_result["resultType"]
+    assert rpc_result["tools"].present?
+
+    modern_rpc "tools/call", { name: "list_sources", arguments: {} }, name: "list_sources"
+    assert_response :success
+    assert_equal "complete", rpc_result["resultType"]
+
+    modern_rpc "subscriptions/listen", { notifications: [] }
+    assert_equal(-32601, JSON.parse(response.body).dig("error", "code"))
   end
 
   test "tools/list shows tools with titles, readOnlyHint, and output schemas" do
@@ -487,6 +505,26 @@ class McpControllerTest < ActionDispatch::IntegrationTest
 
     body = { jsonrpc: "2.0", method: method, params: params }
     body[:id] = id if id
+
+    post mcp_endpoint_path, params: body.to_json, headers: headers
+  end
+
+  def modern_rpc(method, params = {}, name: nil, token: INSTANCE_TOKEN)
+    headers = {
+      "Content-Type" => "application/json",
+      "Accept" => "application/json, text/event-stream",
+      "MCP-Protocol-Version" => MODERN_PROTOCOL_VERSION,
+      "Mcp-Method" => method
+    }
+    headers["Mcp-Name"] = name if name
+    headers["Authorization"] = "Bearer #{token}" if token
+
+    body = {
+      jsonrpc: "2.0",
+      id: 1,
+      method: method,
+      params: params.merge(_meta: { "io.modelcontextprotocol/protocolVersion" => MODERN_PROTOCOL_VERSION, "io.modelcontextprotocol/clientCapabilities" => {} })
+    }
 
     post mcp_endpoint_path, params: body.to_json, headers: headers
   end
