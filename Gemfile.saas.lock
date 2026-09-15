@@ -90,7 +90,7 @@ GEM
       aws-sdk-sesv2 (~> 1, >= 1.34.0)
     aws-eventstream (1.4.0)
     aws-partitions (1.1269.0)
-    aws-sdk-core (3.254.0)
+    aws-sdk-core (3.257.0)
       aws-eventstream (~> 1, >= 1.3.0)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -98,14 +98,15 @@ GEM
       bigdecimal
       jmespath (~> 1, >= 1.6.1)
       logger
+      rexml (~> 3.4, >= 3.4.2)
     aws-sdk-rails (5.1.0)
       aws-sdk-core (~> 3)
       railties (>= 7.1.0)
-    aws-sdk-ses (1.102.0)
-      aws-sdk-core (~> 3, >= 3.254.0)
+    aws-sdk-ses (1.104.0)
+      aws-sdk-core (~> 3, >= 3.256.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-sesv2 (1.107.0)
-      aws-sdk-core (~> 3, >= 3.254.0)
+    aws-sdk-sesv2 (1.109.0)
+      aws-sdk-core (~> 3, >= 3.256.0)
       aws-sigv4 (~> 1.5)
     aws-sdk-sns (1.118.0)
       aws-sdk-core (~> 3, >= 3.254.0)
@@ -114,7 +115,7 @@ GEM
       aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
     bcrypt_pbkdf (1.1.2)
-    bigdecimal (4.1.2)
+    bigdecimal (4.1.3)
     bindex (0.8.1)
     bootsnap (1.26.0)
       msgpack (~> 1.5)
@@ -165,7 +166,7 @@ GEM
       actionpack (>= 6.0.0)
       activesupport (>= 6.0.0)
       railties (>= 6.0.0)
-    io-console (0.9.2)
+    io-console (0.9.3)
     irb (1.18.0)
       pp (>= 0.6.0)
       prism (>= 1.3.0)
@@ -210,7 +211,7 @@ GEM
     minitest (6.0.6)
       drb (~> 2.0)
       prism (~> 1.5)
-    mission_control-jobs (1.2.0)
+    mission_control-jobs (1.3.1)
       actioncable (>= 7.1)
       actionpack (>= 7.1)
       activejob (>= 7.1)
@@ -507,15 +508,15 @@ CHECKSUMS
   aws-actionmailer-ses (1.2.0) sha256=e01ccfcc5bf1449abb91bb8b15e7945e97310144c7f67fee8d9b76de2e89107f
   aws-eventstream (1.4.0) sha256=116bf85c436200d1060811e6f5d2d40c88f65448f2125bc77ffce5121e6e183b
   aws-partitions (1.1269.0) sha256=80beca6c8a35ddfc11b0b529424ea6167ace3da92cd7368847ce694679dedea5
-  aws-sdk-core (3.254.0) sha256=ee3e3220b8468a3c9e59daba18e6ec897bf5c7ce8adcc0670cfa2f1f092112fe
+  aws-sdk-core (3.257.0) sha256=a92ad19c7ff668cec6688ee3200ee562da80647a3bbeed9fda02e8b0ca6492c6
   aws-sdk-rails (5.1.0) sha256=8cffd3b60142e12a6747c91a7a609f668276b1082fc0c10810d5da3d14b13189
-  aws-sdk-ses (1.102.0) sha256=02bca66d12b856c37fce614f0f2ed68198af1ae938f41e08c53afac3bda2618f
-  aws-sdk-sesv2 (1.107.0) sha256=0ccb9a8e70f2cda0f354b7be5df17a2a38f4f16d114cb9aae9573a655e2f9198
+  aws-sdk-ses (1.104.0) sha256=7c9a57bc8f6576938f815cf15c70403a6ebe70776327a347b05fc750dd30b9bd
+  aws-sdk-sesv2 (1.109.0) sha256=cf69bbf1cb2d4168a8080bd12043c9f8290b33fdbbafca910f45a8d1721e12c9
   aws-sdk-sns (1.118.0) sha256=46786eb1a27f8031163572043ed750cd292a1ca408527c5589ba5ecd43a0d2b9
   aws-sigv4 (1.12.1) sha256=6973ff95cb0fd0dc58ba26e90e9510a2219525d07620c8babeb70ef831826c00
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bcrypt_pbkdf (1.1.2) sha256=c2414c23ce66869b3eb9f643d6a3374d8322dfb5078125c82792304c10b94cf6
-  bigdecimal (4.1.2) sha256=53d217666027eab4280346fba98e7d5b66baaae1b9c3c1c0ffe89d48188a3fbd
+  bigdecimal (4.1.3) sha256=61ebe1e5e559bdc3cc6f2c0ee7f427321fc838f59611c294356eb04d6e21cf66
   bindex (0.8.1) sha256=7b1ecc9dc539ed8bccfc8cb4d2732046227b09d6f37582ff12e50a5047ceb17e
   bootsnap (1.26.0) sha256=ca96237015e6cd74a02963d5821cf00ac5ea134653b323e8cd6d702a7718bf1b
   brakeman (8.0.6) sha256=759cc69341115e6c2dcd47b6fd8649a0b9bd540e3585ac8a0a94e31c66fee386
@@ -540,7 +541,7 @@ CHECKSUMS
   hana (1.3.7) sha256=5425db42d651fea08859811c29d20446f16af196308162894db208cac5ce9b0d
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   importmap-rails (2.2.3) sha256=7101be2a4dc97cf1558fb8f573a718404c5f6bcfe94f304bf1f39e444feeb16a
-  io-console (0.9.2) sha256=efa74f891dd03c0939a931dfc6e74c2813d904763d456ea9762b0525e748db08
+  io-console (0.9.3) sha256=f555049461b0afb78a5448b5be8e7c7b48371347cd48abfc22814764160000dd
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
   jmespath (1.6.2) sha256=238d774a58723d6c090494c8879b5e9918c19485f7e840f2c1c7532cf84ebcb1
   json (2.21.2) sha256=1f1d3b7cf2b3ba1a69beca0bb6db13d5438b80bff3cd54cdaaa620b9b07c1c6a
@@ -557,7 +558,7 @@ CHECKSUMS
   mcp (1.5.1) sha256=883ddd0f59e5bf43805e300158c7ecc4b6a559d126d584d41bd241355545bedf
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
-  mission_control-jobs (1.2.0) sha256=127fb47fc0cecae9db46dc33209b8f222601c1bf9bc4bc0731247e2790549a4a
+  mission_control-jobs (1.3.1) sha256=3230be224069b39fee2893eecd27c1c334fb5467290bf575e88b5c9121287b26
   msgpack (1.8.4) sha256=4411c22d350dd1c20250f7eada3cca2695438c2f769cf0782f0cd065d90a3e7b
   net-imap (0.6.6) sha256=96aa4ee50df3060203e649efc341f53480b791d49e150f2fdebf68beb141a8df
   net-pop (0.1.2) sha256=848b4e982013c15b2f0382792268763b748cce91c9e91e36b0f27ed26420dff3
