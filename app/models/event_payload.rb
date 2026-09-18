@@ -41,6 +41,10 @@ class EventPayload
       parse_time(raw.dig("deliveryDelay", "timestamp"))
     when "Subscription"
       parse_time(raw.dig("subscription", "timestamp"))
+    when "Open"
+      parse_time(raw.dig("open", "timestamp"))
+    when "Click"
+      parse_time(raw.dig("click", "timestamp"))
     else
       parse_time(raw.dig("mail", "timestamp"))
     end
