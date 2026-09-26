@@ -87,6 +87,10 @@ builder:
   # # Pass arguments and secrets to the Docker build process
   # args:
   #   RUBY_VERSION: ruby-3.4.8
+  #   # Bake the revision into the image so the "update available" banner
+  #   # can tell how far behind upstream this install is.
+  #   GIT_SHA: <%= `git rev-parse HEAD`.strip %>
+  #   GIT_COMMITTED_AT: "<%= `git show -s --format=%cI HEAD`.strip %>"
   # secrets:
   #   - GITHUB_TOKEN
   #   - RAILS_MASTER_KEY
