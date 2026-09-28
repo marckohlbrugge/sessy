@@ -100,7 +100,9 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert_equal(-32601, JSON.parse(response.body).dig("error", "code"))
   end
 
-  test "tools/list shows tools with titles, readOnlyHint, and output schemas" do
+  WRITE_TOOLS = %w[create_source update_source].freeze
+
+  test "tools/list shows tools with titles, honest annotations, and output schemas" do
     rpc "tools/list"
 
     assert_response :success
@@ -111,11 +113,13 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert_equal "List sources", list_sources["title"]
     assert_equal true, list_sources.dig("annotations", "readOnlyHint")
     assert_equal false, list_sources.dig("annotations", "destructiveHint")
+    assert_equal WRITE_TOOLS.sort, tools.reject { |tool| tool.dig("annotations", "readOnlyHint") }.map { |tool| tool["name"] }.sort,
+      "only the source-management tools may write"
     tools.each do |tool|
       assert_equal false, tool.dig("inputSchema", "additionalProperties"), "#{tool["name"]} schema must forbid unknown params"
       assert tool["outputSchema"].present?, "#{tool["name"]} must declare an outputSchema"
       assert tool.dig("outputSchema", "properties").present?, "#{tool["name"]} outputSchema needs named fields"
-      assert_equal true, tool.dig("annotations", "readOnlyHint"), "#{tool["name"]} must be read-only"
+      assert_equal WRITE_TOOLS.exclude?(tool["name"]), tool.dig("annotations", "readOnlyHint"), "#{tool["name"]} readOnlyHint"
       assert_equal false, tool.dig("annotations", "destructiveHint"), "#{tool["name"]} must not be destructive"
     end
   end
@@ -468,6 +472,121 @@ class McpControllerTest < ActionDispatch::IntegrationTest
 
     call_tool "email_stats", { date_range: "all_time" }
     assert_operator tool_payload.dig("counts", "sent"), :>=, 2, "account-wide stats include all sources"
+  end
+
+  test "create_source creates a source in the key's account and returns its SES wiring" do
+    assert_difference -> { accounts(:instance).sources.count }, 1 do
+      call_tool "create_source", { name: "  Launch Emails  " }
+    end
+
+    assert_response :success
+    payload = tool_payload
+    source = accounts(:instance).sources.find(payload.dig("source", "id"))
+    assert_equal "Launch Emails", source.name
+    assert_equal "Launch Emails", payload.dig("source", "name")
+    assert_includes Source::Colors::ALL, payload.dig("source", "color")
+    assert_nil payload.dig("source", "retention_days")
+    assert_equal "http://www.example.com/sources/#{source.id}", payload.dig("source", "url")
+
+    setup = payload["setup"]
+    assert_equal "http://www.example.com/webhooks/#{source.token}", setup["webhook_url"]
+    assert_equal "launch-emails-ses", setup["config_set_name"]
+    assert_equal "launch-emails-ses-events", setup["sns_topic_name"]
+    assert_equal "http://www.example.com/sources/#{source.id}/setup", setup["setup_url"]
+    assert_operator setup["steps"].size, :>=, 4
+
+    call_tool "list_sources"
+    assert_includes tool_payload["sources"].map { |row| row["name"] }, "Launch Emails"
+  end
+
+  test "create_source honors an explicit color and rejects blank names and unknown colors" do
+    call_tool "create_source", { name: "Tinted", color: "red" }
+    assert_equal "red", tool_payload.dig("source", "color")
+
+    assert_no_difference -> { Source.count } do
+      call_tool "create_source", { name: "   " }
+      assert_equal true, rpc_result["isError"]
+      assert_match(/name can't be blank/i, rpc_result["content"].first["text"])
+
+      call_tool "create_source", { name: "Bad color", color: "magenta" }
+      assert_equal true, rpc_result["isError"]
+      assert_match(/is not one of/, rpc_result["content"].first["text"])
+
+      call_tool "create_source", { name: "Sneaky", retention_days: 1 }
+      assert_equal true, rpc_result["isError"], "retention must not be settable via MCP"
+    end
+  end
+
+  test "create_source links to the configured app host, not the API host" do
+    with_api_host("api.sessy.test", app_host: "app.sessy.test") do
+      host! "api.sessy.test"
+      call_tool "create_source", { name: "Hosted" }
+
+      assert_response :success
+      assert_match %r{\Ahttps://app\.sessy\.test/webhooks/}, tool_payload.dig("setup", "webhook_url")
+      assert_match %r{\Ahttps://app\.sessy\.test/sources/\d+/setup\z}, tool_payload.dig("setup", "setup_url")
+    end
+  end
+
+  test "update_source renames and recolors only the key's own sources" do
+    source = accounts(:instance).sources.create!(name: "Old Name", color: "blue")
+    other_account, other_token = populated_other_account
+
+    call_tool "update_source", { source_id: source.id, name: "New Name" }
+    assert_response :success
+    assert_equal "New Name", tool_payload.dig("source", "name")
+    assert_equal "blue", tool_payload.dig("source", "color"), "omitted fields are untouched"
+    assert_equal "new-name-ses", tool_payload.dig("setup", "config_set_name")
+    assert_equal "New Name", source.reload.name
+
+    call_tool "update_source", { source_id: source.id, color: "green" }
+    assert_equal "green", source.reload.color
+    assert_equal "New Name", source.name
+
+    call_tool "update_source", { source_id: source.id, name: "Hijacked" }, token: other_token
+    assert_equal true, rpc_result["isError"]
+    assert_match(/unknown source_id/i, rpc_result["content"].first["text"])
+    assert_equal "New Name", source.reload.name
+
+    foreign = other_account.sources.first
+    call_tool "update_source", { source_id: foreign.id, name: "Hijacked" }
+    assert_equal true, rpc_result["isError"]
+    assert_equal "OtherApp", foreign.reload.name
+  end
+
+  test "update_source rejects empty updates and invalid values without changing the row" do
+    source = accounts(:instance).sources.create!(name: "Stable", color: "blue")
+
+    call_tool "update_source", { source_id: source.id }
+    assert_equal true, rpc_result["isError"]
+    assert_match(/nothing to update/i, rpc_result["content"].first["text"])
+
+    call_tool "update_source", { source_id: source.id, name: "" }
+    assert_equal true, rpc_result["isError"]
+
+    call_tool "update_source", { source_id: source.id, retention_days: 1 }
+    assert_equal true, rpc_result["isError"], "retention must not be settable via MCP"
+
+    source.reload
+    assert_equal "Stable", source.name
+    assert_nil source.retention_days
+  end
+
+  test "get_source_setup returns wiring for an existing source and hides foreign ones" do
+    source = accounts(:instance).sources.create!(name: "Existing", retention_days: 90)
+    other_account, _token = populated_other_account
+
+    call_tool "get_source_setup", { source_id: source.id }
+    assert_response :success
+    assert_equal "Existing", tool_payload.dig("source", "name")
+    assert_equal 90, tool_payload.dig("source", "retention_days")
+    assert_equal 90, tool_payload.dig("source", "effective_retention_days")
+    assert_equal "http://www.example.com/webhooks/#{source.token}", tool_payload.dig("setup", "webhook_url")
+    assert_equal "existing-ses", tool_payload.dig("setup", "config_set_name")
+
+    call_tool "get_source_setup", { source_id: other_account.sources.first.id }
+    assert_equal true, rpc_result["isError"]
+    assert_match(/unknown source_id/i, rpc_result["content"].first["text"])
   end
 
   private
