@@ -135,24 +135,26 @@ aws sns subscribe \
   --region "$REGION"
 
 # Connect configuration set to SNS topic
-aws ses create-configuration-set-event-destination \
+# Uses the SESv2 API: the v1 API does not support the DELIVERY_DELAY and SUBSCRIPTION event types.
+aws sesv2 create-configuration-set-event-destination \
   --configuration-set-name "$CONFIG_SET" \
+  --event-destination-name sessy-events \
   --event-destination "{
-    \"Name\": \"sessy-events\",
     \"Enabled\": true,
-    \"MatchingEventTypes\": [\"bounce\", \"click\", \"complaint\", \"delivery\", \"deliveryDelay\", \"open\", \"reject\", \"renderingFailure\", \"send\", \"subscription\"],
-    \"SNSDestination\": { \"TopicARN\": \"$TOPIC_ARN\" }
+    \"MatchingEventTypes\": [\"SEND\", \"DELIVERY\", \"DELIVERY_DELAY\", \"BOUNCE\", \"COMPLAINT\", \"REJECT\", \"OPEN\", \"CLICK\", \"RENDERING_FAILURE\", \"SUBSCRIPTION\"],
+    \"SnsDestination\": { \"TopicArn\": \"$TOPIC_ARN\" }
   }" \
   --region "$REGION"
 ```
+
+Note: the "Include original email headers" option is only available in the SES console. If you set up the event destination via the CLI and want original headers in your events, enable it afterwards by editing the event destination in the console.
 
 Verify:
 
 ```bash
 aws sns list-subscriptions-by-topic --topic-arn "$TOPIC_ARN" --region "$REGION"
-aws ses describe-configuration-set \
+aws sesv2 get-configuration-set-event-destinations \
   --configuration-set-name "$CONFIG_SET" \
-  --configuration-set-attribute-names eventDestinations \
   --region "$REGION"
 ```
 
@@ -180,9 +182,8 @@ Useful checks:
 
 ```bash
 aws sns list-subscriptions-by-topic --topic-arn "$TOPIC_ARN" --region "$REGION"
-aws ses describe-configuration-set \
+aws sesv2 get-configuration-set-event-destinations \
   --configuration-set-name "$CONFIG_SET" \
-  --configuration-set-attribute-names eventDestinations trackingOptions \
   --region "$REGION"
 ```
 

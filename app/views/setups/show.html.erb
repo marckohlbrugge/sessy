@@ -81,15 +81,18 @@
         <li>Click <strong>Add destination</strong></li>
       </ol>
       <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
-      <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws ses create-configuration-set-event-destination \
+      <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sesv2 create-configuration-set-event-destination \
   --configuration-set-name "<%= config_set_name(@source) %>" \
+  --event-destination-name "<%= sns_topic_name(@source) %>" \
   --event-destination '{
-    "Name":"<%= sns_topic_name(@source) %>",
     "Enabled":true,
-    "MatchingEventTypes":["bounce","click","complaint","delivery","deliveryDelay","open","reject","renderingFailure","send","subscription"],
-    "SNSDestination":{"TopicARN":"arn:aws:sns:&lt;region&gt;:&lt;account-id&gt;:<%= sns_topic_name(@source) %>"}
+    "MatchingEventTypes":["SEND","DELIVERY","DELIVERY_DELAY","BOUNCE","COMPLAINT","REJECT","OPEN","CLICK","RENDERING_FAILURE","SUBSCRIPTION"],
+    "SnsDestination":{"TopicArn":"arn:aws:sns:&lt;region&gt;:&lt;account-id&gt;:<%= sns_topic_name(@source) %>"}
   }' \
   --region &lt;region&gt;</code></pre>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-2 text-sm">
+        "Include original email headers" can't be set via the CLI. Enable it afterwards by editing the event destination in the SES console.
+      </p>
     </section>
 
     <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
@@ -137,9 +140,8 @@ end</code></pre>
   --topic-arn arn:aws:sns:&lt;region&gt;:&lt;account-id&gt;:<%= sns_topic_name(@source) %> \
   --region &lt;region&gt;
 
-aws ses describe-configuration-set \
+aws sesv2 get-configuration-set-event-destinations \
   --configuration-set-name "<%= config_set_name(@source) %>" \
-  --configuration-set-attribute-names eventDestinations \
   --region &lt;region&gt;</code></pre>
     </section>
   </div>
