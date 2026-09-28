@@ -1,4 +1,8 @@
 class EventPayload
+  # SES publishes "Rendering Failure" with a space; Event::Types stores it as
+  # "RenderingFailure". Every other SES event type already matches the enum.
+  EVENT_TYPE_ALIASES = { "Rendering Failure" => "RenderingFailure" }.freeze
+
   attr_reader :raw
 
   def initialize(payload_hash)
@@ -6,7 +10,7 @@ class EventPayload
   end
 
   def event_type
-    raw["eventType"]
+    EVENT_TYPE_ALIASES.fetch(raw["eventType"], raw["eventType"])
   end
 
   def message_id
@@ -41,6 +45,10 @@ class EventPayload
       parse_time(raw.dig("deliveryDelay", "timestamp"))
     when "Subscription"
       parse_time(raw.dig("subscription", "timestamp"))
+    when "Open"
+      parse_time(raw.dig("open", "timestamp"))
+    when "Click"
+      parse_time(raw.dig("click", "timestamp"))
     else
       parse_time(raw.dig("mail", "timestamp"))
     end
@@ -71,12 +79,16 @@ class EventPayload
       raw["delivery"]
     when "DeliveryDelay"
       raw["deliveryDelay"]
-    when "Rendering Failure"
+    when "RenderingFailure"
       raw["failure"]
     when "Reject"
       raw["reject"]
     when "Subscription"
       raw["subscription"]
+    when "Open"
+      raw["open"]
+    when "Click"
+      raw["click"]
     else
       {}
     end

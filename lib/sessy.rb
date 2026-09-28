@@ -15,6 +15,30 @@ module Sessy
       return @saas if defined?(@saas)
       @saas = defined?(Sessy::Saas) ? true : false
     end
+
+    # Git SHA baked into the Docker image (or SESSY_GIT_SHA / REVISION file).
+    # Blank for local/dev builds that were not built with revision metadata.
+    def revision
+      ENV["SESSY_GIT_SHA"].presence || read_build_file("REVISION").presence
+    end
+
+    # Commit timestamp for {#revision}, used to express how many days an
+    # install is behind the latest upstream commit.
+    def committed_at
+      raw = ENV["SESSY_GIT_COMMITTED_AT"].presence || read_build_file("COMMITTED_AT").presence
+      raw && Time.iso8601(raw)
+    rescue ArgumentError
+      nil
+    end
+
+    private
+
+    def read_build_file(name)
+      path = Rails.root.join(name)
+      File.read(path).strip if path.exist?
+    rescue Errno::ENOENT, Errno::EACCES
+      nil
+    end
   end
 
   class DbAdapter
