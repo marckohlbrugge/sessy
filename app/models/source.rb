@@ -36,6 +36,16 @@ class Source < ApplicationRecord
     end
   end
 
+  # Suggested AWS resource names for the setup guide, derived from the source
+  # name so they read naturally in the SES console.
+  def config_set_name
+    "#{name.parameterize}-ses"
+  end
+
+  def sns_topic_name
+    "#{name.parameterize}-ses-events"
+  end
+
   private
 
   def generate_token

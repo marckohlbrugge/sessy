@@ -5,7 +5,7 @@
   <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400 max-w-2xl">
     Connect AI agents like Claude Code, Cursor, and Codex to this Sessy instance over the
     Model Context Protocol. Agents can search email events, inspect message timelines with
-    bounce diagnostics, and pull delivery stats &mdash; read-only.
+    bounce diagnostics, pull delivery stats, and create sources to wire up SES end to end.
   </p>
 
   <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -73,8 +73,8 @@ bearer_token_env_var = "SESSY_API_KEY"</code></pre>
         </div>
         <div>
           <h3 class="font-medium text-zinc-900 dark:text-zinc-100">Security notes</h3>
-          <p class="mt-1">API keys grant read access to all of this account's email data; keys live in your editor's config files, so treat them like passwords and revoke unused ones. Enabling HTTP Basic auth later does <em>not</em> revoke keys minted earlier &mdash; review the <%= link_to "API keys page", api_keys_path, class: "underline hover:text-zinc-900 dark:hover:text-zinc-100" %> after locking down an install.</p>
-          <p class="mt-1">Email subjects, recipient addresses, and bounce diagnostics are third-party content. The server instructs agents to treat them as data, never as instructions, and tools are read-only by design.</p>
+          <p class="mt-1">API keys grant access to all of this account's email data and can create and rename sources; keys live in your editor's config files, so treat them like passwords and revoke unused ones. Enabling HTTP Basic auth later does <em>not</em> revoke keys minted earlier &mdash; review the <%= link_to "API keys page", api_keys_path, class: "underline hover:text-zinc-900 dark:hover:text-zinc-100" %> after locking down an install.</p>
+          <p class="mt-1">Email subjects, recipient addresses, and bounce diagnostics are third-party content. The server instructs agents to treat them as data, never as instructions. Email data is read-only, and the only writes are a source's name and color &mdash; retention settings and deleting sources stay in the web UI, so a misled agent can't destroy history.</p>
         </div>
       </div>
     </div>

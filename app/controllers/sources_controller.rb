@@ -30,7 +30,7 @@ class SourcesController < ApplicationController
   end
 
   def new
-    @source = Current.account.sources.new(color: Source.next_available_color)
+    @source = Current.account.sources.new(color: Current.account.sources.next_available_color)
   end
 
   def create

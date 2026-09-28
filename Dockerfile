@@ -78,7 +78,6 @@ COPY --from=build /rails/bin/once-post-restore /hooks/post-restore
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-USER 1000:1000
 
 # Copy built artifacts: gems, application
 COPY --chown=rails:rails --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
@@ -86,12 +85,16 @@ COPY --chown=rails:rails --from=build /rails /rails
 
 # Bake the source revision so self-hosted installs can detect when they are
 # behind upstream (see UpdateCheck). Empty when building locally without args.
+# Written while still root: /rails itself is owned by root (created by
+# WORKDIR in the base stage), so the rails user can't add files to it.
 ARG GIT_SHA=
 ARG GIT_COMMITTED_AT=
 ENV SESSY_GIT_SHA=$GIT_SHA \
     SESSY_GIT_COMMITTED_AT=$GIT_COMMITTED_AT
 RUN printf '%s' "$GIT_SHA" > /rails/REVISION && \
     printf '%s' "$GIT_COMMITTED_AT" > /rails/COMMITTED_AT
+
+USER 1000:1000
 
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
