@@ -17,9 +17,39 @@ class McpServer::BaseTool < MCP::Tool
     additionalProperties: false
   }.freeze
 
+  # One shape for a source wherever a tool returns one, plus the details an
+  # agent needs to wire AWS SES up to it. The webhook URL embeds the source
+  # token, which is ingestion-only: it lets a holder post events, not read them.
+  SOURCE_SCHEMA = {
+    type: "object",
+    properties: {
+      id: { type: "integer" },
+      name: { type: "string" },
+      color: { type: "string", enum: Source::Colors::ALL },
+      retention_days: { type: [ "integer", "null" ], description: "Per-source retention override; null means the account default applies (see effective_retention_days)" },
+      effective_retention_days: { type: [ "integer", "null" ], description: "Days of history kept after the account default is applied; null means forever" },
+      url: { type: "string", description: "Web UI page for the source" }
+    },
+    required: %w[id name color retention_days effective_retention_days url],
+    additionalProperties: false
+  }.freeze
+
+  SETUP_SCHEMA = {
+    type: "object",
+    properties: {
+      webhook_url: { type: "string", description: "HTTPS endpoint for the SNS subscription" },
+      config_set_name: { type: "string", description: "Suggested SES configuration set name" },
+      sns_topic_name: { type: "string", description: "Suggested SNS topic name" },
+      setup_url: { type: "string", description: "Step-by-step setup guide in the web UI" },
+      steps: { type: "array", items: { type: "string" }, description: "The AWS-side steps that remain, in order" }
+    },
+    required: %w[webhook_url config_set_name sns_topic_name setup_url steps],
+    additionalProperties: false
+  }.freeze
+
   class << self
-    # Every tool on this server reads the account's own closed dataset, so
-    # declare the full set of behavior hints once.
+    # Tools default to the read-only hints; the few write tools override
+    # `annotations` in their own class body so tools/list stays honest.
     def inherited(subclass)
       super
       subclass.annotations(read_only_hint: true, idempotent_hint: true, destructive_hint: false, open_world_hint: false)
@@ -61,6 +91,37 @@ class McpServer::BaseTool < MCP::Tool
     def find_source!(account, source_id)
       account.sources.find_by(id: source_id) ||
         raise(ToolError, "Unknown source_id: #{source_id.to_i}. Use list_sources for this account's sources.")
+    end
+
+    def source_payload(source, app_base_url)
+      {
+        id: source.id,
+        name: source.name,
+        color: source.color,
+        retention_days: source.retention_days,
+        effective_retention_days: source.effective_retention_days,
+        url: "#{app_base_url}#{routes.source_path(source)}"
+      }
+    end
+
+    def setup_payload(source, app_base_url)
+      {
+        webhook_url: "#{app_base_url}#{routes.webhook_path(source_token: source.token)}",
+        config_set_name: source.config_set_name,
+        sns_topic_name: source.sns_topic_name,
+        setup_url: "#{app_base_url}#{routes.source_setup_path(source)}",
+        steps: [
+          "Create an SES configuration set named #{source.config_set_name}",
+          "Create a standard SNS topic named #{source.sns_topic_name}",
+          "Subscribe the topic to the webhook_url over HTTPS with raw message delivery disabled; confirmation is automatic",
+          "Add an SNS event destination to the configuration set for all event types (send, delivery, bounce, complaint, deliveryDelay, open, click, reject, renderingFailure, subscription)",
+          "Send mail with the configuration set (X-SES-CONFIGURATION-SET header or configuration_set_name), then check search_events"
+        ]
+      }
+    end
+
+    def routes
+      Rails.application.routes.url_helpers
     end
 
     def resolve_date_params(date_range: nil, from_date: nil, to_date: nil)
