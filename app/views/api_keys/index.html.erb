@@ -96,11 +96,11 @@ http_headers = { "Authorization" = "Bearer <%= flash[:api_key_token] %>" }</code
     <div class="text-sm text-zinc-500 dark:text-zinc-400 space-y-4">
       <div>
         <h3 class="font-medium text-zinc-900 dark:text-zinc-100">What are these for?</h3>
-        <p class="mt-1">An API key authenticates MCP clients like Claude Code, Cursor, and Codex so they can query your sources, events, and stats. Keys are read-only.</p>
+        <p class="mt-1">An API key authenticates MCP clients like Claude Code, Cursor, and Codex so they can query your sources, events, and stats, and create or rename sources. Email data is read-only; retention and deletion stay in the web UI.</p>
       </div>
       <div>
         <h3 class="font-medium text-zinc-900 dark:text-zinc-100">Keep keys secret</h3>
-        <p class="mt-1">A key grants read access to all of this account's email data. Revoke any key you no longer use &mdash; revocation takes effect immediately.</p>
+        <p class="mt-1">A key grants access to all of this account's email data. Revoke any key you no longer use &mdash; revocation takes effect immediately.</p>
       </div>
     </div>
   </div>
