@@ -38,7 +38,7 @@ For hardening recommendations, see [SES security and deliverability best practic
 
 ## MCP server for AI agents
 
-Sessy ships an [MCP](https://modelcontextprotocol.io) server at `/mcp`, so AI coding agents (Claude Code, Cursor, Codex) can query your email data: search events, inspect a message's full delivery timeline with bounce diagnostics, and pull aggregate stats. All tools are read-only.
+Sessy ships an [MCP](https://modelcontextprotocol.io) server at `/mcp`, so AI coding agents (Claude Code, Cursor, Codex) can query your email data: search events, inspect a message's full delivery timeline with bounce diagnostics, and pull aggregate stats. Agents can also create and rename sources and fetch the SES wiring details (webhook URL, configuration set and topic names) to set up a new app end to end. Email data is read-only; retention settings and deleting sources stay in the web UI.
 
 Create an API key on the **API keys** page in the web UI, then follow the connect instructions at `/docs/mcp` on your instance. For example, for Claude Code:
 

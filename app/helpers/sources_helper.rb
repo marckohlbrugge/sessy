@@ -1,10 +1,10 @@
 module SourcesHelper
   def config_set_name(source)
-    "#{source.name.parameterize}-ses"
+    source.config_set_name
   end
 
   def sns_topic_name(source)
-    "#{source.name.parameterize}-ses-events"
+    source.sns_topic_name
   end
 
   def bounce_label(bounce_type)
