@@ -114,7 +114,7 @@ class McpServer::BaseTool < MCP::Tool
           "Create an SES configuration set named #{source.config_set_name}",
           "Create a standard SNS topic named #{source.sns_topic_name}",
           "Subscribe the topic to the webhook_url over HTTPS with raw message delivery disabled; confirmation is automatic",
-          "Add an SNS event destination to the configuration set for all event types (send, delivery, bounce, complaint, deliveryDelay, open, click, reject, renderingFailure, subscription) with original email headers included",
+          "Add an SNS event destination to the configuration set for all event types (send, delivery, bounce, complaint, deliveryDelay, open, click, reject, renderingFailure, subscription)",
           "Send mail with the configuration set (X-SES-CONFIGURATION-SET header or configuration_set_name), then check search_events"
         ]
       }
