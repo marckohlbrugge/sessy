@@ -300,11 +300,13 @@ Five PRs, dependency-ordered. PR2 has no dependency and should land first: every
   - `app/controllers/webhooks_controller.rb`
   - `app/models/event/sns_ingestible.rb`
   - `app/models/source.rb` (or `app/models/source/setup_status.rb` concern: `setup_status` → `:waiting | :connected | :complete`)
+  - `app/models/source/first_event_backfill.rb` (new; the backfill `UPDATE` shared by the migration and tests)
+  - `app/models/sns_subscription_confirmation.rb` (new; host allowlist + confirmation GET with a swappable `fetcher` for tests)
   - `test/controllers/webhooks_controller_test.rb` (new)
   - `test/models/event_sns_ingestible_test.rb` (new or extend existing ingest tests)
   - `test/models/source_setup_status_test.rb` (new)
 - **Approach:**
-  1. Migration adds `subscribed_at`, `first_event_at` (`datetime`, nullable) and `sns_topic_arn` (`string`, nullable), then backfills `first_event_at` per KTD7 by calling `Source::SetupStatus.backfill_first_event_at`, a class method holding the single correlated-subquery `UPDATE` (portable to SQLite and PostgreSQL; no `UPDATE … FROM`). Keeping the SQL outside the migration is what lets the AE3 scenarios run under `bin/rails test` on both adapters, since the test schema already has the column. `down` only removes the columns.
+  1. Migration adds `subscribed_at`, `first_event_at` (`datetime`, nullable) and `sns_topic_arn` (`string`, nullable), then backfills `first_event_at` per KTD7 by calling `Source::FirstEventBackfill.run`, a module method holding the single correlated-subquery `UPDATE` (portable to SQLite and PostgreSQL; no `UPDATE … FROM`). Keeping the SQL outside the migration is what lets the AE3 scenarios run under `bin/rails test` on both adapters, since the test schema already has the column. `down` only removes the columns.
   1b. Before deploying PR2: run the backfill's `SELECT` equivalent in the production console and compare the resulting "no first event" list against the known cohort (as of 2026-09-29 the four hosted accounts with events still hold their messages, so the list should match).
   1c. After PR2 is deployed and before PR5 ships: hand-stamp `first_event_at` for any real customer whose data aged out of retention. Keep the nudge (U6) undeployed until this review is done.
   2. Rewrite `confirm_subscription` per KTD6: reject a `SubscribeURL` that is not `https` on an `sns.<region>.amazonaws.com` host with 400 before any request; otherwise `Net::HTTP.start(host, 443, use_ssl: true, open_timeout: 2, read_timeout: 5) { |http| http.get(path) }` (the `get_response` class method takes no timeouts), success = `Net::HTTPSuccess` and body includes `SubscriptionArn`; on success set `subscribed_at` where still nil, set `sns_topic_arn` from the message's `TopicArn` unconditionally (warn-log when it changes from a non-nil value), and `head :ok`; otherwise log and `head :service_unavailable`. Log the `SubscribeURL` host and `TopicArn` only, not the full URL with its one-time `Token`.
@@ -321,7 +323,7 @@ Five PRs, dependency-ordered. PR2 has no dependency and should land first: every
   - First `Notification` for a source sets `first_event_at` to the event timestamp; a second notification does not change it; re-delivery of the same `MessageId` (idempotent path) does not change it.
   - Re-delivery of an unprocessed webhook whose events already exist (simulating a crash before the stamp) sets a nil `first_event_at`.
   - Two concurrent ingests for the same source leave `first_event_at` equal to the earlier stamp, not the later one.
-  - Covers AE3. `Source::SetupStatus.backfill_first_event_at`: source with `messages_count: 2` and no events → `first_event_at = created_at`; with events → `MIN(event_at)`; with `messages_count: 0` and no messages or events → nil; with `messages_count: 0` but surviving events → `MIN(event_at)`; a source with `first_event_at` already set is untouched on re-run.
+  - Covers AE3. `Source::FirstEventBackfill.run`: source with `messages_count: 2` and no events → `first_event_at = created_at`; with events → `MIN(event_at)`; with `messages_count: 0` and no messages or events → nil; with `messages_count: 0` but surviving events → `MIN(event_at)`; a source with `first_event_at` already set is untouched on re-run.
   - `setup_status` returns `:waiting`, `:connected`, `:complete` for the three column combinations, and `:complete` when only `first_event_at` is set.
 - **Verification:** `bin/rails test` green on SQLite and PostgreSQL; `bin/rails db:migrate` on a copy of production data leaves the instance account's sources and the four active hosted sources at `:complete`.
 
