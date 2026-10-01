@@ -35,7 +35,7 @@ Rails.application.routes.draw do
 
   # Dashboard
   resources :sources, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
-    resource :setup, only: [ :show ]
+    resource :setup, only: [ :show, :update ]
     resources :events, only: [ :index ]
     resources :messages, only: [ :show ]
   end

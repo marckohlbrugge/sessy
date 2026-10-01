@@ -2,6 +2,7 @@ class Source < ApplicationRecord
   include Colors
   include RetentionPolicy
   include SetupStatus
+  include LaunchStack
 
   belongs_to :account, default: -> { Account.instance }
   has_many :messages, dependent: :destroy
@@ -38,16 +39,21 @@ class Source < ApplicationRecord
   end
 
   # Suggested AWS resource names for the setup guide, derived from the source
-  # name so they read naturally in the SES console.
+  # name so they read naturally in the SES console. Names that parameterize
+  # to nothing (non-Latin scripts) fall back to the source id.
   def config_set_name
-    "#{name.parameterize}-ses"
+    "#{resource_slug}-ses"
   end
 
   def sns_topic_name
-    "#{name.parameterize}-ses-events"
+    "#{resource_slug}-ses-events"
   end
 
   private
+
+  def resource_slug
+    name.parameterize.presence || "source-#{id}"
+  end
 
   def generate_token
     self.token ||= SecureRandom.uuid
