@@ -1,6 +1,7 @@
 class Source < ApplicationRecord
   include Colors
   include RetentionPolicy
+  include SetupStatus
 
   belongs_to :account, default: -> { Account.instance }
   has_many :messages, dependent: :destroy

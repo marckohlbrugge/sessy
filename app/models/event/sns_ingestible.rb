@@ -4,13 +4,14 @@ module Event::SnsIngestible
   class_methods do
     def ingest(event_payload, source:, webhook: nil)
       message = Message.find_or_create_from_event_payload(event_payload, source: source)
+      event_at = event_payload.timestamp
 
-      event_payload.recipients.map do |recipient_email|
+      events = event_payload.recipients.map do |recipient_email|
         create_or_find_by!(
           ses_message_id: event_payload.message_id,
           event_type: event_payload.event_type,
           recipient_email: recipient_email,
-          event_at: event_payload.timestamp
+          event_at: event_at
         ) do |event|
           event.message = message
           event.source = source
@@ -20,6 +21,13 @@ module Event::SnsIngestible
           event.bounce_type = event_payload.event_data["bounceType"] if event_payload.event_type == "Bounce"
         end
       end
+
+      # On every ingest, not only when events were created: a crash between
+      # creating the events and stamping leaves the webhook unprocessed, and
+      # the SNS retry then finds the events instead of creating them.
+      source.record_first_event(event_at)
+
+      events
     end
   end
 end
