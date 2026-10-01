@@ -27,6 +27,17 @@ class Source::SetupStatusTest < ActiveSupport::TestCase
     assert_equal Time.utc(2026, 9, 1), source.reload.first_event_at
   end
 
+  test "record_first_event keeps the first stamp when two stale instances race" do
+    source = accounts(:instance).sources.create!(name: "Raced")
+    first = Source.find(source.id)
+    second = Source.find(source.id)
+
+    first.record_first_event(Time.utc(2026, 9, 1))
+    second.record_first_event(Time.utc(2026, 9, 2))
+
+    assert_equal Time.utc(2026, 9, 1), source.reload.first_event_at
+  end
+
   test "record_subscription_confirmed keeps the first subscribed_at and the latest topic" do
     source = accounts(:instance).sources.create!(name: "Confirmed")
 
