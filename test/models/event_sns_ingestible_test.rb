@@ -56,11 +56,38 @@ class EventSnsIngestibleTest < ActiveSupport::TestCase
     end
   end
 
+  test "stamps the source's first_event_at on first ingest and leaves it afterwards" do
+    source = accounts(:instance).sources.create!(name: "Fresh")
+    first = EventPayload.new({ "eventType" => "Send", "mail" => mail("msg-a", timestamp: "2026-09-01T10:00:00.000Z") })
+    second = EventPayload.new({ "eventType" => "Send", "mail" => mail("msg-b", timestamp: "2026-09-02T10:00:00.000Z") })
+
+    Event.ingest(first, source: source)
+    assert_equal Time.utc(2026, 9, 1, 10), source.reload.first_event_at
+
+    Event.ingest(second, source: source)
+    assert_equal Time.utc(2026, 9, 1, 10), source.reload.first_event_at
+  end
+
+  test "stamps first_event_at even when the events already exist" do
+    # A crash between event creation and the stamp leaves the webhook
+    # unprocessed; the SNS retry finds the events instead of creating them.
+    source = accounts(:instance).sources.create!(name: "Crashed")
+    payload = EventPayload.new({ "eventType" => "Send", "mail" => mail("msg-crash", timestamp: "2026-09-01T10:00:00.000Z") })
+
+    Event.ingest(payload, source: source)
+    Source.where(id: source.id).update_all(first_event_at: nil)
+
+    assert_no_difference -> { Event.where(ses_message_id: "msg-crash").count } do
+      Event.ingest(payload, source: source)
+    end
+    assert_equal Time.utc(2026, 9, 1, 10), source.reload.first_event_at
+  end
+
   private
 
-  def mail(message_id)
+  def mail(message_id, timestamp: "2024-01-01T10:00:00.000Z")
     {
-      "timestamp" => "2024-01-01T10:00:00.000Z",
+      "timestamp" => timestamp,
       "messageId" => message_id,
       "source" => "sender@example.com",
       "destination" => [ "r@example.com" ],

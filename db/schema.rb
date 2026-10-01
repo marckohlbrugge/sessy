@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_25_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_01_110000) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "approved_at"
     t.datetime "created_at", null: false
@@ -109,9 +109,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_25_150000) do
     t.integer "account_id", null: false
     t.string "color", default: "blue"
     t.datetime "created_at", null: false
+    t.datetime "first_event_at"
     t.integer "messages_count", default: 0, null: false
     t.string "name", null: false
     t.integer "retention_days"
+    t.string "sns_topic_arn"
+    t.datetime "subscribed_at"
     t.string "token", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_sources_on_account_id"

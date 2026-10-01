@@ -14,8 +14,7 @@ class WebhooksController < ApplicationController
 
     case sns_message["Type"]
     when "SubscriptionConfirmation"
-      confirm_subscription(sns_message["SubscribeURL"])
-      head :ok
+      confirm_subscription(sns_message)
     when "Notification"
       handle_notification(sns_message)
       head :ok
@@ -47,12 +46,26 @@ class WebhooksController < ApplicationController
     Webhook.process(sns_message, source: @source)
   end
 
-  def confirm_subscription(subscribe_url)
-    uri = URI.parse(subscribe_url)
-    Net::HTTP.get(uri)
-    Rails.logger.info("SNS subscription confirmed: #{subscribe_url}")
-  rescue => e
-    Rails.logger.error("Failed to confirm SNS subscription: #{e.message}")
+  # Answers SNS with 5xx when the confirmation did not go through so it
+  # retries, instead of acknowledging a failure as success. Logs name the host
+  # and topic only; the SubscribeURL carries a one-time token.
+  def confirm_subscription(sns_message)
+    confirmation = SnsSubscriptionConfirmation.new(sns_message["SubscribeURL"])
+    topic_arn = sns_message["TopicArn"]
+
+    unless confirmation.sns_url?
+      Rails.logger.warn("Rejected SNS SubscribeURL on host #{confirmation.host.inspect} for source #{@source.id}")
+      return head :bad_request
+    end
+
+    if confirmation.confirm
+      @source.record_subscription_confirmed(topic_arn)
+      Rails.logger.info("SNS subscription confirmed for source #{@source.id} via #{confirmation.host} (#{topic_arn})")
+      head :ok
+    else
+      Rails.logger.error("SNS subscription confirmation failed for source #{@source.id} via #{confirmation.host} (#{topic_arn})")
+      head :service_unavailable
+    end
   end
 
   def verify_sns_signature
