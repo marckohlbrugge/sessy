@@ -29,9 +29,8 @@ class Sessy::Saas::TenancyTest < ActionDispatch::IntegrationTest
     account = Account.create!(name: "Approved", approved_at: Time.current)
     source = account.sources.create!(name: "Src")
 
-    with_confirmed_sns_subscription do
-      post webhook_path(source.token), params: subscription_confirmation, as: :json
-    end
+    stub_sns_confirmation
+    post webhook_path(source.token), params: subscription_confirmation, as: :json
     assert_response :success
   end
 
@@ -61,18 +60,5 @@ class Sessy::Saas::TenancyTest < ActionDispatch::IntegrationTest
 
   def subscription_confirmation
     { "Type" => "SubscriptionConfirmation", "SubscribeURL" => "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription" }
-  end
-
-  def with_confirmed_sns_subscription
-    original = SnsSubscriptionConfirmation.fetcher
-    SnsSubscriptionConfirmation.fetcher = ->(_uri) {
-      Net::HTTPOK.new("1.1", "200", "OK").tap do |response|
-        response.instance_variable_set(:@body, "<SubscriptionArn>arn:aws:sns:us-east-1:1:t:s</SubscriptionArn>")
-        response.instance_variable_set(:@read, true)
-      end
-    }
-    yield
-  ensure
-    SnsSubscriptionConfirmation.fetcher = original
   end
 end

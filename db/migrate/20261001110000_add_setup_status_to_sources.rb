@@ -5,7 +5,7 @@ class AddSetupStatusToSources < ActiveRecord::Migration[8.1]
     add_column :sources, :sns_topic_arn, :string
 
     Source.reset_column_information
-    Source.backfill_first_event_at
+    Source::FirstEventBackfill.run
   end
 
   def down

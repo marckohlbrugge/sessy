@@ -42,14 +42,12 @@ class Source::SetupStatusTest < ActiveSupport::TestCase
     assert_equal "arn:aws:sns:us-east-1:1:second", source.sns_topic_arn
   end
 
-  # Backfill (AE3)
-
   test "backfill stamps sources that have messages but no events with created_at" do
     source = accounts(:instance).sources.create!(name: "Aged out", created_at: 10.days.ago)
     source.messages.create!(ses_message_id: SecureRandom.uuid, subject: "x", sent_at: 5.days.ago)
     assert_equal 1, source.reload.messages_count
 
-    Source.backfill_first_event_at
+    Source::FirstEventBackfill.run
 
     assert_in_delta 10.days.ago, source.reload.first_event_at, 2
   end
@@ -61,7 +59,7 @@ class Source::SetupStatusTest < ActiveSupport::TestCase
       message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Send", event_at: at, recipient_email: "r@example.com")
     end
 
-    Source.backfill_first_event_at
+    Source::FirstEventBackfill.run
 
     assert_in_delta 3.days.ago, source.reload.first_event_at, 2
   end
@@ -72,7 +70,7 @@ class Source::SetupStatusTest < ActiveSupport::TestCase
     message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Send", event_at: 2.days.ago, recipient_email: "r@example.com")
     Source.where(id: source.id).update_all(messages_count: 0)
 
-    Source.backfill_first_event_at
+    Source::FirstEventBackfill.run
 
     assert_in_delta 2.days.ago, source.reload.first_event_at, 2
   end
@@ -80,7 +78,7 @@ class Source::SetupStatusTest < ActiveSupport::TestCase
   test "backfill leaves sources with no messages and no events untouched" do
     source = accounts(:instance).sources.create!(name: "Never sent")
 
-    Source.backfill_first_event_at
+    Source::FirstEventBackfill.run
 
     assert_nil source.reload.first_event_at
   end
@@ -89,8 +87,8 @@ class Source::SetupStatusTest < ActiveSupport::TestCase
     source = accounts(:instance).sources.create!(name: "Already stamped", first_event_at: Time.utc(2026, 1, 1))
     source.messages.create!(ses_message_id: SecureRandom.uuid, subject: "x", sent_at: 1.day.ago)
 
-    Source.backfill_first_event_at
-    Source.backfill_first_event_at
+    Source::FirstEventBackfill.run
+    Source::FirstEventBackfill.run
 
     assert_equal Time.utc(2026, 1, 1), source.reload.first_event_at
   end

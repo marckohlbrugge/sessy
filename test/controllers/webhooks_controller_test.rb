@@ -6,18 +6,13 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
   setup do
     @source = sources(:betalist)
-    @original_fetcher = SnsSubscriptionConfirmation.fetcher
-    SnsSubscriptionConfirmation.fetcher = ->(uri) { flunk "unexpected outbound request to #{uri}" }
-  end
-
-  teardown do
-    SnsSubscriptionConfirmation.fetcher = @original_fetcher
+    forbid_outbound_requests
   end
 
   # --- SubscriptionConfirmation ---
 
   test "successful confirmation sets subscribed_at once and records the topic" do
-    sns_responds 200, confirmed_body
+    stub_sns_confirmation body: confirmed_body
 
     post_sns subscription_confirmation
     assert_response :ok
@@ -36,7 +31,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a later confirmation from a different topic replaces sns_topic_arn but keeps subscribed_at" do
-    sns_responds 200, confirmed_body
+    stub_sns_confirmation body: confirmed_body
     post_sns subscription_confirmation
     first_subscribed_at = @source.reload.subscribed_at
 
@@ -53,7 +48,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
   test "confirmation responses without a SubscriptionArn or with an error status return 5xx and set nothing" do
     [ [ 200, "<ConfirmSubscriptionResponse></ConfirmSubscriptionResponse>" ], [ 400, "<Error/>" ], [ 500, "" ] ].each do |status, body|
-      sns_responds status, body
+      stub_sns_confirmation status: status, body: body
 
       post_sns subscription_confirmation
       assert_response :service_unavailable, "expected 503 for upstream #{status}"
@@ -65,6 +60,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "a confirmation timeout returns 5xx and sets nothing" do
+    stub_sns_confirmation
     SnsSubscriptionConfirmation.fetcher = ->(_uri) { raise Net::OpenTimeout }
 
     post_sns subscription_confirmation
@@ -92,7 +88,7 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     account = Account.create!(name: "Pending")
     source = account.sources.create!(name: "Pending source")
 
-    post webhook_path(source.token), params: subscription_confirmation.to_json, headers: { "CONTENT_TYPE" => "application/json" }
+    post_sns subscription_confirmation, source: source
     assert_response :not_found
 
     assert_nil source.reload.subscribed_at
@@ -121,8 +117,15 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
   private
 
-  def post_sns(message)
-    post webhook_path(@source.token), params: message.to_json, headers: { "CONTENT_TYPE" => "application/json" }
+  def post_sns(message, source: @source)
+    post webhook_path(source.token), params: message, as: :json
+  end
+
+  # Every test starts here; the ones that expect a confirmation GET replace it
+  # with stub_sns_confirmation (which also arranges the teardown restore).
+  def forbid_outbound_requests
+    stub_sns_confirmation
+    SnsSubscriptionConfirmation.fetcher = ->(uri) { flunk "unexpected outbound request to #{uri}" }
   end
 
   def subscription_confirmation(subscribe_url: SUBSCRIBE_URL, topic_arn: TOPIC_ARN)
@@ -158,13 +161,5 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
 
   def confirmed_body
     "<ConfirmSubscriptionResponse><ConfirmSubscriptionResult><SubscriptionArn>#{TOPIC_ARN}:deadbeef</SubscriptionArn></ConfirmSubscriptionResult></ConfirmSubscriptionResponse>"
-  end
-
-  def sns_responds(status, body)
-    response = Net::HTTPResponse::CODE_TO_OBJ.fetch(status.to_s).new("1.1", status.to_s, "")
-    response.instance_variable_set(:@body, body)
-    response.instance_variable_set(:@read, true)
-
-    SnsSubscriptionConfirmation.fetcher = ->(_uri) { response }
   end
 end

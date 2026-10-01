@@ -1,7 +1,7 @@
 # Confirms an SNS HTTPS subscription by fetching its SubscribeURL, as the SNS
 # docs prescribe. Only URLs on SNS hosts are fetched: the SNS signature already
 # covers SubscribeURL in production, but verification is bypassed locally and
-# the allowlist costs nothing. Plain Ruby object, not a table.
+# the allowlist costs nothing.
 class SnsSubscriptionConfirmation
   SNS_HOST = /\Asns\.[a-z0-9-]+\.amazonaws\.com\z/
   NETWORK_ERRORS = [ SocketError, Timeout::Error, SystemCallError, OpenSSL::SSL::SSLError, IOError ].freeze
@@ -13,8 +13,6 @@ class SnsSubscriptionConfirmation
       http.get(uri.request_uri)
     end
   }
-
-  attr_reader :uri
 
   def initialize(subscribe_url)
     @uri = URI.parse(subscribe_url.to_s)
@@ -39,4 +37,9 @@ class SnsSubscriptionConfirmation
     Rails.logger.error("SNS subscription confirmation request to #{host} failed: #{e.class}: #{e.message}")
     false
   end
+
+  private
+
+  # Never exposed: the URL carries a one-time token that must stay out of logs.
+  attr_reader :uri
 end

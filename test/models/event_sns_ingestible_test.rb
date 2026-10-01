@@ -76,6 +76,7 @@ class EventSnsIngestibleTest < ActiveSupport::TestCase
 
     Event.ingest(payload, source: source)
     Source.where(id: source.id).update_all(first_event_at: nil)
+    source.reload
 
     assert_no_difference -> { Event.where(ses_message_id: "msg-crash").count } do
       Event.ingest(payload, source: source)
