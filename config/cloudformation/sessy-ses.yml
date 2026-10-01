@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Sessy: publish Amazon SES events for one sending configuration set to a
+  Sessy webhook through an SNS topic. Creates no IAM resources and shares no
+  AWS credentials with Sessy.
+
+# Published to a versioned, write-once S3 key (see docs/hosted-launch-runbook.md).
+# Any change to this file ships under a new key; test/cloudformation_template_test.rb
+# pins the digest of the published body.
+
+Parameters:
+  WebhookUrl:
+    Type: String
+    Description: >-
+      The source's Sessy webhook URL. It contains a secret token; treat it like
+      a password.
+    AllowedPattern: "^https://.+"
+    ConstraintDescription: must be an https URL
+  ConfigurationSetName:
+    Type: String
+    Description: Name of the SES configuration set to create for this source.
+    AllowedPattern: "^[a-zA-Z0-9_-]{1,64}$"
+    ConstraintDescription: letters, digits, hyphens and underscores, up to 64 characters
+  ExistingConfigurationSetName:
+    Type: String
+    Default: ""
+    Description: >-
+      Leave empty to create ConfigurationSetName. To attach Sessy to a
+      configuration set you already send with, enter its name here instead.
+    AllowedPattern: "^[a-zA-Z0-9_-]{0,64}$"
+    ConstraintDescription: letters, digits, hyphens and underscores, up to 64 characters
+  TopicName:
+    Type: String
+    Description: Name of the SNS topic that forwards SES events to Sessy.
+    AllowedPattern: "^[a-zA-Z0-9_-]{1,256}$"
+    ConstraintDescription: letters, digits, hyphens and underscores, up to 256 characters
+
+Conditions:
+  CreateConfigSet:
+    Fn::Equals:
+      - Ref: ExistingConfigurationSetName
+      - ""
+
+Resources:
+  ConfigurationSet:
+    Type: AWS::SES::ConfigurationSet
+    Condition: CreateConfigSet
+    Properties:
+      Name:
+        Ref: ConfigurationSetName
+
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName:
+        Ref: TopicName
+
+  TopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - Ref: Topic
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowSesPublishForThisConfigurationSet
+            Effect: Allow
+            Principal:
+              Service: ses.amazonaws.com
+            Action: sns:Publish
+            Resource:
+              Ref: Topic
+            Condition:
+              StringEquals:
+                AWS:SourceAccount:
+                  Ref: AWS::AccountId
+                AWS:SourceArn:
+                  Fn::Sub:
+                    - "arn:${AWS::Partition}:ses:${AWS::Region}:${AWS::AccountId}:configuration-set/${Name}"
+                    - Name:
+                        Fn::If:
+                          - CreateConfigSet
+                          - Ref: ConfigurationSet
+                          - Ref: ExistingConfigurationSetName
+
+  Subscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: https
+      Endpoint:
+        Ref: WebhookUrl
+      TopicArn:
+        Ref: Topic
+
+  EventDestination:
+    Type: AWS::SES::ConfigurationSetEventDestination
+    # SES checks at create time that it may publish to the topic. Ref: Topic
+    # orders this after the topic but not after the policy; without this the
+    # stack intermittently rolls back with InvalidSNSDestination.
+    DependsOn: TopicPolicy
+    Properties:
+      ConfigurationSetName:
+        Fn::If:
+          - CreateConfigSet
+          - Ref: ConfigurationSet
+          - Ref: ExistingConfigurationSetName
+      EventDestination:
+        Name:
+          Ref: TopicName
+        Enabled: true
+        MatchingEventTypes:
+          - SEND
+          - REJECT
+          - BOUNCE
+          - COMPLAINT
+          - DELIVERY
+          - OPEN
+          - CLICK
+          - RENDERING_FAILURE
+          - DELIVERY_DELAY
+          - SUBSCRIPTION
+        SnsDestination:
+          TopicARN:
+            Ref: Topic
+
+Outputs:
+  TopicArn:
+    Description: SNS topic that forwards SES events to Sessy.
+    Value:
+      Ref: Topic
+  ConfigurationSetName:
+    Description: Configuration set to send with (X-SES-CONFIGURATION-SET header or configuration_set_name).
+    Value:
+      Fn::If:
+        - CreateConfigSet
+        - Ref: ConfigurationSet
+        - Ref: ExistingConfigurationSetName

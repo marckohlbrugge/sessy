@@ -28,6 +28,13 @@ module Sessy
     config.x.api_host = ENV["API_HOST"]
     config.x.app_host = ENV["APP_HOST"]
 
+    # Where the Launch Stack template lives. CloudFormation only accepts S3
+    # URLs, so self-hosters who change the template publish their own copy
+    # and point this at it. The default key is versioned and write-once; see
+    # docs/hosted-launch-runbook.md.
+    config.x.cloudformation_template_url = ENV.fetch("CLOUDFORMATION_TEMPLATE_URL",
+      "https://sessy-cloudformation.s3.us-east-1.amazonaws.com/v1/sessy-ses.yml")
+
     config.active_storage.variant_processor = :disabled
 
     # Configuration for the application, engines, and railties goes here.
