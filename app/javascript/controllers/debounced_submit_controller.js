@@ -10,8 +10,19 @@ export default class extends Controller {
     }
   }
 
+  disconnect() {
+    clearTimeout(this.timer)
+  }
+
   submit() {
-    if (this.timer) clearTimeout(this.timer)
+    clearTimeout(this.timer)
     this.timer = setTimeout(() => this.element.requestSubmit(), 300)
+  }
+
+  // For discrete controls (selects, radios): a debounce window would let a
+  // second change land on a form Turbo has already replaced and be dropped.
+  submitNow() {
+    clearTimeout(this.timer)
+    this.element.requestSubmit()
   }
 }

@@ -43,6 +43,14 @@ class Source::LaunchStackTest < ActiveSupport::TestCase
     assert_match(/\A[a-zA-Z][-a-zA-Z0-9]*\z/, source.stack_name)
   end
 
+  test "configuration set and topic names fit SES's 64-character limit without a dangling hyphen" do
+    source = create_source(("word " * 40).strip)
+
+    assert_operator source.config_set_name.length, :<=, 64
+    assert_operator source.sns_topic_name.length, :<=, 64
+    assert_match(/\A[a-z0-9]+(-[a-z0-9]+)*-ses-events\z/, source.sns_topic_name)
+  end
+
   test "launch URL is nil without a region or with a region outside the SES list" do
     source = create_source("BetaList")
     assert_nil source.launch_stack_url(webhook_url: WEBHOOK)

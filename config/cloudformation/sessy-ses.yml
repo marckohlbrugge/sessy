@@ -31,9 +31,9 @@ Parameters:
     ConstraintDescription: letters, digits, hyphens and underscores, up to 64 characters
   TopicName:
     Type: String
-    Description: Name of the SNS topic that forwards SES events to Sessy.
-    AllowedPattern: "^[a-zA-Z0-9_-]{1,256}$"
-    ConstraintDescription: letters, digits, hyphens and underscores, up to 256 characters
+    Description: Name of the SNS topic that forwards SES events to Sessy. Also used as the SES event destination name.
+    AllowedPattern: "^[a-zA-Z0-9_-]{1,64}$"
+    ConstraintDescription: letters, digits, hyphens and underscores, up to 64 characters (the SES event destination name limit)
 
 Conditions:
   CreateConfigSet:

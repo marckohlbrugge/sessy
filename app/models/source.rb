@@ -40,7 +40,10 @@ class Source < ApplicationRecord
 
   # Suggested AWS resource names for the setup guide, derived from the source
   # name so they read naturally in the SES console. Names that parameterize
-  # to nothing (non-Latin scripts) fall back to the source id.
+  # to nothing (non-Latin scripts) fall back to the source id, and the slug is
+  # capped so the longest derived name fits SES's 64-character limit.
+  RESOURCE_SLUG_MAX_LENGTH = 64 - "-ses-events".length
+
   def config_set_name
     "#{resource_slug}-ses"
   end
@@ -52,7 +55,8 @@ class Source < ApplicationRecord
   private
 
   def resource_slug
-    name.parameterize.presence || "source-#{id}"
+    slug = name.parameterize[0, RESOURCE_SLUG_MAX_LENGTH].sub(/-+\z/, "")
+    slug.presence || "source-#{id}"
   end
 
   def generate_token

@@ -13,7 +13,7 @@ class CloudformationTemplateTest < ActiveSupport::TestCase
   # When this test fails after editing the template: publish the new body
   # under a new key, point config.x.cloudformation_template_url at it, then
   # update this constant.
-  PUBLISHED_TEMPLATE_SHA256 = "707a3a0aa450796645d44e091e8a4b0b1d7018b9451719f2c9c999d3aa6d4086"
+  PUBLISHED_TEMPLATE_SHA256 = "d2654febb2d522130d563f067764fee539732e177f3344ebe099ac9973d8f221"
 
   EVENT_TYPES = %w[SEND REJECT BOUNCE COMPLAINT DELIVERY OPEN CLICK RENDERING_FAILURE DELIVERY_DELAY SUBSCRIPTION]
 
@@ -64,13 +64,33 @@ class CloudformationTemplateTest < ActiveSupport::TestCase
       "Template changed: publish it under a new key and update PUBLISHED_TEMPLATE_SHA256"
   end
 
+  # A missing or swapped object is a defect (the Launch Stack link would open a
+  # broken console page), so only a network failure skips; any HTTP status
+  # other than 2xx fails.
   test "published template at the default URL has the pinned digest" do
     skip "network check runs only in CI" unless ENV["CI"]
 
-    body = fetch(Rails.configuration.x.cloudformation_template_url)
-    skip "published template unreachable" if body.nil?
+    url = Rails.configuration.x.cloudformation_template_url
+    response = fetch(url)
+    skip "published template unreachable" if response.nil?
 
-    assert_equal PUBLISHED_TEMPLATE_SHA256, Digest::SHA256.hexdigest(body)
+    assert_kind_of Net::HTTPSuccess, response, "Published template returned HTTP #{response.code} at #{url}"
+    assert_equal PUBLISHED_TEMPLATE_SHA256, Digest::SHA256.hexdigest(response.body)
+  end
+
+  test "names Sessy generates satisfy the template's parameter constraints" do
+    long = accounts(:instance).sources.create!(name: "a" * 200, aws_region: "us-east-1")
+    short = accounts(:instance).sources.create!(name: "日本語", aws_region: "us-east-1")
+
+    [ long, short ].each do |source|
+      url = source.launch_stack_url(webhook_url: "https://app.example.com/webhooks/#{source.token}")
+      query = Rack::Utils.parse_query(url.split("review?").last)
+
+      template["Parameters"].each do |name, parameter|
+        value = query.fetch("param_#{name}")
+        assert_match Regexp.new(parameter["AllowedPattern"]), value, "#{name}=#{value.inspect} violates the template"
+      end
+    end
   end
 
   test "template URL defaults to the Sessy bucket and honors the environment" do
@@ -91,10 +111,9 @@ class CloudformationTemplateTest < ActiveSupport::TestCase
 
   def fetch(url)
     uri = URI(url)
-    response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 5, read_timeout: 5) do |http|
+    Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 5, read_timeout: 5) do |http|
       http.get(uri.request_uri)
     end
-    response.is_a?(Net::HTTPSuccess) ? response.body : nil
   rescue SocketError, Timeout::Error, SystemCallError, OpenSSL::SSL::SSLError
     nil
   end
