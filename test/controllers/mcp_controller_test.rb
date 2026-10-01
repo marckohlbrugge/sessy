@@ -597,7 +597,7 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert_nil setup["aws_region"]
     assert_nil setup["launch_stack_url"]
     assert_match(/Launch Stack/, setup["steps"].first)
-    assert_match(/#{Regexp.escape(setup["setup_url"])}/, setup["steps"].first)
+    assert_includes setup["steps"].first, setup["setup_url"]
 
     source.update!(aws_region: "eu-west-1")
     call_tool "get_source_setup", { source_id: source.id }

@@ -2,8 +2,8 @@ require "test_helper"
 require "digest"
 require "net/http"
 
-# Guards the structure of the Launch Stack template (KTD4) and reminds the
-# publisher that a changed template ships under a new S3 key (KTD2). The
+# Guards the structure of the Launch Stack template and reminds the
+# publisher that a changed template ships under a new S3 key. The
 # template's real validation is `aws cloudformation validate-template` and a
 # sandbox stack; see docs/hosted-launch-runbook.md.
 class CloudformationTemplateTest < ActiveSupport::TestCase
@@ -90,7 +90,10 @@ class CloudformationTemplateTest < ActiveSupport::TestCase
   end
 
   def fetch(url)
-    response = Net::HTTP.get_response(URI(url))
+    uri = URI(url)
+    response = Net::HTTP.start(uri.host, uri.port, use_ssl: true, open_timeout: 5, read_timeout: 5) do |http|
+      http.get(uri.request_uri)
+    end
     response.is_a?(Net::HTTPSuccess) ? response.body : nil
   rescue SocketError, Timeout::Error, SystemCallError, OpenSSL::SSL::SSLError
     nil

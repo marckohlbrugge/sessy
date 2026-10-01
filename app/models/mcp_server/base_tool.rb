@@ -40,10 +40,12 @@ class McpServer::BaseTool < MCP::Tool
       webhook_url: { type: "string", description: "HTTPS endpoint for the SNS subscription" },
       config_set_name: { type: "string", description: "Suggested SES configuration set name" },
       sns_topic_name: { type: "string", description: "Suggested SNS topic name" },
+      aws_region: { type: [ "string", "null" ], description: "SES region chosen on the Setup page; null until picked" },
+      launch_stack_url: { type: [ "string", "null" ], description: "CloudFormation quick-create link that provisions everything in the user's AWS account; null until a region is picked" },
       setup_url: { type: "string", description: "Step-by-step setup guide in the web UI" },
       steps: { type: "array", items: { type: "string" }, description: "The AWS-side steps that remain, in order" }
     },
-    required: %w[webhook_url config_set_name sns_topic_name setup_url steps],
+    required: %w[webhook_url config_set_name sns_topic_name aws_region launch_stack_url setup_url steps],
     additionalProperties: false
   }.freeze
 

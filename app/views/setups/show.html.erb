@@ -16,7 +16,7 @@
     <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
       <h2 class="font-semibold mb-2">1. Choose your SES region</h2>
       <p class="text-zinc-500 dark:text-zinc-400 mb-3">The region you send email from. Sessy uses it for the Launch Stack link and the CLI commands below.</p>
-      <%= form_with model: @source, url: source_setup_path(@source), method: :patch, class: "max-w-sm", data: { controller: "debounced-submit" } do |f| %>
+      <%= form_with model: @source, url: source_setup_path(@source), class: "max-w-sm", data: { controller: "debounced-submit" } do |f| %>
         <% if @source.errors[:aws_region].any? %>
           <p class="mb-2 text-red-600 dark:text-red-400">Region <%= @source.errors[:aws_region].to_sentence %></p>
         <% end %>
@@ -35,7 +35,7 @@
       <p class="text-zinc-500 dark:text-zinc-400 mb-3">One click creates everything SES needs to send events to this source.</p>
       <%= render "launch_stack", source: @source %>
 
-      <details class="mt-5 group">
+      <details class="mt-5">
         <summary class="cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white select-none">Set up manually instead</summary>
         <div class="mt-4 space-y-6">
           <section>

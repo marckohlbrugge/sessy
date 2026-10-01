@@ -13,7 +13,7 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     assert_select "select[name='source[aws_region]']" do
       assert_select "option[value='']", text: /Choose the region/
       assert_select "option[value='eu-west-1']", text: "Europe (Ireland) (eu-west-1)"
-      assert_select "option", count: 28
+      assert_select "option", count: Source::SES_REGIONS.size + 1
     end
     assert_select "[aria-disabled='true']", text: /Launch Stack/
     assert_select "a[href*='console.aws.amazon.com']", count: 0

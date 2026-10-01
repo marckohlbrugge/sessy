@@ -1,4 +1,3 @@
-# The CloudFormation quick-create link on the Setup page (KTD3, KTD4, KTD5).
 # The region is interpolated into the console hostname, so the inclusion
 # validation and the nil return for an unknown stored value are security
 # controls, not only UX.
@@ -39,7 +38,7 @@ module Source::LaunchStack
   STACK_NAME_MAX_LENGTH = 128
 
   included do
-    before_validation { self.aws_region = aws_region.presence }
+    normalizes :aws_region, with: ->(region) { region.presence }
     validates :aws_region, inclusion: { in: SES_REGIONS.keys }, allow_nil: true
   end
 
@@ -47,8 +46,12 @@ module Source::LaunchStack
     SES_REGIONS.key?(aws_region)
   end
 
+  def aws_region_name
+    SES_REGIONS[aws_region]
+  end
+
   # Quick-create URL for the region's CloudFormation console, or nil until a
-  # known region is chosen. Every value is percent-encoded individually.
+  # known region is chosen.
   def launch_stack_url(webhook_url:)
     return unless aws_region_known?
 
