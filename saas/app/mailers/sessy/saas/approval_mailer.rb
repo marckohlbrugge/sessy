@@ -7,7 +7,6 @@ class Sessy::Saas::ApprovalMailer < Sessy::Saas::ApplicationMailer
   def welcome(account)
     @account = account
     @source = account.sources.first
-    @setup_url = @source ? source_setup_url(@source) : new_session_url
 
     mail to: account.users.first.email_address, subject: "Welcome to Sessy"
   end

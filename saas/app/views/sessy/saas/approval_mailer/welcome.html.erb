@@ -2,14 +2,14 @@
 <% if @source %>
   <p>Your account is ready, and we've created a source called <strong><%= @source.name %></strong> for you. Here's how to connect it to SES — it takes a few minutes and you don't share any AWS credentials with us:</p>
   <ol>
-    <li><%= link_to "Open the Setup page", @setup_url %> and pick the AWS region you send email from. (If you're signed out, enter the one-time code we email you and you'll land right back there.)</li>
+    <li><%= link_to "Open the Setup page", source_setup_url(@source) %> and pick the AWS region you send email from. (If you're signed out, enter the one-time code we email you and you'll land right back there.)</li>
     <li>Click <strong>Launch Stack</strong>. It opens a pre-filled CloudFormation form in your AWS console that creates the configuration set, SNS topic, and event destination for you.</li>
     <li>Send email through that configuration set — deliveries, bounces, complaints, opens, and clicks show up in Sessy moments later.</li>
   </ol>
 <% else %>
   <p>Your account is ready. Here's how to start watching your SES activity:</p>
   <ol>
-    <li><%= link_to "Sign in", @setup_url %> with this email address — we'll send you a one-time code.</li>
+    <li><%= link_to "Sign in", new_session_url %> with this email address — we'll send you a one-time code.</li>
     <li>Create a source for each SES configuration set you want to track, then pick your AWS region and click <strong>Launch Stack</strong> on its Setup page. CloudFormation creates the configuration set, SNS topic, and event destination for you.</li>
     <li>Send email through that configuration set — deliveries, bounces, complaints, opens, and clicks show up in Sessy moments later.</li>
   </ol>

@@ -8,7 +8,8 @@ class Sessy::Saas::PendingsController < ApplicationController
   layout "sessy/saas/public"
 
   def show
-    redirect_to root_path if Current.account.nil? || Current.account.approved?
-    @support_address = Mail::Address.new(Sessy::Saas::ApplicationMailer.default[:from]).address
+    return redirect_to root_path if Current.account.nil? || Current.account.approved?
+
+    @support_address = Sessy::Saas::ApplicationMailer.support_address
   end
 end

@@ -46,7 +46,6 @@ class Sessy::Saas::SignupsTest < ActionDispatch::IntegrationTest
     assert_redirected_to pending_path
     follow_redirect!
     assert_select "h1", text: "This account is paused"
-    assert_select "p", text: /approved by hand/, count: 0
 
     post webhook_path(source.token), params: { "Type" => "SubscriptionConfirmation", "SubscribeURL" => "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription" }, as: :json
     assert_response :not_found

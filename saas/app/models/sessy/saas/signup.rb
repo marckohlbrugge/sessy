@@ -5,6 +5,7 @@ class Sessy::Saas::Signup
   include ActiveModel::Model
 
   attr_accessor :user, :name
+  attr_reader :source
 
   validates :name, presence: true
   validates :user, presence: true
@@ -19,12 +20,14 @@ class Sessy::Saas::Signup
   def complete
     return false unless valid?
 
-    # Approved on the spot: approved_at is now the suspension switch, not an
+    # Approved on the spot: approved_at is the suspension switch, not an
     # admission gate (the operator nulls it by hand to stop an abusive account).
     account = ActiveRecord::Base.transaction do
       Account.create!(name: account_name, retention_days: HOSTED_RETENTION_DAYS, approved_at: Time.current).tap do |account|
         account.memberships.create!(user: user, role: "owner")
-        account.sources.create!(name: FIRST_SOURCE_NAME, color: account.sources.next_available_color)
+        # The first colour in the palette is what next_available_color picks
+        # for an account with no sources yet; skip the query.
+        @source = account.sources.create!(name: FIRST_SOURCE_NAME, color: Source::Colors::ALL.first)
       end
     end
 

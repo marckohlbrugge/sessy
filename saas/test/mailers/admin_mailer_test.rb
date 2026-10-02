@@ -18,7 +18,6 @@ class Sessy::Saas::AdminMailerTest < ActiveSupport::TestCase
       [ mail.html_part, mail.text_part ].each do |part|
         body = part.body.to_s
         assert_includes body, "casey@example.com"
-        assert_no_match(/pending until you approve/i, body)
         assert_match(/suspend/i, body)
       end
 

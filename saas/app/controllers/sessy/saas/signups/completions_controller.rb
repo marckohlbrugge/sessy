@@ -11,9 +11,8 @@ class Sessy::Saas::Signups::CompletionsController < ApplicationController
   def create
     @signup = Sessy::Saas::Signup.new(user: Current.user, name: params[:name])
 
-    if account = @signup.complete
-      # Straight onto the first source's Setup page while attention is high.
-      redirect_to source_setup_path(account.sources.first)
+    if @signup.complete
+      redirect_to source_setup_path(@signup.source)
     else
       render :new, status: :unprocessable_entity
     end
