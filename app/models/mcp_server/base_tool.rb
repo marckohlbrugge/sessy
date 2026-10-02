@@ -40,8 +40,8 @@ class McpServer::BaseTool < MCP::Tool
       webhook_url: { type: "string", description: "HTTPS endpoint for the SNS subscription" },
       config_set_name: { type: "string", description: "Suggested SES configuration set name" },
       sns_topic_name: { type: "string", description: "Suggested SNS topic name" },
-      aws_region: { type: [ "string", "null" ], description: "SES region chosen on the Setup page; null until picked" },
-      launch_stack_url: { type: [ "string", "null" ], description: "CloudFormation quick-create link that provisions everything in the user's AWS account; null until a region is picked" },
+      aws_region: { type: [ "string", "null" ], description: "SES region, chosen on the Setup page or inferred from the confirmed SNS topic; null until then" },
+      launch_stack_url: { type: "string", description: "CloudFormation quick-create link that provisions everything in the user's AWS account; opens the console's last-used region until aws_region is set" },
       setup_url: { type: "string", description: "Step-by-step setup guide in the web UI" },
       steps: { type: "array", items: { type: "string" }, description: "The AWS-side steps that remain, in order" }
     },
@@ -118,7 +118,7 @@ class McpServer::BaseTool < MCP::Tool
         launch_stack_url: source.launch_stack_url(webhook_url: webhook_url),
         setup_url: setup_url,
         steps: [
-          "Fastest: pick the SES region at #{setup_url} and click Launch Stack to create everything below in one CloudFormation stack (no IAM resources); or follow the manual steps",
+          "Fastest: open launch_stack_url (or click Launch Stack at #{setup_url}) to create everything below in one CloudFormation stack (no IAM resources); the console opens in its last-used region, so check the region on the review page or set it at #{setup_url} first; or follow the manual steps",
           "Create an SES configuration set named #{source.config_set_name}",
           "Create a standard SNS topic named #{source.sns_topic_name}",
           "Subscribe the topic to the webhook_url over HTTPS with raw message delivery disabled; confirmation is automatic",

@@ -53,6 +53,50 @@ class Source::SetupStatusTest < ActiveSupport::TestCase
     assert_equal "arn:aws:sns:us-east-1:1:second", source.sns_topic_arn
   end
 
+  test "record_subscription_confirmed fills in the region from the topic ARN only while none is chosen" do
+    source = accounts(:instance).sources.create!(name: "Inferred")
+
+    source.record_subscription_confirmed("arn:aws:sns:eu-west-1:000000000000:inferred-ses-events")
+    assert_equal "eu-west-1", source.reload.aws_region
+
+    source.record_subscription_confirmed("arn:aws:sns:us-east-2:000000000000:other-topic")
+    assert_equal "eu-west-1", source.reload.aws_region
+  end
+
+  test "record_subscription_confirmed never overwrites a region the user chose" do
+    source = accounts(:instance).sources.create!(name: "Chosen", aws_region: "us-east-1")
+
+    source.record_subscription_confirmed("arn:aws:sns:eu-west-1:000000000000:chosen-ses-events")
+
+    assert_equal "us-east-1", source.reload.aws_region
+  end
+
+  test "record_subscription_confirmed leaves the region nil for a malformed or unknown ARN" do
+    source = accounts(:instance).sources.create!(name: "Odd")
+
+    source.record_subscription_confirmed("garbage")
+    source.record_subscription_confirmed("arn:aws:sns:mars-north-1:000000000000:odd")
+
+    source.reload
+    assert_nil source.aws_region
+    assert source.subscribed_at.present?
+    assert_equal "arn:aws:sns:mars-north-1:000000000000:odd", source.sns_topic_arn
+  end
+
+  test "region backfill fills nil regions from stored topic ARNs and nothing else" do
+    inferable = accounts(:instance).sources.create!(name: "Inferable", sns_topic_arn: "arn:aws:sns:eu-west-1:000000000000:a")
+    chosen = accounts(:instance).sources.create!(name: "Chosen", aws_region: "us-east-1", sns_topic_arn: "arn:aws:sns:eu-west-1:000000000000:b")
+    malformed = accounts(:instance).sources.create!(name: "Malformed", sns_topic_arn: "not-an-arn")
+    unconfirmed = accounts(:instance).sources.create!(name: "Unconfirmed")
+
+    2.times { Source::AwsRegionBackfill.run }
+
+    assert_equal "eu-west-1", inferable.reload.aws_region
+    assert_equal "us-east-1", chosen.reload.aws_region
+    assert_nil malformed.reload.aws_region
+    assert_nil unconfirmed.reload.aws_region
+  end
+
   test "backfill stamps sources that have messages but no events with created_at" do
     source = accounts(:instance).sources.create!(name: "Aged out", created_at: 10.days.ago)
     source.messages.create!(ses_message_id: SecureRandom.uuid, subject: "x", sent_at: 5.days.ago)

@@ -589,15 +589,17 @@ class McpControllerTest < ActionDispatch::IntegrationTest
     assert_match(/unknown source_id/i, rpc_result["content"].first["text"])
   end
 
-  test "get_source_setup leads with Launch Stack and includes the link once a region is set" do
+  test "get_source_setup leads with Launch Stack and links it with or without a region" do
     source = accounts(:instance).sources.create!(name: "Launchable")
 
     call_tool "get_source_setup", { source_id: source.id }
     setup = tool_payload.fetch("setup")
     assert_nil setup["aws_region"]
-    assert_nil setup["launch_stack_url"]
+    assert setup["launch_stack_url"].start_with?("https://console.aws.amazon.com/cloudformation/")
+    assert_includes setup["launch_stack_url"], ERB::Util.url_encode(setup["webhook_url"])
     assert_match(/Launch Stack/, setup["steps"].first)
     assert_includes setup["steps"].first, setup["setup_url"]
+    assert_no_match(/pick the (SES )?region/i, setup["steps"].first)
 
     source.update!(aws_region: "eu-west-1")
     call_tool "get_source_setup", { source_id: source.id }

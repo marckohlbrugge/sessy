@@ -51,12 +51,46 @@ class Source::LaunchStackTest < ActiveSupport::TestCase
     assert_match(/\A[a-z0-9]+(-[a-z0-9]+)*-ses-events\z/, source.sns_topic_name)
   end
 
-  test "launch URL is nil without a region or with a region outside the SES list" do
+  test "launch URL without a region opens the console's global host with the same parameters" do
     source = create_source("BetaList")
-    assert_nil source.launch_stack_url(webhook_url: WEBHOOK)
 
+    url = source.launch_stack_url(webhook_url: WEBHOOK)
+
+    assert url.start_with?("https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?")
+    assert_no_match(/region=/, url)
+    query = Rack::Utils.parse_query(url.split("review?").last)
+    assert_equal "sessy-betalist-#{source.id}", query["stackName"]
+    assert_equal WEBHOOK, query["param_WebhookUrl"]
+    assert_equal "betalist-ses", query["param_ConfigurationSetName"]
+  end
+
+  test "a stored region outside the SES list is never interpolated into the URL" do
+    source = create_source("BetaList")
     Source.where(id: source.id).update_all(aws_region: "evil.example.com/")
-    assert_nil source.reload.launch_stack_url(webhook_url: WEBHOOK)
+
+    url = source.reload.launch_stack_url(webhook_url: WEBHOOK)
+
+    assert url.start_with?("https://console.aws.amazon.com/cloudformation/")
+    assert_no_match(/evil/, url)
+  end
+
+  test "region_from_topic_arn reads a known SES region out of an SNS topic ARN" do
+    assert_equal "eu-west-1", Source.region_from_topic_arn("arn:aws:sns:eu-west-1:000000000000:betalist-ses-events")
+    assert_equal "us-east-1", Source.region_from_topic_arn("arn:aws:sns:us-east-1:1:first")
+  end
+
+  test "region_from_topic_arn is nil for anything but an SNS ARN in a known region" do
+    [
+      "arn:aws:sqs:eu-west-1:000000000000:queue",
+      "arn:aws:sns:mars-north-1:000000000000:topic",
+      "arn:aws-cn:sns:cn-north-1:000000000000:topic",
+      "eu-west-1",
+      "garbage",
+      "",
+      nil
+    ].each do |arn|
+      assert_nil Source.region_from_topic_arn(arn), "expected nil for #{arn.inspect}"
+    end
   end
 
   test "region must be an SES region; blank is stored as nil" do
