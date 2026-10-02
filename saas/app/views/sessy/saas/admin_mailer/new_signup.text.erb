@@ -1,7 +1,7 @@
 <%= @user.email_address %> just signed up as "<%= @account.name %>".
 
-The account is pending until you approve it. Review and approve:
+The account is already approved and has a "Production" source waiting on its Setup page. Nothing to do unless it looks like abuse. View account:
 
-<%= @approval_url %>
+<%= @account_url %>
 
-Approving sends them a welcome email with getting-started instructions. This link works for 30 days; after that, approve from the console.
+Suspending from that page hides the app behind a "paused" notice and makes the account's webhooks return 404 right away; you can restore it from the same page. This link works for 30 days; after that, use the console.

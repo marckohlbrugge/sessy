@@ -1,18 +1,27 @@
-<% content_for :title, "Approve account" %>
+<% content_for :title, @account.name %>
 
 <h1 class="text-lg font-semibold"><%= @account.name %></h1>
 <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
   <%= @account.users.first&.email_address %> &middot; signed up <%= time_ago_in_words(@account.created_at) %> ago
+  &middot; <%= pluralize(@account.sources.count, "source") %>
 </p>
 
 <% if @account.approved? %>
   <p class="mt-6 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
-    Approved <%= time_ago_in_words(@account.approved_at) %> ago.
+    Active &middot; approved <%= time_ago_in_words(@account.approved_at) %> ago.
+  </p>
+  <%= button_to "Suspend account", admin_approval_path(token: params[:token]), method: :delete,
+        class: "mt-6 w-full rounded-md border border-red-500/40 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-500/10 dark:text-red-400" %>
+  <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+    Suspending hides the app behind a “paused” notice and makes this account's webhooks return 404 immediately. Nothing is deleted; you can restore it from here.
   </p>
 <% else %>
-  <%= button_to "Approve account", admin_approval_path(token: params[:token]),
+  <p class="mt-6 rounded-md bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-400">
+    Paused &middot; signed-in users see only the paused page and webhooks return 404.
+  </p>
+  <%= button_to "Restore account", admin_approval_path(token: params[:token]),
         class: "mt-6 w-full rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300" %>
   <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-    Approving emails them a welcome message with getting-started instructions.
+    Restoring emails them the welcome message with the Setup link again.
   </p>
 <% end %>

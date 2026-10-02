@@ -4,7 +4,7 @@ Steps to turn app.sessy.do into the multi-tenant hosted edition. Maintainer-run;
 
 ## Pre-deploy
 
-1. **Verify the SES sending identity** for `MAILER_FROM_ADDRESS` (e.g. `hello@sessy.do`) and send a test email — magic codes and approval notices can't ship without it.
+1. **Verify the SES sending identity** for `MAILER_FROM_ADDRESS` (e.g. `hello@sessy.do`) and send a test email — magic codes and welcome emails can't ship without it.
 2. **Store SES sending credentials** in Kamal secrets (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`) or attach a host IAM role.
 3. **Set `MISSION_CONTROL_USERNAME` / `MISSION_CONTROL_PASSWORD`** on the hosted env. In hosted mode `/jobs` is locked with unguessable credentials until these are set.
 4. **Set `APP_HOST=app.sessy.do`** so email links resolve.
@@ -68,28 +68,27 @@ Then:
 
 Before the first production launch, create one stack from the published URL in a sandbox account (Setup page → Launch Stack) and confirm: the stack reaches `CREATE_COMPLETE` with no capabilities prompt; the webhook receives and confirms the `SubscriptionConfirmation`; whether the quick-create form prefills a `NoEcho` parameter (if so, mark `WebhookUrl` as `NoEcho: true` in the next template version); whether event payloads include original email headers (the Setup page currently says this must be enabled in the console); and that the quick-create link survives the console sign-in redirect from a signed-out browser.
 
-## Approving new signups
+## Suspending accounts
 
-New accounts land pending. With `ADMIN_EMAIL` set on the hosted env, each signup emails the operator a one-click approval link (`/admin/approval?token=...`, a signed token valid for 30 days). Approving — via the link or the console — sends the user a welcome email with getting-started instructions.
+Signups are approved on the spot: `Signup#complete` creates the account with `approved_at` set and a first source named "Production", redirects the user to that source's Setup page, and sends the welcome email with the same link. Nobody is pending any more; `approved_at` is now the suspension switch. The Stripe checkout with a free trial is the planned abuse control; until it ships, suspension is by hand.
 
-Console fallback:
+With `ADMIN_EMAIL` set on the hosted env, each signup emails the operator an FYI linking to the admin account page (`/admin/approval?token=...`, a signed token valid for 30 days). That page has a **Suspend account** button: it nulls `approved_at`, so signed-in users see only the "this account is paused" page and the account's webhooks return 404, stopping ingest immediately. Nothing is deleted. **Restore account** on the same page sets `approved_at` again and re-sends the welcome email.
 
-```ruby
-Account.find_by!(name: "Casey's Sessy").approve!   # sends the approval email
-```
-
-To re-send the notification for every account still pending (signed up before `ADMIN_EMAIL` was set, or the email got lost):
-
-```bash
-kamal app exec -c config/deploy.saas.yml "bin/rails saas:notify_pending"
-```
-
-## Abuse response
-
-Approval is otherwise permanent; to cut off an abusive account:
+Console equivalents (also for links older than 30 days):
 
 ```ruby
-account = Account.find(...)
-account.update!(approved_at: nil)   # re-gates the UI and stops webhook ingest (404s)
+account = Account.find_by!(name: "Casey's Sessy")
+account.update!(approved_at: nil)   # suspend: paused page + webhooks 404
+account.approve!                    # restore: re-sends the welcome email
 account.sources.destroy_all         # escalation: drop their sources entirely
 ```
+
+### One-off after deploying auto-approval
+
+Accounts that signed up under manual approval and were never let in are still pending, and nothing emails the operator about them any more. Approve them once in the production console right after the deploy; each gets the welcome email (with a sign-in link, since they have no source yet):
+
+```ruby
+Account.where(approved_at: nil, instance: false).joins(:users).distinct.find_each(&:approve!)
+```
+
+Accounts with no users were abandoned mid-signup and stay as they are.
