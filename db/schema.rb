@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_01_160000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_02_100000) do
   create_table "accounts", force: :cascade do |t|
     t.datetime "approved_at"
     t.datetime "created_at", null: false
     t.boolean "instance", default: false, null: false
     t.string "name"
     t.integer "retention_days"
+    t.datetime "setup_nudge_sent_at"
     t.datetime "updated_at", null: false
     t.index ["instance"], name: "index_accounts_on_instance", unique: true, where: "instance"
   end
