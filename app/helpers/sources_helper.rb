@@ -41,6 +41,19 @@ module SourcesHelper
     source.setup_status == :complete ? :done : setup_step_state(source, number)
   end
 
+  # Done-step summaries show only what was recorded: a backfilled source may
+  # know nothing but its first event.
+  def setup_connected_summary(source)
+    parts = [ safe_join([ "Connected", (local_time_ago(source.subscribed_at) if source.subscribed_at?) ].compact, " ") ]
+    parts << "#{source.aws_region_name} (#{source.aws_region})" if source.aws_region_known?
+    parts << tag.code(source.sns_topic_arn, class: "bg-zinc-100 dark:bg-white/5 px-1 font-mono break-all") if source.sns_topic_arn.present?
+    safe_join(parts, tag.span(" · ", aria: { hidden: true }, class: "text-zinc-300 dark:text-zinc-600"))
+  end
+
+  def setup_first_event_summary(source)
+    safe_join([ "First event received", local_time(source.first_event_at, format: "%b %-d, %Y") ], " ") if source.first_event_at?
+  end
+
   def bounce_label(bounce_type)
     case bounce_type
     when "Permanent"

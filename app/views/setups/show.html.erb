@@ -12,14 +12,11 @@
 
     <%= render "progress", source: @source %>
 
-    <%# Step 1: connected summary shows only what was recorded (backfilled sources may know nothing but the first event). %>
-    <% connected_parts = [ safe_join([ "Connected", (local_time_ago(@source.subscribed_at) if @source.subscribed_at?) ].compact, " ") ] %>
-    <% connected_parts << "#{@source.aws_region_name} (#{@source.aws_region})" if @source.aws_region_known? %>
-    <% connected_parts << tag.code(@source.sns_topic_arn, class: "bg-zinc-100 dark:bg-white/5 px-1 font-mono break-all") if @source.sns_topic_arn.present? %>
-    <% connected_summary = safe_join(connected_parts, tag.span(" · ", aria: { hidden: true }, class: "text-zinc-300 dark:text-zinc-600")) %>
-    <%= render layout: "setups/step", locals: { number: 1, title: "Connect SES to Sessy", state: setup_step_state(@source, 1), summary: connected_summary } do %>
+    <% step_state = (1..3).index_with { |number| setup_step_state(@source, number) } %>
+
+    <%= render layout: "setups/step", locals: { number: 1, title: "Connect SES to Sessy", state: step_state[1], summary: setup_connected_summary(@source) } do %>
       <p class="text-zinc-500 dark:text-zinc-400 mb-3">One click creates everything SES needs to send events to this source.</p>
-      <%= render "launch_stack", source: @source, live: setup_step_state(@source, 1) == :current %>
+      <%= render "launch_stack", source: @source, live: step_state[1] == :current %>
 
       <details class="mt-5">
         <summary class="cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white select-none">Set up manually instead</summary>
@@ -109,10 +106,9 @@
       </details>
     <% end %>
 
-    <% first_event_summary = safe_join([ "First event received", local_time(@source.first_event_at, format: "%b %-d, %Y") ], " ") if @source.first_event_at? %>
-    <%= render layout: "setups/step", locals: { number: 2, title: "Send a test email through the Configuration Set", state: setup_step_state(@source, 2), summary: first_event_summary } do %>
+    <%= render layout: "setups/step", locals: { number: 2, title: "Send a test email through the Configuration Set", state: step_state[2], summary: setup_first_event_summary(@source) } do %>
       <p class="text-zinc-500 dark:text-zinc-400">Specify your Configuration Set when sending. Any email through it — a test to yourself is enough — shows up in Sessy within seconds.</p>
-      <%= render "status", source: @source if setup_step_state(@source, 2) == :current %>
+      <%= render "status", source: @source if step_state[2] == :current %>
 
       <div class="mt-5">
         <p class="font-medium mb-2">
@@ -164,7 +160,7 @@ aws sesv2 get-configuration-set-event-destinations \
       </div>
     <% end %>
 
-    <%= render layout: "setups/step", locals: { number: 3, title: "Receiving events", state: setup_step_state(@source, 3) } do %>
+    <%= render layout: "setups/step", locals: { number: 3, title: "Receiving events", state: step_state[3] } do %>
       <%= render "status", source: @source %>
       <p class="text-zinc-500 dark:text-zinc-400 mt-3">
         Deliveries, bounces, complaints, opens and clicks show up in
