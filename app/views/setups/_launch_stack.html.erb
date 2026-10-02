@@ -1,0 +1,35 @@
+<%# locals: (source:) %>
+<% url = launch_stack_url(source) %>
+<% button_classes = "inline-flex items-center px-3 py-1.5 text-sm font-medium border" %>
+
+<div class="flex flex-wrap items-center gap-3">
+  <% if url %>
+    <%= link_to "Launch Stack", url, target: "_blank", rel: "noopener noreferrer",
+          class: "#{button_classes} border-zinc-950 dark:border-white bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200" %>
+    <span class="text-zinc-500 dark:text-zinc-400">
+      Opens the CloudFormation console in <%= source.aws_region_name %>. Review the stack and click <strong>Create stack</strong>.
+    </span>
+  <% else %>
+    <span aria-disabled="true" class="<%= button_classes %> border-zinc-950/10 dark:border-white/10 text-zinc-400 dark:text-zinc-500 cursor-not-allowed select-none">Launch Stack</span>
+    <span class="text-zinc-500 dark:text-zinc-400">Choose your SES region first.</span>
+  <% end %>
+</div>
+
+<div class="mt-4 space-y-2 text-zinc-500 dark:text-zinc-400">
+  <p>
+    The stack runs in your AWS account and creates a Configuration Set
+    <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>,
+    an SNS topic
+    <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= sns_topic_name(source) %></code>,
+    an HTTPS subscription to your webhook, and an event destination for every SES event type.
+    No IAM roles or users. Sessy never sees your AWS credentials.
+  </p>
+  <p>
+    Already sending with a Configuration Set? Enter its name as
+    <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">ExistingConfigurationSetName</code>
+    on the review page and the stack will attach to it instead of creating a new one.
+  </p>
+  <p>
+    Afterwards, enable <strong>Include original email headers</strong> on the event destination in the SES console so Sessy can show subjects.
+  </p>
+</div>

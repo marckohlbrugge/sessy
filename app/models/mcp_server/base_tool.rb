@@ -40,10 +40,12 @@ class McpServer::BaseTool < MCP::Tool
       webhook_url: { type: "string", description: "HTTPS endpoint for the SNS subscription" },
       config_set_name: { type: "string", description: "Suggested SES configuration set name" },
       sns_topic_name: { type: "string", description: "Suggested SNS topic name" },
+      aws_region: { type: [ "string", "null" ], description: "SES region chosen on the Setup page; null until picked" },
+      launch_stack_url: { type: [ "string", "null" ], description: "CloudFormation quick-create link that provisions everything in the user's AWS account; null until a region is picked" },
       setup_url: { type: "string", description: "Step-by-step setup guide in the web UI" },
       steps: { type: "array", items: { type: "string" }, description: "The AWS-side steps that remain, in order" }
     },
-    required: %w[webhook_url config_set_name sns_topic_name setup_url steps],
+    required: %w[webhook_url config_set_name sns_topic_name aws_region launch_stack_url setup_url steps],
     additionalProperties: false
   }.freeze
 
@@ -105,12 +107,18 @@ class McpServer::BaseTool < MCP::Tool
     end
 
     def setup_payload(source, app_base_url)
+      webhook_url = "#{app_base_url}#{routes.webhook_path(source_token: source.token)}"
+      setup_url = "#{app_base_url}#{routes.source_setup_path(source)}"
+
       {
-        webhook_url: "#{app_base_url}#{routes.webhook_path(source_token: source.token)}",
+        webhook_url: webhook_url,
         config_set_name: source.config_set_name,
         sns_topic_name: source.sns_topic_name,
-        setup_url: "#{app_base_url}#{routes.source_setup_path(source)}",
+        aws_region: source.aws_region,
+        launch_stack_url: source.launch_stack_url(webhook_url: webhook_url),
+        setup_url: setup_url,
         steps: [
+          "Fastest: pick the SES region at #{setup_url} and click Launch Stack to create everything below in one CloudFormation stack (no IAM resources); or follow the manual steps",
           "Create an SES configuration set named #{source.config_set_name}",
           "Create a standard SNS topic named #{source.sns_topic_name}",
           "Subscribe the topic to the webhook_url over HTTPS with raw message delivery disabled; confirmation is automatic",
