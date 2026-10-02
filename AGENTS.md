@@ -84,6 +84,14 @@ SESSY_MODE=saas bin/ci               # full local pipeline in SaaS mode
 
 Contributor policy: if the SaaS CI leg fails on an external contribution, fixing it is the maintainer's responsibility, not the contributor's.
 
+## Everything Here Is Public
+
+This repository is open source. Code, commits, docs, issues, pull request titles, bodies, and comments are all publicly visible, including anything written for the hosted version. Treat every one of those surfaces as public before writing to it.
+
+- Do not reference a globally unique external resource name (S3 bucket, domain, package or image name, etc.) anywhere in the repo or on GitHub until it has actually been registered. Claim first, then commit.
+- Keep hosted-only operational details (account identifiers, internal hostnames, credentials, customer data) out of committed files and PR text. Use environment variables or private notes instead.
+- When a change depends on an external resource that does not exist yet, either create it before pushing the reference or leave the reference out of the public diff (for example, an env var with no default).
+
 ## Event Types
 
 SES event types handled: Send, Delivery, Bounce (with subtypes: Permanent, Transient, Undetermined), Complaint, DeliveryDelay, Subscription, Reject, Rendering Failure.
