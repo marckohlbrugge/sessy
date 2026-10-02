@@ -1,31 +1,32 @@
 import { Controller } from "@hotwired/stimulus"
+import { Turbo } from "@hotwired/turbo-rails"
 
 // Reloads the Turbo Frame it is attached to on an interval while the tab is
-// visible. Stops for good when the frame's content declares a `done` target,
-// and pauses after a budget so an abandoned tab does not poll forever; coming
-// back to the tab restarts polling with a fresh budget.
+// visible. When a reload brings back a different setup status than the page
+// was rendered with, it re-renders the whole page from the server so the open
+// step advances (the server owns which step is open). Pauses after a budget
+// so an abandoned tab does not poll forever; coming back to the tab restarts
+// polling with a fresh budget.
 export default class extends Controller {
-  static targets = [ "done", "paused" ]
+  static targets = [ "paused" ]
   static values = {
     url: String,
+    status: String,
     interval: { type: Number, default: 5000 },
     budget: { type: Number, default: 30 * 60 * 1000 }
   }
 
   connect() {
     this.onVisibilityChange = () => this.visibilityChanged()
+    this.onFrameLoad = () => this.frameLoaded()
     document.addEventListener("visibilitychange", this.onVisibilityChange)
+    this.element.addEventListener("turbo:frame-load", this.onFrameLoad)
     this.start()
   }
 
   disconnect() {
     document.removeEventListener("visibilitychange", this.onVisibilityChange)
-    this.stop()
-  }
-
-  // Fires on every reload that renders the done state, including the one that
-  // transitions a live frame; the frame element itself is never replaced.
-  doneTargetConnected() {
+    this.element.removeEventListener("turbo:frame-load", this.onFrameLoad)
     this.stop()
   }
 
@@ -38,7 +39,7 @@ export default class extends Controller {
 
   start() {
     this.stop()
-    if (this.hasDoneTarget || document.visibilityState !== "visible") return
+    if (document.visibilityState !== "visible") return
 
     this.deadline = Date.now() + this.budgetValue
     this.timer = setInterval(() => this.tick(), this.intervalValue)
@@ -67,6 +68,16 @@ export default class extends Controller {
       this.element.reload()
     } else {
       this.element.src = this.urlValue
+    }
+  }
+
+  // A replace visit to the current URL is a Turbo page refresh: the server
+  // re-renders header, steps and frame from one state, so they always agree.
+  frameLoaded() {
+    const status = this.element.querySelector("[data-setup-status]")?.dataset.setupStatus
+    if (status && status !== this.statusValue) {
+      this.stop()
+      Turbo.visit(window.location.href, { action: "replace" })
     }
   }
 
