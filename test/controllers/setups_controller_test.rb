@@ -179,8 +179,12 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # The polled frame must appear exactly once, inside the open step: a second
+  # copy would give Turbo two frames with the same id.
   def assert_open_step(number)
     assert_select "[data-step-state='current']", count: 1
     assert_select "[data-setup-step='#{number}'][data-step-state='current']"
+    assert_select "turbo-frame#setup_status", count: 1
+    assert_select "[data-setup-step='#{number}'] turbo-frame#setup_status", count: 1
   end
 end
