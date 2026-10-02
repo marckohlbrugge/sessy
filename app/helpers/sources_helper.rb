@@ -20,6 +20,27 @@ module SourcesHelper
     Source::SES_REGIONS.map { |code, label| [ "#{label} (#{code})", code ] }
   end
 
+  SETUP_STEP_LABELS = [ "Connect SES", "Send a test email", "Receiving events" ].freeze
+
+  # The Setup page opens one step at a time. The current step is the first
+  # one the recorded status has not completed; once complete, the last step
+  # is the open one and the progress header shows all three as done.
+  def setup_current_step(source)
+    { waiting: 1, connected: 2, complete: 3 }.fetch(source.setup_status)
+  end
+
+  def setup_step_state(source, number)
+    current = setup_current_step(source)
+    if number < current then :done
+    elsif number == current then :current
+    else :upcoming
+    end
+  end
+
+  def setup_progress_state(source, number)
+    source.setup_status == :complete ? :done : setup_step_state(source, number)
+  end
+
   def bounce_label(bounce_type)
     case bounce_type
     when "Permanent"

@@ -1,74 +1,38 @@
 <%# locals: (source:) %>
 <%#
-  Live setup progress. poll_controller.js reloads this frame until the first
-  event is recorded. The frame carries no src: an eager frame would refetch
-  what the page just rendered, and Turbo rejects a frame response whose src
-  points back at the request URL, so the controller owns the URL instead.
-  Once complete there is nothing left to poll, so the frame ships without a
-  controller; the `done` target tells a controller that is already running
-  (from before the state changed) to stop.
+  Live line for the open step. poll_controller.js reloads this frame until
+  the first event is recorded and re-renders the page (Turbo.visit) when the
+  status it was rendered with changes, so the open step advances from server
+  state. The frame carries no src: an eager frame would refetch what the page
+  just rendered, and Turbo rejects a frame response whose src points back at
+  the request URL, so the controller owns the URL instead. Once complete there
+  is nothing left to poll, so the frame ships without a controller.
 %>
 <% status = source.setup_status %>
-<% frame_attributes = status == :complete ? {} : { data: { controller: "poll", poll_url_value: source_setup_path(source) } } %>
+<% frame_attributes = status == :complete ? {} : { data: { controller: "poll", poll_url_value: source_setup_path(source), poll_status_value: status } } %>
 <%= turbo_frame_tag "setup_status", **frame_attributes do %>
-  <%= tag.div class: "border border-zinc-950/10 dark:border-white/10 px-4 py-3 space-y-2",
-        aria: { live: "polite" },
-        data: { setup_status: status, poll_target: ("done" if status == :complete) } do %>
-    <% if status == :complete %>
-      <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span class="font-medium">
-          <span aria-hidden="true">&#10003;</span>
-          Receiving events since <%= local_time(source.first_event_at, format: "%b %-d, %Y") %>
-        </span>
-        <% if source.subscribed_at? %>
-          <span aria-hidden="true" class="text-zinc-300 dark:text-zinc-600">&middot;</span>
-          <span class="text-zinc-500 dark:text-zinc-400">SNS connected <%= local_time(source.subscribed_at, format: "%b %-d, %Y") %></span>
-        <% end %>
-        <% if source.aws_region_known? %>
-          <span aria-hidden="true" class="text-zinc-300 dark:text-zinc-600">&middot;</span>
-          <span class="text-zinc-500 dark:text-zinc-400">Region <%= source.aws_region_name %> (<%= source.aws_region %>)</span>
-        <% end %>
-        <% if source.sns_topic_arn.present? %>
-          <span aria-hidden="true" class="text-zinc-300 dark:text-zinc-600">&middot;</span>
-          <span class="text-zinc-500 dark:text-zinc-400">Topic <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono break-all"><%= source.sns_topic_arn %></code></span>
-        <% end %>
+  <%= tag.div class: "mt-3 text-zinc-500 dark:text-zinc-400 space-y-1", aria: { live: "polite" }, data: { setup_status: status } do %>
+    <% case status %>
+    <% when :complete %>
+      <p class="font-medium text-zinc-950 dark:text-white">
+        <span aria-hidden="true">&#10003;</span>
+        Receiving events since <%= local_time(source.first_event_at, format: "%b %-d, %Y") %>
+      </p>
+    <% when :connected %>
+      <p>
+        <span class="font-medium text-zinc-950 dark:text-white">Waiting for the first event</span> — this updates automatically.
+        SNS is connected; send an email through the
+        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>
+        configuration set and it shows up here.
       </p>
     <% else %>
-      <% current = status == :waiting ? 0 : 1 %>
-      <ol class="flex flex-wrap items-center gap-x-6 gap-y-2">
-        <% [ [ "Waiting for AWS", nil ], [ "SNS connected", source.subscribed_at ], [ "First event received", nil ] ].each_with_index do |(label, at), index| %>
-          <% state = index < current ? :done : (index == current ? :current : :upcoming) %>
-          <%= tag.li class: "flex items-center gap-2 #{'text-zinc-400 dark:text-zinc-500' if state == :upcoming}",
-                aria: { current: ("step" if state == :current) } do %>
-            <% case state %>
-            <% when :done %>
-              <span aria-hidden="true" class="inline-flex size-4 items-center justify-center text-[10px] border border-zinc-950 dark:border-white">&#10003;</span>
-              <span class="sr-only">Done:</span>
-            <% when :current %>
-              <span aria-hidden="true" class="inline-flex size-4 items-center justify-center border border-zinc-950 dark:border-white"><span class="size-1.5 bg-zinc-950 dark:bg-white animate-pulse"></span></span>
-              <span class="sr-only">Current step:</span>
-            <% else %>
-              <span aria-hidden="true" class="inline-block size-4 border border-zinc-950/20 dark:border-white/20"></span>
-              <span class="sr-only">Next:</span>
-            <% end %>
-            <span class="<%= 'font-medium' if state == :current %>"><%= label %></span>
-            <% if at %>
-              <span class="text-zinc-400 dark:text-zinc-500"><%= local_time_ago(at) %></span>
-            <% end %>
-          <% end %>
-        <% end %>
-      </ol>
-      <p class="text-zinc-500 dark:text-zinc-400">
-        <% if status == :connected %>
-          SNS is connected. Send an email through the
-          <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>
-          configuration set to finish.
-        <% else %>
-          Click Launch Stack above, then create the stack in the AWS console. This updates automatically.
-          If the stack finished but this hasn't changed after a few minutes, check the stack's Events tab for errors.
-        <% end %>
+      <p>
+        <span class="font-medium text-zinc-950 dark:text-white">Waiting for AWS</span> — this updates automatically once the stack has been created.
+        If the stack finished but this hasn't changed after a few minutes, check the stack's Events tab in the CloudFormation console.
       </p>
-      <p class="text-zinc-500 dark:text-zinc-400" data-poll-target="paused" hidden>
+    <% end %>
+    <% unless status == :complete %>
+      <p data-poll-target="paused" hidden>
         Stopped checking. <%= link_to "Reload", source_setup_path(source), class: "underline", data: { action: "poll#restart" } %> to check again.
       </p>
     <% end %>
