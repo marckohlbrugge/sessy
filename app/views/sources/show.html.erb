@@ -1,11 +1,21 @@
 <%= render layout: "sources/layout", locals: { source: @source, active: :overview } do %>
-  <% if @source.messages.none? %>
+  <%# Keyed on the recorded first event, not live messages: retention deletes a
+      quiet source's messages, which must not bring the setup prompt back. %>
+  <% unless @source.first_event_at? %>
     <div class="mb-6 py-3 px-4 border border-zinc-950/10 dark:border-white/10 text-sm">
-      <p class="font-medium">Ready to receive events</p>
-      <p class="text-zinc-500 dark:text-zinc-400 mt-1">
-        Configure AWS SES to send events to your webhook URL.
-        <%= link_to "View setup instructions", source_setup_path(@source), class: "underline" %>
-      </p>
+      <% if @source.setup_status == :connected %>
+        <p class="font-medium">SNS connected</p>
+        <p class="text-zinc-500 dark:text-zinc-400 mt-1">
+          Send an email through <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(@source) %></code> to see it here.
+          <%= link_to "View setup", source_setup_path(@source), class: "underline" %>
+        </p>
+      <% else %>
+        <p class="font-medium">Finish setup to start receiving events</p>
+        <p class="text-zinc-500 dark:text-zinc-400 mt-1">
+          Connect AWS SES to this source with one click.
+          <%= link_to "Finish setup", source_setup_path(@source), class: "underline" %>
+        </p>
+      <% end %>
     </div>
   <% end %>
 

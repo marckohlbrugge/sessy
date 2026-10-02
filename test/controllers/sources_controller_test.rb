@@ -45,4 +45,25 @@ class SourcesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
   end
+
+  test "overview empty state follows the recorded first event, not live messages" do
+    source = accounts(:instance).sources.create!(name: "Quiet")
+
+    get source_path(source)
+    assert_select "p", text: "Finish setup to start receiving events"
+    assert_select "a[href='#{source_setup_path(source)}']", text: /setup/i, minimum: 2 # tab + empty state
+
+    source.update!(subscribed_at: Time.current)
+    get source_path(source)
+    assert_select "p", text: "SNS connected"
+    assert_match "quiet-ses", response.body
+    assert_select "p", text: "Finish setup to start receiving events", count: 0
+
+    source.update!(first_event_at: 1.day.ago)
+    get source_path(source)
+    assert_equal 0, source.messages.count
+    assert_select "p", text: "Finish setup to start receiving events", count: 0
+    assert_select "p", text: "SNS connected", count: 0
+    assert_select "a[href='#{source_setup_path(source)}']", count: 1 # the tab only
+  end
 end
