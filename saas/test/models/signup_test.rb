@@ -27,6 +27,19 @@ class Sessy::Saas::SignupTest < ActiveSupport::TestCase
     assert_enqueued_email_with Sessy::Saas::ApprovalMailer, :welcome, args: [ account ]
   end
 
+  test "complete for a user who already has an account returns it without creating or emailing again" do
+    first = Sessy::Saas::Signup.new(user: @user, name: "Casey").complete
+    repeat = Sessy::Saas::Signup.new(user: @user, name: "Casey again")
+
+    assert_no_difference [ -> { Account.count }, -> { Membership.count }, -> { Source.count } ] do
+      assert_no_enqueued_emails do
+        assert_equal first, repeat.complete
+      end
+    end
+
+    assert_equal first.sources.sole, repeat.source
+  end
+
   test "complete with an invalid name creates nothing and enqueues nothing" do
     signup = Sessy::Saas::Signup.new(user: @user, name: "")
 
