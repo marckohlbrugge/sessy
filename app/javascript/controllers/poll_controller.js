@@ -71,7 +71,11 @@ export default class extends Controller {
   }
 
   visibilityChanged() {
-    document.visibilityState === "visible" ? this.start() : this.stop()
+    if (document.visibilityState === "visible") {
+      this.start()
+    } else {
+      this.stop()
+    }
   }
 
   showPaused(paused) {
