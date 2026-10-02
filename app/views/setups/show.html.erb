@@ -35,8 +35,10 @@
     <%# Once events flow, Launch Stack is a done step: fold it away behind its heading. %>
     <% complete = @source.setup_status == :complete %>
     <%= content_tag complete ? :details : :section, class: "border-t border-zinc-950/10 dark:border-white/10 pt-5" do %>
-      <%= content_tag complete ? :summary : :div, class: ("cursor-pointer select-none" if complete) do %>
-        <h2 class="font-semibold mb-2 <%= 'inline' if complete %>">2. Connect SES to Sessy</h2>
+      <% if complete %>
+        <summary class="cursor-pointer select-none"><h2 class="font-semibold mb-2 inline">2. Connect SES to Sessy</h2></summary>
+      <% else %>
+        <h2 class="font-semibold mb-2">2. Connect SES to Sessy</h2>
       <% end %>
       <p class="text-zinc-500 dark:text-zinc-400 mb-3">One click creates everything SES needs to send events to this source.</p>
       <%= render "launch_stack", source: @source %>
