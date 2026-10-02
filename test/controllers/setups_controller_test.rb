@@ -65,6 +65,80 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     assert_match "not included in the list", response.body
   end
 
+  test "a waiting source renders the status strip with Waiting for AWS active and polling on" do
+    get source_setup_path(@source)
+
+    assert_response :success
+    assert_select "turbo-frame#setup_status[data-controller='poll'][data-poll-url-value='#{source_setup_path(@source)}']" do
+      assert_select "[data-setup-status='waiting']"
+      assert_select "[aria-live='polite']"
+      assert_select "li[aria-current='step']", text: /Waiting for AWS/
+      assert_select "li", text: /SNS connected/
+      assert_select "li", text: /First event received/
+    end
+    assert_match "Click Launch Stack above", response.body
+    assert_match "Stopped checking", response.body
+  end
+
+  test "a frame request returns only the status strip" do
+    get source_setup_path(@source), headers: { "Turbo-Frame" => "setup_status" }
+
+    assert_response :success
+    assert_select "turbo-frame#setup_status"
+    assert_select "h2", count: 0
+    assert_select "select[name='source[aws_region]']", count: 0
+    assert_select "details", count: 0
+  end
+
+  test "a connected source highlights SNS connected and names the configuration set" do
+    @source.update!(subscribed_at: Time.current, sns_topic_arn: "arn:aws:sns:eu-west-1:000000000000:betalist-ses-events")
+
+    get source_setup_path(@source)
+
+    assert_select "turbo-frame#setup_status[data-controller='poll']" do
+      assert_select "[data-setup-status='connected']"
+      assert_select "li[aria-current='step']", text: /SNS connected/
+    end
+    assert_select "turbo-frame#setup_status", text: /SNS is connected\. Send an email through the\s+betalist-ses\s+configuration set/
+  end
+
+  test "a complete source renders the summary, collapses Launch Stack, and stops polling" do
+    @source.update!(aws_region: "eu-west-1", subscribed_at: 2.days.ago, first_event_at: 1.day.ago,
+      sns_topic_arn: "arn:aws:sns:eu-west-1:000000000000:betalist-ses-events")
+
+    get source_setup_path(@source)
+
+    assert_response :success
+    assert_select "turbo-frame#setup_status[data-controller='poll']", count: 0
+    assert_select "turbo-frame#setup_status[data-poll-url-value]", count: 0
+    assert_select "turbo-frame#setup_status[src]", count: 0
+    assert_select "turbo-frame#setup_status [data-setup-status='complete']"
+    assert_select "turbo-frame#setup_status li", count: 0
+    assert_select "turbo-frame#setup_status", text: /Receiving events since/
+    assert_select "turbo-frame#setup_status", text: /SNS connected/
+    assert_select "turbo-frame#setup_status", text: /Europe \(Ireland\)/
+    assert_select "turbo-frame#setup_status", text: /arn:aws:sns:eu-west-1:000000000000:betalist-ses-events/
+    assert_select "details summary", text: /Connect SES to Sessy/
+    assert_select "details summary", text: /Set up manually instead/
+    assert_select "h2", text: /Use the Configuration Set/
+    assert_select "details h2", text: /Use the Configuration Set/, count: 0
+  end
+
+  test "a backfilled complete source shows only what it knows" do
+    @source.update!(first_event_at: 1.day.ago)
+
+    get source_setup_path(@source)
+
+    assert_select "turbo-frame#setup_status", text: /Receiving events since/ do |frames|
+      text = frames.first.text.squish
+      assert_no_match(/SNS connected/, text)
+      assert_no_match(/Region/, text)
+      assert_no_match(/Topic/, text)
+      assert_no_match(/(·|\u00b7)\s*(·|\u00b7)/, text)
+      assert_no_match(/(·|\u00b7)\s*\z/, text)
+    end
+  end
+
   test "another account's source setup is not reachable" do
     other = Account.create!(name: "Other Co", approved_at: Time.current).sources.create!(name: "OtherApp")
 

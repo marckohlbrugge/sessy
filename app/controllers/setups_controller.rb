@@ -1,7 +1,10 @@
 class SetupsController < ApplicationController
   include SourceScoped
 
+  # The status strip polls this action inside a Turbo Frame; answer those
+  # requests with the strip alone instead of rendering the whole page.
   def show
+    render partial: "setups/status", locals: { source: @source } if turbo_frame_request?
   end
 
   # Only the SES region lives here: SourcesController#update redirects to
