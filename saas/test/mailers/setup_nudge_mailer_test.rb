@@ -50,6 +50,19 @@ class Sessy::Saas::SetupNudgeMailerTest < ActiveSupport::TestCase
     end
   end
 
+  test "no-event variant names the connected source, not merely the oldest one" do
+    @account.sources.create!(name: "Staging", created_at: 2.days.ago)
+    connected = @account.sources.create!(name: "Production", subscribed_at: 1.day.ago)
+
+    mail = Sessy::Saas::SetupNudgeMailer.nudge(@account)
+
+    each_body(mail) do |body|
+      assert_includes body, source_setup_url(connected)
+      assert_includes body, connected.config_set_name
+      assert_not_includes body, "Staging"
+    end
+  end
+
   test "replies go to the operator when ADMIN_EMAIL is set, otherwise to the sender" do
     with_admin_email "admin@example.com" do
       assert_equal [ "admin@example.com" ], Sessy::Saas::SetupNudgeMailer.nudge(@account).reply_to
