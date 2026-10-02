@@ -27,6 +27,7 @@ class Sessy::Saas::AdminApprovalsTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_select "form button", text: "Restore account"
 
+    stub_sns_confirmation # a gate regression must fail the assertion, not reach the network
     post webhook_path(source.token), params: { "Type" => "SubscriptionConfirmation", "SubscribeURL" => "https://sns.us-east-1.amazonaws.com/?Action=ConfirmSubscription" }, as: :json
     assert_response :not_found
   end
@@ -48,6 +49,7 @@ class Sessy::Saas::AdminApprovalsTest < ActionDispatch::IntegrationTest
       post admin_approval_path(token: @token)
     end
     assert @account.reload.approved?
+    assert_equal "Account is already active.", flash[:notice]
   end
 
   test "garbage and expired tokens 404" do

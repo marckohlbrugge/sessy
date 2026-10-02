@@ -85,10 +85,15 @@ account.sources.destroy_all         # escalation: drop their sources entirely
 
 ### One-off after deploying auto-approval
 
-Accounts that signed up under manual approval and were never let in are still pending, and nothing emails the operator about them any more. Approve them once in the production console right after the deploy; each gets the welcome email (with a sign-in link, since they have no source yet):
+Accounts that signed up under manual approval and were never let in still have `approved_at: nil`, and nothing emails the operator about them any more. Under the old flow that same state also meant "suspended for abuse", so review the list before approving anything. In the production console right after the deploy:
 
 ```ruby
-Account.where(approved_at: nil, instance: false).joins(:users).distinct.find_each(&:approve!)
+# 1. List the candidates: accounts with an owner but no approval.
+pending = Account.where(approved_at: nil, instance: false).joins(:users).distinct
+pending.each { |a| puts [ a.id, a.name, a.created_at.to_date, a.users.first.email_address ].join("  ") }
+
+# 2. Approve the ones that were merely waiting; leave out any you suspended on purpose.
+pending.where.not(id: [ ]).find_each(&:approve!)   # fill in the ids to skip
 ```
 
-Accounts with no users were abandoned mid-signup and stay as they are.
+Each approved account gets the welcome email (with a sign-in link, since they have no source yet). Accounts with no users were abandoned mid-signup and stay as they are.

@@ -16,8 +16,12 @@ class Sessy::Saas::Admin::ApprovalsController < ApplicationController
   end
 
   def create
-    @account.approve! unless @account.approved?
-    redirect_to admin_approval_path(token: params[:token]), notice: "Account restored. #{@account.users.first&.email_address} has been emailed."
+    if @account.approved?
+      redirect_to admin_approval_path(token: params[:token]), notice: "Account is already active."
+    else
+      @account.approve!
+      redirect_to admin_approval_path(token: params[:token]), notice: "Account restored. #{@account.users.first&.email_address} has been emailed."
+    end
   end
 
   def destroy
