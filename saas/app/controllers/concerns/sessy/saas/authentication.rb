@@ -52,8 +52,11 @@ module Sessy::Saas::Authentication
     Current.user = session_record.user
   end
 
+  # Stores the path only (not request.url): the Host header is unvalidated in
+  # production, and CodesController#after_sign_in_path turns this value into a
+  # redirect target.
   def request_authentication
-    session[:return_to_after_authenticating] = request.url if request.get? || request.head?
+    session[:return_to_after_authenticating] = request.fullpath if request.get? || request.head?
     # main_app. so the helper resolves against the app's routes even when the
     # request is inside a mounted engine (e.g. Mission Control at /jobs).
     redirect_to main_app.new_session_path

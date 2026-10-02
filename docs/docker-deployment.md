@@ -169,12 +169,12 @@ The hosted edition adds multi-tenant signup, magic-code auth, and transactional 
 
 | Variable | Purpose |
 | --- | --- |
-| `MAILER_FROM_ADDRESS` | From address for magic-code and approval emails (e.g. `Sessy <hello@sessy.do>`). |
+| `MAILER_FROM_ADDRESS` | From address for magic-code and welcome emails (e.g. `Sessy <hello@sessy.do>`). Its address is also shown as the support contact on the paused-account page. |
 | `APP_HOST` | Public host for links in emails (e.g. `app.sessy.do`). |
-| `ADMIN_EMAIL` | Operator address notified of each new signup, with a one-click approval link. Unset means no signup notifications. |
+| `ADMIN_EMAIL` | Operator address that gets an FYI for each new signup (accounts are approved automatically), linking to the admin page where the account can be suspended. Unset means no signup notifications. |
 | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | SES sending credentials (or use a host IAM role). Delivery uses SESv2 in production. |
 | `MISSION_CONTROL_USERNAME` / `MISSION_CONTROL_PASSWORD` | Operator credentials for `/jobs`. In hosted mode `/jobs` is locked with unguessable credentials if these are unset — set them before you need the dashboard. |
 
-Magic codes and approval emails require a **verified SES sending identity** for `MAILER_FROM_ADDRESS`. In development the sign-in code is shown on the code-entry page (and an `X-Magic-Code` header), so no mail setup is needed locally.
+Magic codes and welcome emails require a **verified SES sending identity** for `MAILER_FROM_ADDRESS`. In development the sign-in code is shown on the code-entry page (and an `X-Magic-Code` header), so no mail setup is needed locally.
 
 Retire `HTTP_AUTH_USERNAME` / `HTTP_AUTH_PASSWORD` from the hosted env only after cutover — magic-code auth replaces them, and the hosted app ignores them.

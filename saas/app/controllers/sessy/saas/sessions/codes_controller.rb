@@ -31,12 +31,16 @@ class Sessy::Saas::Sessions::CodesController < ApplicationController
 
   # Route by membership presence, not code purpose: an abandoned signup leaves a
   # membership-less user whose next code is sign_in-purpose, but they still need
-  # the completion form.
+  # the completion form. Members resume where request_authentication stopped
+  # them (the welcome email's Setup deep link); url_from refuses anything that
+  # is not a same-origin path, so a hostile stored value falls back to root.
   def after_sign_in_path(user)
+    return_to = session.delete(:return_to_after_authenticating)
+
     if user.memberships.none?
       new_signup_completion_path
     else
-      root_path
+      url_from(return_to) || root_path
     end
   end
 

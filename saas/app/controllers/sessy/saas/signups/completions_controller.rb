@@ -12,7 +12,7 @@ class Sessy::Saas::Signups::CompletionsController < ApplicationController
     @signup = Sessy::Saas::Signup.new(user: Current.user, name: params[:name])
 
     if @signup.complete
-      redirect_to root_path
+      redirect_to source_setup_path(@signup.source)
     else
       render :new, status: :unprocessable_entity
     end
