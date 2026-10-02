@@ -30,6 +30,20 @@ class WebhooksControllerTest < ActionDispatch::IntegrationTest
     assert_equal first_subscribed_at, @source.reload.subscribed_at
   end
 
+  test "successful confirmation fills in the SES region from the topic ARN unless one was chosen" do
+    stub_sns_confirmation body: confirmed_body
+    assert_nil @source.aws_region
+
+    post_sns subscription_confirmation
+    assert_response :ok
+    assert_equal "us-east-1", @source.reload.aws_region
+
+    chosen = accounts(:instance).sources.create!(name: "Chosen", aws_region: "eu-west-1")
+    post_sns subscription_confirmation, source: chosen
+    assert_response :ok
+    assert_equal "eu-west-1", chosen.reload.aws_region
+  end
+
   test "a later confirmation from a different topic replaces sns_topic_arn but keeps subscribed_at" do
     stub_sns_confirmation body: confirmed_body
     post_sns subscription_confirmation

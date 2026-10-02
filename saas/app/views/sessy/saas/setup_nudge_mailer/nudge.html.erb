@@ -5,7 +5,7 @@
 <p><%= link_to "Create your first source", @next_step_url %> — its Setup page then connects SES for you with a one-click Launch Stack button, no AWS console tour needed.</p>
 <% when :no_subscription %>
 <p>Your source “<%= @source.name %>” is still waiting for AWS: Sessy hasn't heard from SNS yet.</p>
-<p>Open its <%= link_to "Setup page", @next_step_url %>, pick the region you send from, and click <strong>Launch Stack</strong>. CloudFormation creates the configuration set, the SNS topic, and the event destination in your AWS account; Sessy shows “SNS connected” as soon as the subscription is confirmed.</p>
+<p>Open its <%= link_to "Setup page", @next_step_url %> and click <strong>Launch Stack</strong>. CloudFormation creates the configuration set, the SNS topic, and the event destination in your AWS account; Sessy shows “SNS connected” as soon as the subscription is confirmed.</p>
 <p>Already created the stack? Check its Events tab in the CloudFormation console for a rollback, then try again from the Setup page.</p>
 <% when :no_event %>
 <p>SNS is connected to “<%= @source.name %>”, but Sessy hasn't received an event yet. That usually means nothing has been sent through the configuration set so far.</p>

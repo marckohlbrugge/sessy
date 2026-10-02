@@ -1,0 +1,24 @@
+<%# locals: (source:) %>
+<%# Compact checklist of the three setup steps; states come from the recorded status, never colour alone. %>
+<nav aria-label="Setup progress" class="border border-zinc-950/10 dark:border-white/10 px-4 py-3">
+  <ol class="flex flex-wrap items-center gap-x-6 gap-y-2">
+    <% SourcesHelper::SETUP_STEP_LABELS.each_with_index do |label, index| %>
+      <% state = setup_progress_state(source, index + 1) %>
+      <%= tag.li class: "flex items-center gap-2 #{'text-zinc-400 dark:text-zinc-500' if state == :upcoming}",
+            aria: { current: ("step" if state == :current) } do %>
+        <% case state %>
+        <% when :done %>
+          <span aria-hidden="true" class="inline-flex size-4 items-center justify-center text-[10px] border border-zinc-950 dark:border-white">&#10003;</span>
+          <span class="sr-only">Done:</span>
+        <% when :current %>
+          <span aria-hidden="true" class="inline-flex size-4 items-center justify-center border border-zinc-950 dark:border-white"><span class="size-1.5 bg-zinc-950 dark:bg-white animate-pulse"></span></span>
+          <span class="sr-only">Current step:</span>
+        <% else %>
+          <span aria-hidden="true" class="inline-block size-4 border border-zinc-950/20 dark:border-white/20"></span>
+          <span class="sr-only">Next:</span>
+        <% end %>
+        <span class="<%= 'font-medium' if state == :current %>"><%= index + 1 %>. <%= label %></span>
+      <% end %>
+    <% end %>
+  </ol>
+</nav>

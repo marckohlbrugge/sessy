@@ -1,6 +1,6 @@
 # The region is interpolated into the console hostname, so the inclusion
-# validation and the nil return for an unknown stored value are security
-# controls, not only UX.
+# validation and the region-less fallback for an unknown stored value are
+# security controls, not only UX.
 module Source::LaunchStack
   extend ActiveSupport::Concern
 
@@ -42,6 +42,16 @@ module Source::LaunchStack
     validates :aws_region, inclusion: { in: SES_REGIONS.keys }, allow_nil: true
   end
 
+  class_methods do
+    # arn:aws:sns:<region>:<account>:<topic> → region, when it is an SES
+    # region we know; anything else (other service, partition, malformed) is
+    # nil so callers can COALESCE over it.
+    def region_from_topic_arn(arn)
+      scheme, partition, service, region = arn.to_s.split(":", 6)
+      region if scheme == "arn" && partition == "aws" && service == "sns" && SES_REGIONS.key?(region)
+    end
+  end
+
   def aws_region_known?
     SES_REGIONS.key?(aws_region)
   end
@@ -50,11 +60,11 @@ module Source::LaunchStack
     SES_REGIONS[aws_region]
   end
 
-  # Quick-create URL for the region's CloudFormation console, or nil until a
-  # known region is chosen.
+  # Quick-create URL for the CloudFormation console. Without a known region
+  # the console's global host opens the user's last-used region, which for
+  # someone who just set up SES is almost always the right one; the review
+  # page shows it before they create anything.
   def launch_stack_url(webhook_url:)
-    return unless aws_region_known?
-
     query = {
       templateURL: Rails.configuration.x.cloudformation_template_url,
       stackName: stack_name,
@@ -64,7 +74,11 @@ module Source::LaunchStack
       param_ExistingConfigurationSetName: ""
     }.map { |key, value| "#{key}=#{ERB::Util.url_encode(value)}" }.join("&")
 
-    "https://#{aws_region}.console.aws.amazon.com/cloudformation/home?region=#{aws_region}#/stacks/create/review?#{query}"
+    if aws_region_known?
+      "https://#{aws_region}.console.aws.amazon.com/cloudformation/home?region=#{aws_region}#/stacks/create/review?#{query}"
+    else
+      "https://console.aws.amazon.com/cloudformation/home#/stacks/create/review?#{query}"
+    end
   end
 
   # sessy-<slug>-<id>: the id avoids AlreadyExists when two sources share a

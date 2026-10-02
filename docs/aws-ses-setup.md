@@ -71,7 +71,7 @@ aws ses get-identity-mail-from-domain-attributes --identities "$DOMAIN" --region
 
 ## 3) Create a configuration set
 
-> **Shortcut:** steps 3 and 4 can be done in one click. On the source's Setup page in Sessy, pick your SES region and click **Launch Stack**. It opens the CloudFormation console in your AWS account with a template that creates the configuration set, SNS topic, webhook subscription, and event destination (no IAM resources). Review the stack, click **Create stack**, then continue with step 5.
+> **Shortcut:** steps 3 and 4 can be done in one click. On the source's Setup page in Sessy, click **Launch Stack**. It opens the CloudFormation console in your AWS account (in the region you used last; pick a region on the Setup page if it is the wrong one) with a template that creates the configuration set, SNS topic, webhook subscription, and event destination (no IAM resources). Review the stack, click **Create stack**, then continue with step 5.
 
 In SES:
 

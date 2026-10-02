@@ -15,12 +15,15 @@ module Source::SetupStatus
   # subscribed_at is first-wins so redelivered or concurrent confirmations
   # cannot move it; sns_topic_arn is latest-wins so the status summary shows
   # whichever topic is feeding the source now (anyone holding the webhook
-  # token could subscribe it to a topic of their own).
+  # token could subscribe it to a topic of their own). aws_region is filled
+  # from the topic ARN only while nothing is stored: a region the user chose
+  # stays, and a malformed ARN coalesces to no change.
   def record_subscription_confirmed(topic_arn)
     previous_topic_arn = sns_topic_arn
 
     self.class.where(id: id).update_all([
-      "subscribed_at = COALESCE(subscribed_at, ?), sns_topic_arn = ?", Time.current, topic_arn
+      "subscribed_at = COALESCE(subscribed_at, ?), sns_topic_arn = ?, aws_region = COALESCE(aws_region, ?)",
+      Time.current, topic_arn, self.class.region_from_topic_arn(topic_arn)
     ])
 
     if previous_topic_arn.present? && previous_topic_arn != topic_arn
