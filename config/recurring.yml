@@ -21,3 +21,10 @@ production:
   magic_link_cleanup:
     command: "MagicLink.cleanup"
     schedule: every day at 3am
+
+  # Hosted only: the guard short-circuits before the engine constant is read,
+  # so OSS installs never evaluate it. 10:00 UTC keeps the run clear of the
+  # usual European-afternoon deploy window (a deploy can kill it mid-loop).
+  setup_nudge:
+    command: "Sessy.saas? && Sessy::Saas::SetupNudge.deliver_due"
+    schedule: every day at 10am

@@ -25,6 +25,26 @@ Steps to turn app.sessy.do into the multi-tenant hosted edition. Maintainer-run;
 
 10. **Retire `HTTP_AUTH_USERNAME` / `HTTP_AUTH_PASSWORD`** from the hosted env last — magic-code auth has replaced them and the hosted app ignores them.
 
+## Setup nudge
+
+`Sessy::Saas::SetupNudge.deliver_due` emails each hosted account once, two days after approval, if none of its sources has received an SES event yet (`sources.first_event_at`). The copy matches the stall point: no source, source without a confirmed SNS subscription, or SNS confirmed without events. Replies go to `ADMIN_EMAIL`. It runs from the `setup_nudge` entry in `config/recurring.yml` every day at 10:00 UTC, and the first run has no age cutoff, so it reaches every account that was already stalled.
+
+**Preview before the first run.** The schedule ships with the code, so deploy it after 10:00 UTC and review the cohort in the console before the next morning:
+
+```ruby
+Sessy::Saas::SetupNudge.eligible_accounts.pluck(:name, :approved_at)
+```
+
+Every name on that list gets exactly one email. Check it against what you know: a real customer who went quiet long enough for retention to delete their events must already carry a hand-stamped `first_event_at` on a source (see the retention note below), and internal or test accounts you never want to nudge can be opted out by stamping them as already sent:
+
+```ruby
+Account.find_by!(name: "...").update!(setup_nudge_sent_at: Time.current)
+```
+
+`Sessy::Saas::SetupNudge.variant_for(account)` shows which copy an account would get. To hold the run entirely, remove the `setup_nudge` entry from `config/recurring.yml` before deploying; there is no runtime switch.
+
+Retention note: `first_event_at` is stamped on ingest and was backfilled once from surviving messages and events. A source whose data had already aged out of retention when the backfill ran looks like it never received an event, so stamp it by hand (`source.update!(first_event_at: source.created_at)`) before the nudge is live.
+
 ## Publishing the Launch Stack template
 
 The Setup page's Launch Stack button opens a CloudFormation quick-create form whose `templateURL` must be an S3 URL. The template is committed at `config/cloudformation/sessy-ses.yml` and runs inside customers' AWS accounts, so the bucket is a supply-chain surface: every published key is write-once and a changed template always ships under a new key.

@@ -1,0 +1,29 @@
+Hi,
+
+<% case @variant -%>
+<% when :no_source -%>
+You signed up for Sessy a couple of days ago, but "<%= @account.name %>" doesn't have a source yet. A source is one SES configuration set you want to watch, and it's the first step to seeing your deliveries, bounces, and complaints.
+
+Create your first source:
+<%= @next_step_url %>
+
+Its Setup page then connects SES for you with a one-click Launch Stack button, no AWS console tour needed.
+<% when :no_subscription -%>
+Your source "<%= @source.name %>" is still waiting for AWS: Sessy hasn't heard from SNS yet.
+
+Open its Setup page, pick the region you send from, and click Launch Stack:
+<%= @next_step_url %>
+
+CloudFormation creates the configuration set, the SNS topic, and the event destination in your AWS account; Sessy shows "SNS connected" as soon as the subscription is confirmed.
+
+Already created the stack? Check its Events tab in the CloudFormation console for a rollback, then try again from the Setup page.
+<% when :no_event -%>
+SNS is connected to "<%= @source.name %>", but Sessy hasn't received an event yet. That usually means nothing has been sent through the configuration set so far.
+
+Send an email through the <%= @source.config_set_name %> configuration set, or make it the default for your sending identity with the command on the Setup page:
+<%= @next_step_url %>
+
+Deliveries, bounces, and complaints show up moments later. If your SES account is still in the sandbox, you can only send to verified addresses — a test to one of those is enough.
+<% end -%>
+
+Stuck or have questions? Just reply to this email and I'll help you out. This is the only reminder you'll get from us.
