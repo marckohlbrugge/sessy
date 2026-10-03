@@ -20,7 +20,7 @@
 
   <p class="mt-4 text-xs text-zinc-400 dark:text-zinc-500">No AWS credentials are shared with Sessy; every event is cryptographically verified.</p>
 
-  <details class="mt-8" data-setup-more>
+  <%= tag.details class: "mt-8", open: flash[:setup_more_open].present?, data: { setup_more: true } do %>
     <summary class="cursor-pointer select-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white">More options</summary>
     <div class="mt-5 space-y-8">
       <section>
@@ -87,5 +87,5 @@ aws sesv2 create-configuration-set-event-destination \
         </p>
       </section>
     </div>
-  </details>
+  <% end %>
 <% end %>

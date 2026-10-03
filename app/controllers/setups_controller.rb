@@ -17,11 +17,15 @@ class SetupsController < ApplicationController
 
   # Only the SES region lives here: SourcesController#update redirects to
   # Overview, which would bounce the user off the page they are setting up.
+  # The picker sits inside the "More options" disclosure, so the render that
+  # follows keeps it open: closing it under the user would also drop focus
+  # from the select that data-turbo-permanent just preserved.
   def update
     if @source.update(setup_params)
-      redirect_to source_setup_path(@source)
+      redirect_to source_setup_path(@source), flash: { setup_more_open: true }
     else
       @step = helpers.setup_current_step(@source)
+      flash.now[:setup_more_open] = true
       render :show, status: :unprocessable_entity
     end
   end

@@ -83,6 +83,10 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
 
     follow_redirect!
     assert_select "a[href^='https://us-east-1.console.aws.amazon.com/cloudformation/']", text: /Launch Stack/
+    assert_select "details[data-setup-more][open]"
+
+    get source_setup_path(@source)
+    assert_select "details[data-setup-more][open]", count: 0
   end
 
   test "an unknown region is rejected and the setup page re-renders" do
@@ -90,7 +94,7 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_nil @source.reload.aws_region
-    assert_select "select[name='source[aws_region]']"
+    assert_select "details[data-setup-more][open] select[name='source[aws_region]']"
     assert_match "not included in the list", response.body
   end
 
