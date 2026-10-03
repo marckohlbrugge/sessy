@@ -20,43 +20,41 @@
 
   <p class="mt-4 text-xs text-zinc-400 dark:text-zinc-500">No AWS credentials are shared with Sessy; every event is cryptographically verified.</p>
 
-  <%= tag.details class: "mt-8", open: flash[:setup_more_open].present?, data: { setup_more: true } do %>
-    <summary class="cursor-pointer select-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white">More options</summary>
-    <div class="mt-5 space-y-8">
-      <section>
-        <% if readonly %>
-          <h3 class="font-medium mb-1">Region</h3>
-          <p class="text-zinc-500 dark:text-zinc-400">
-            <%= source.aws_region_known? ? "#{source.aws_region_name} (#{source.aws_region})" : "Not recorded." %>
-          </p>
-        <% else %>
-          <%= render "region", source: source %>
-        <% end %>
-      </section>
+  <%= render layout: "setups/more_options", locals: { open: flash[:setup_more_open].present? } do %>
+    <section>
+      <% if readonly %>
+        <h3 class="font-medium mb-1">Region</h3>
+        <p class="text-zinc-500 dark:text-zinc-400">
+          <%= source.aws_region_known? ? "#{source.aws_region_name} (#{source.aws_region})" : "Not recorded." %>
+        </p>
+      <% else %>
+        <%= render "region", source: source %>
+      <% end %>
+    </section>
 
-      <section class="text-zinc-500 dark:text-zinc-400 space-y-2">
-        <h3 class="font-medium text-zinc-950 dark:text-white">What the stack creates</h3>
-        <p>
-          In your AWS account: a Configuration Set
-          <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>,
-          an SNS topic
-          <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= sns_topic_name(source) %></code>,
-          an HTTPS subscription to your webhook, and an event destination for every SES event type. No IAM roles or users.
-        </p>
-        <p>
-          Already sending with a Configuration Set? Enter its name as
-          <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">ExistingConfigurationSetName</code>
-          on the review page and the stack attaches to it instead.
-        </p>
-        <p>Stack created but still waiting? Check the stack's Events tab in the CloudFormation console.</p>
-      </section>
+    <section class="text-zinc-500 dark:text-zinc-400 space-y-2">
+      <h3 class="font-medium text-zinc-950 dark:text-white">What the stack creates</h3>
+      <p>
+        In your AWS account: a Configuration Set
+        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>,
+        an SNS topic
+        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= sns_topic_name(source) %></code>,
+        an HTTPS subscription to your webhook, and an event destination for every SES event type. No IAM roles or users.
+      </p>
+      <p>
+        Already sending with a Configuration Set? Enter its name as
+        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">ExistingConfigurationSetName</code>
+        on the review page and the stack attaches to it instead.
+      </p>
+      <p>Stack created but still waiting? Check the stack's Events tab in the CloudFormation console.</p>
+    </section>
 
-      <section>
-        <h3 class="font-medium mb-1">Set up manually</h3>
-        <p class="text-zinc-500 dark:text-zinc-400 mb-3">
-          The same four resources from the AWS CLI. Replace <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">&lt;account-id&gt;</code> with the account id in the topic ARN that <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">create-topic</code> prints.
-        </p>
-        <pre class="text-xs overflow-x-auto"><code class="language-shell">aws sesv2 create-configuration-set \
+    <section>
+      <h3 class="font-medium mb-1">Set up manually</h3>
+      <p class="text-zinc-500 dark:text-zinc-400 mb-3">
+        The same four resources from the AWS CLI. Replace <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">&lt;account-id&gt;</code> with the account id in the topic ARN that <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">create-topic</code> prints.
+      </p>
+      <pre class="text-xs overflow-x-auto"><code class="language-shell">aws sesv2 create-configuration-set \
   --configuration-set-name "<%= config_set_name(source) %>" \
   --region <%= ses_region(source) %>
 
@@ -79,13 +77,12 @@ aws sesv2 create-configuration-set-event-destination \
     "SnsDestination":{"TopicArn":"arn:aws:sns:<%= ses_region(source) %>:&lt;account-id&gt;:<%= sns_topic_name(source) %>"}
   }' \
   --region <%= ses_region(source) %></code></pre>
-        <p class="text-zinc-500 dark:text-zinc-400 mt-3">
-          Prefer clicking through the console, or new to SES?
-          <%= link_to "Follow the full AWS SES setup guide", "https://github.com/marckohlbrugge/sessy/blob/main/docs/aws-ses-setup.md", target: "_blank", class: "underline" %>.
-          Running in production?
-          <%= link_to "Review security and deliverability best practices", "https://github.com/marckohlbrugge/sessy/blob/main/docs/ses-security-best-practices.md", target: "_blank", class: "underline" %>.
-        </p>
-      </section>
-    </div>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-3">
+        Prefer clicking through the console, or new to SES?
+        <%= link_to "Follow the full AWS SES setup guide", "https://github.com/marckohlbrugge/sessy/blob/main/docs/aws-ses-setup.md", target: "_blank", class: "underline" %>.
+        Running in production?
+        <%= link_to "Review security and deliverability best practices", "https://github.com/marckohlbrugge/sessy/blob/main/docs/ses-security-best-practices.md", target: "_blank", class: "underline" %>.
+      </p>
+    </section>
   <% end %>
 <% end %>

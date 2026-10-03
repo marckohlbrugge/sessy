@@ -11,7 +11,7 @@ class SetupsController < ApplicationController
     if turbo_frame_request?
       render partial: "setups/status", locals: { source: @source }
     else
-      @step = shown_step
+      set_steps
     end
   end
 
@@ -24,7 +24,7 @@ class SetupsController < ApplicationController
     if @source.update(setup_params)
       redirect_to source_setup_path(@source), flash: { setup_more_open: true }
     else
-      @step = helpers.setup_current_step(@source)
+      set_steps
       flash.now[:setup_more_open] = true
       render :show, status: :unprocessable_entity
     end
@@ -36,8 +36,8 @@ class SetupsController < ApplicationController
     params.require(:source).permit(:aws_region)
   end
 
-  def shown_step
-    current = helpers.setup_current_step(@source)
-    params[:step].present? ? params[:step].to_i.clamp(1, current) : current
+  def set_steps
+    @current_step = helpers.setup_current_step(@source)
+    @step = params[:step].present? ? params[:step].to_i.clamp(1, @current_step) : @current_step
   end
 end

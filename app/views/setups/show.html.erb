@@ -6,10 +6,9 @@
   or the region form.
 %>
 <%= render layout: "sources/layout", locals: { source: @source, active: :setup } do %>
-  <% current = setup_current_step(@source) %>
-  <% readonly = @step != current %>
+  <% readonly = @step != @current_step %>
   <div class="mx-auto max-w-xl text-sm">
-    <%= render "progress", current: current %>
+    <%= render "progress", current: @current_step %>
 
     <div class="mt-8">
       <%= render "step_#{%w[connect send done][@step - 1]}", source: @source, readonly: readonly %>
@@ -24,7 +23,7 @@
         <% end %>
         <% if readonly %>
           <%= link_to source_setup_path(@source), class: "ml-auto font-medium text-zinc-950 dark:text-white" do %>
-            Continue to step <%= current %> <span aria-hidden="true">&rarr;</span>
+            Continue to step <%= @current_step %> <span aria-hidden="true">&rarr;</span>
           <% end %>
         <% end %>
       </nav>

@@ -49,18 +49,17 @@ end</code></pre>
 
   <%= render "status", source: source unless readonly %>
 
-  <details class="mt-8" data-setup-more>
-    <summary class="cursor-pointer select-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white">More options</summary>
-    <div class="mt-5">
+  <%= render layout: "setups/more_options" do %>
+    <section>
       <h3 class="font-medium mb-1">Nothing arriving?</h3>
       <p class="text-zinc-500 dark:text-zinc-400 mb-3">Check the wiring from the CLI: the topic should list a confirmed HTTPS subscription to your webhook, and the configuration set an SNS event destination.</p>
       <pre class="text-xs overflow-x-auto"><code class="language-shell">aws sns list-subscriptions-by-topic \
-  --topic-arn <%= source.sns_topic_arn.presence || "arn:aws:sns:#{ses_region(source)}:&lt;account-id&gt;:#{sns_topic_name(source)}".html_safe %> \
+  --topic-arn <%= source.sns_topic_arn.presence || "arn:aws:sns:#{ses_region(source)}:<account-id>:#{sns_topic_name(source)}" %> \
   --region <%= ses_region(source) %>
 
 aws sesv2 get-configuration-set-event-destinations \
   --configuration-set-name "<%= config_set_name(source) %>" \
   --region <%= ses_region(source) %></code></pre>
-    </div>
-  </details>
+    </section>
+  <% end %>
 <% end %>
