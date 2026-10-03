@@ -177,6 +177,17 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#setup_status", count: 1
   end
 
+  test "a malformed step falls back to the first step, read-only when it is not the current one" do
+    @source.record_subscription_confirmed(TOPIC_ARN)
+
+    get source_setup_path(@source, step: "garbage")
+    assert_only_step 1
+    assert_select "[data-setup-step='1'][data-setup-readonly]"
+
+    get source_setup_path(@source, step: -4)
+    assert_only_step 1
+  end
+
   test "a complete source renders step 3 with a one-line summary and stops polling" do
     @source.update!(aws_region: "eu-west-1", subscribed_at: Time.zone.local(2026, 9, 30, 12), first_event_at: Time.zone.local(2026, 10, 1, 12), sns_topic_arn: TOPIC_ARN)
 
