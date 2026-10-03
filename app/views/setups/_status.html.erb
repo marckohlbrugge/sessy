@@ -1,35 +1,25 @@
 <%# locals: (source:) %>
 <%#
-  Live line for the open step. poll_controller.js reloads this frame until
+  Live line for the current step. poll_controller.js reloads this frame until
   the first event is recorded and re-renders the page (Turbo.visit) when the
-  status it was rendered with changes, so the open step advances from server
+  status it was rendered with changes, so the step advances from server
   state. The frame carries no src: an eager frame would refetch what the page
   just rendered, and Turbo rejects a frame response whose src points back at
-  the request URL, so the controller owns the URL instead. Once complete there
-  is nothing left to poll, so the frame ships without a controller.
+  the request URL, so the controller owns the URL instead. The :complete
+  branch only ever answers a poll from a connected page, which then re-renders
+  without this frame.
 %>
 <% status = source.setup_status %>
 <% frame_attributes = status == :complete ? {} : { data: { controller: "poll", poll_url_value: source_setup_path(source), poll_status_value: status } } %>
 <%= turbo_frame_tag "setup_status", **frame_attributes do %>
-  <%= tag.div class: "mt-3 text-zinc-500 dark:text-zinc-400 space-y-1", aria: { live: "polite" }, data: { setup_status: status } do %>
+  <%= tag.div class: "mt-4 text-zinc-500 dark:text-zinc-400 space-y-1", aria: { live: "polite" }, data: { setup_status: status } do %>
     <% case status %>
     <% when :complete %>
-      <p class="font-medium text-zinc-950 dark:text-white">
-        <span aria-hidden="true">&#10003;</span>
-        Receiving events since <%= local_time(source.first_event_at, format: "%b %-d, %Y") %>
-      </p>
+      <p><span aria-hidden="true">&#10003;</span> Receiving events.</p>
     <% when :connected %>
-      <p>
-        <span class="font-medium text-zinc-950 dark:text-white">Waiting for the first event</span> — this updates automatically.
-        SNS is connected; send an email through the
-        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>
-        configuration set and it shows up here.
-      </p>
+      <p><span class="font-medium text-zinc-950 dark:text-white">Waiting for the first event</span> — this updates automatically.</p>
     <% else %>
-      <p>
-        <span class="font-medium text-zinc-950 dark:text-white">Waiting for AWS</span> — this updates automatically once the stack has been created.
-        If the stack finished but this hasn't changed after a few minutes, check the stack's Events tab in the CloudFormation console.
-      </p>
+      <p><span class="font-medium text-zinc-950 dark:text-white">Waiting for AWS</span> — this updates automatically once the stack is created.</p>
     <% end %>
     <% unless status == :complete %>
       <p data-poll-target="paused" hidden>

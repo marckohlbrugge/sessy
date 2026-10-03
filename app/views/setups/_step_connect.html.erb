@@ -1,0 +1,88 @@
+<%# locals: (source:, readonly: false) %>
+<%# readonly: an earlier step reopened from a later one — no live line, region shown as text. %>
+<%= tag.section data: { setup_step: 1, setup_readonly: (true if readonly) } do %>
+  <h1 class="text-xl font-semibold text-balance">Connect SES to Sessy</h1>
+  <p class="mt-2 text-zinc-500 dark:text-zinc-400">
+    <% if source.aws_region_known? %>
+      Launch Stack opens a ready-made CloudFormation stack in your AWS account (<%= source.aws_region_name %>) — review it and click <strong>Create stack</strong>.
+    <% else %>
+      Launch Stack opens a ready-made CloudFormation stack in the AWS region you used last — check it's the one you send email from, then click <strong>Create stack</strong>.
+    <% end %>
+  </p>
+
+  <div class="mt-5 flex flex-wrap items-center gap-3">
+    <%= link_to "Launch Stack", launch_stack_url(source), target: "_blank", rel: "noopener noreferrer",
+          class: "inline-flex items-center px-3 py-1.5 text-sm font-medium border border-zinc-950 dark:border-white bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200" %>
+    <%= render "agent_instructions", prompt: agent_instructions(source).connect %>
+  </div>
+
+  <%= render "status", source: source unless readonly %>
+
+  <p class="mt-4 text-xs text-zinc-400 dark:text-zinc-500">No AWS credentials are shared with Sessy; every event is cryptographically verified.</p>
+
+  <%= render layout: "setups/more_options", locals: { open: flash[:setup_more_open].present? } do %>
+    <section>
+      <% if readonly %>
+        <h3 class="font-medium mb-1">Region</h3>
+        <p class="text-zinc-500 dark:text-zinc-400">
+          <%= source.aws_region_known? ? "#{source.aws_region_name} (#{source.aws_region})" : "Not recorded." %>
+        </p>
+      <% else %>
+        <%= render "region", source: source %>
+      <% end %>
+    </section>
+
+    <section class="text-zinc-500 dark:text-zinc-400 space-y-2">
+      <h3 class="font-medium text-zinc-950 dark:text-white">What the stack creates</h3>
+      <p>
+        In your AWS account: a Configuration Set
+        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>,
+        an SNS topic
+        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= sns_topic_name(source) %></code>,
+        an HTTPS subscription to your webhook, and an event destination for every SES event type. No IAM roles or users.
+      </p>
+      <p>
+        Already sending with a Configuration Set? Enter its name as
+        <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">ExistingConfigurationSetName</code>
+        on the review page and the stack attaches to it instead.
+      </p>
+      <p>Stack created but still waiting? Check the stack's Events tab in the CloudFormation console.</p>
+    </section>
+
+    <section>
+      <h3 class="font-medium mb-1">Set up manually</h3>
+      <p class="text-zinc-500 dark:text-zinc-400 mb-3">
+        The same four resources from the AWS CLI. Replace <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">&lt;account-id&gt;</code> with the account id in the topic ARN that <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">create-topic</code> prints.
+      </p>
+      <pre class="text-xs overflow-x-auto"><code class="hljs language-shell">aws sesv2 create-configuration-set \
+  --configuration-set-name "<%= config_set_name(source) %>" \
+  --region <%= ses_region(source) %>
+
+aws sns create-topic \
+  --name "<%= sns_topic_name(source) %>" \
+  --region <%= ses_region(source) %>
+
+aws sns subscribe \
+  --topic-arn arn:aws:sns:<%= ses_region(source) %>:&lt;account-id&gt;:<%= sns_topic_name(source) %> \
+  --protocol https \
+  --notification-endpoint "<%= webhook_url(source_token: source.token) %>" \
+  --region <%= ses_region(source) %>
+
+aws sesv2 create-configuration-set-event-destination \
+  --configuration-set-name "<%= config_set_name(source) %>" \
+  --event-destination-name "<%= sns_topic_name(source) %>" \
+  --event-destination '{
+    "Enabled":true,
+    "MatchingEventTypes":["SEND","DELIVERY","DELIVERY_DELAY","BOUNCE","COMPLAINT","REJECT","OPEN","CLICK","RENDERING_FAILURE","SUBSCRIPTION"],
+    "SnsDestination":{"TopicArn":"arn:aws:sns:<%= ses_region(source) %>:&lt;account-id&gt;:<%= sns_topic_name(source) %>"}
+  }' \
+  --region <%= ses_region(source) %></code></pre>
+      <p class="text-zinc-500 dark:text-zinc-400 mt-3">
+        Prefer clicking through the console, or new to SES?
+        <%= link_to "Follow the full AWS SES setup guide", "https://github.com/marckohlbrugge/sessy/blob/main/docs/aws-ses-setup.md", target: "_blank", class: "underline" %>.
+        Running in production?
+        <%= link_to "Review security and deliverability best practices", "https://github.com/marckohlbrugge/sessy/blob/main/docs/ses-security-best-practices.md", target: "_blank", class: "underline" %>.
+      </p>
+    </section>
+  <% end %>
+<% end %>

@@ -1,0 +1,65 @@
+<%# locals: (source:, readonly: false) %>
+<%# One code sample at a time; the tabs controller swaps panels client-side, the first is shown on first paint. %>
+<%= tag.section data: { setup_step: 2, setup_readonly: (true if readonly) } do %>
+  <h1 class="text-xl font-semibold text-balance">Send a test email</h1>
+  <p class="mt-2 text-zinc-500 dark:text-zinc-400">
+    Send any email through the
+    <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(source) %></code>
+    configuration set — a test to yourself is enough — and it shows up here within seconds.
+  </p>
+
+  <div class="mt-5" data-controller="tabs">
+    <% samples = [ [ "sdk", "aws-sdk-sesv2" ], [ "mailer", "aws-actionmailer-ses" ], [ "cli", "AWS CLI" ] ] %>
+    <div role="tablist" aria-label="Code sample" class="flex flex-wrap gap-1 text-xs">
+      <% samples.each_with_index do |(key, label), index| %>
+        <button type="button" role="tab" id="sample-tab-<%= key %>" aria-controls="sample-<%= key %>" aria-selected="<%= index.zero? %>"
+                data-tabs-target="tab" data-action="tabs#select" data-tabs-index-param="<%= index %>"
+                class="px-2.5 py-1 border border-zinc-950/10 dark:border-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white aria-selected:border-zinc-950 dark:aria-selected:border-white aria-selected:text-zinc-950 dark:aria-selected:text-white aria-selected:font-medium cursor-pointer"><%= label %></button>
+      <% end %>
+    </div>
+
+    <div id="sample-sdk" role="tabpanel" aria-labelledby="sample-tab-sdk" data-tabs-target="panel" class="mt-3">
+      <pre class="text-sm overflow-x-auto"><code class="language-ruby" data-controller="highlight">ses.send_email(
+  from_email_address: "you@example.com",
+  destination: { to_addresses: ["you@example.com"] },
+  content: { ... },
+  configuration_set_name: "<%= config_set_name(source) %>"
+)</code></pre>
+    </div>
+
+    <div id="sample-mailer" role="tabpanel" aria-labelledby="sample-tab-mailer" data-tabs-target="panel" class="mt-3" hidden>
+      <pre class="text-sm overflow-x-auto"><code class="language-ruby" data-controller="highlight">class ApplicationMailer < ActionMailer::Base
+  default "X-SES-CONFIGURATION-SET" => "<%= config_set_name(source) %>"
+end</code></pre>
+      <p class="mt-2 text-zinc-500 dark:text-zinc-400">Or set <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">headers["X-SES-CONFIGURATION-SET"]</code> in a single mailer.</p>
+    </div>
+
+    <div id="sample-cli" role="tabpanel" aria-labelledby="sample-tab-cli" data-tabs-target="panel" class="mt-3" hidden>
+      <pre class="text-xs overflow-x-auto"><code class="hljs language-shell">aws sesv2 put-email-identity-configuration-set-attributes \
+  --email-identity example.com \
+  --configuration-set-name "<%= config_set_name(source) %>" \
+  --region <%= ses_region(source) %></code></pre>
+      <p class="mt-2 text-zinc-500 dark:text-zinc-400">No code changes — SES applies the configuration set to every email from that verified identity.</p>
+    </div>
+  </div>
+
+  <div class="mt-5">
+    <%= render "agent_instructions", prompt: agent_instructions(source).send_test_email %>
+  </div>
+
+  <%= render "status", source: source unless readonly %>
+
+  <%= render layout: "setups/more_options" do %>
+    <section>
+      <h3 class="font-medium mb-1">Nothing arriving?</h3>
+      <p class="text-zinc-500 dark:text-zinc-400 mb-3">Check the wiring from the CLI: the topic should list a confirmed HTTPS subscription to your webhook, and the configuration set an SNS event destination.</p>
+      <pre class="text-xs overflow-x-auto"><code class="hljs language-shell">aws sns list-subscriptions-by-topic \
+  --topic-arn <%= source.sns_topic_arn.presence || "arn:aws:sns:#{ses_region(source)}:<account-id>:#{sns_topic_name(source)}" %> \
+  --region <%= ses_region(source) %>
+
+aws sesv2 get-configuration-set-event-destinations \
+  --configuration-set-name "<%= config_set_name(source) %>" \
+  --region <%= ses_region(source) %></code></pre>
+    </section>
+  <% end %>
+<% end %>

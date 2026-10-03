@@ -2,28 +2,23 @@
 <%#
   The region is an override, not a gate: Launch Stack works without it and
   the console picks the user's last-used region. Picking one here makes the
-  link regional and fills the CLI snippets.
+  link regional and fills the CLI commands and the agent prompt.
 %>
-<div class="mt-5">
-  <h3 class="font-medium mb-1">Not opening in the right region? Pick it here.</h3>
-  <p class="text-zinc-500 dark:text-zinc-400 mb-3">
-    Your region is the one your app sends SES email from: look for <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">AWS_REGION</code>
-    or the <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">region:</code> passed to the SES client,
-    or read it off the SMTP endpoint (<code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">email-smtp.eu-west-1.amazonaws.com</code> means <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">eu-west-1</code>).
-    It is also shown in the SES console's top bar and URL.
-  </p>
-  <%= form_with model: source, url: source_setup_path(source), class: "max-w-sm", data: { controller: "debounced-submit" } do |f| %>
-    <% if source.errors[:aws_region].any? %>
-      <p class="mb-2 text-red-600 dark:text-red-400">Region <%= source.errors[:aws_region].to_sentence %></p>
-    <% end %>
-    <div class="flex items-center gap-2">
-      <%# turbo_permanent keeps keyboard focus on the select across the redirect re-render %>
-      <%= f.select :aws_region, ses_region_options, { include_blank: "Choose the region you send from" },
-            id: "source_#{source.id}_aws_region",
-            "aria-label": "SES region",
-            class: "w-full border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20",
-            data: { turbo_permanent: true, action: "change->debounced-submit#submitNow" } %>
-      <noscript><%= f.submit "Save", class: "px-2.5 py-1.5 text-sm border border-zinc-950/10 dark:border-white/10 cursor-pointer" %></noscript>
-    </div>
+<h3 class="font-medium mb-1">Not opening in the right region?</h3>
+<p class="text-zinc-500 dark:text-zinc-400 mb-3">
+  Pick the region your app sends SES email from: look for <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">AWS_REGION</code>
+  or the <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">region:</code> passed to the SES client,
+  or read it off the SMTP endpoint (<code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">email-smtp.eu-west-1.amazonaws.com</code> means <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono">eu-west-1</code>).
+</p>
+<%= form_with model: source, url: source_setup_path(source), class: "max-w-sm", data: { controller: "debounced-submit" } do |f| %>
+  <% if source.errors[:aws_region].any? %>
+    <p class="mb-2 text-red-600 dark:text-red-400">Region <%= source.errors[:aws_region].to_sentence %></p>
   <% end %>
-</div>
+  <%# turbo_permanent keeps keyboard focus on the select across the redirect re-render %>
+  <%= f.select :aws_region, ses_region_options, { include_blank: "Choose the region you send from" },
+        id: "source_#{source.id}_aws_region",
+        "aria-label": "SES region",
+        class: "w-full border border-zinc-950/10 dark:border-white/10 bg-transparent px-2.5 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-zinc-950/20 dark:focus:ring-white/20",
+        data: { turbo_permanent: true, action: "change->debounced-submit#submitNow" } %>
+  <noscript><%= f.submit "Save", class: "mt-2 px-2.5 py-1.5 text-sm border border-zinc-950/10 dark:border-white/10 cursor-pointer" %></noscript>
+<% end %>

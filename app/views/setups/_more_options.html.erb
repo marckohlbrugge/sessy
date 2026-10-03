@@ -1,0 +1,8 @@
+<%# locals: (open: false) %>
+<%# The one disclosure per step for everything secondary. Collapsed unless the render follows a region save (see SetupsController#update). %>
+<%= tag.details class: "mt-8", open: open, data: { setup_more: true } do %>
+  <summary class="cursor-pointer select-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white">More options</summary>
+  <div class="mt-5 space-y-8">
+    <%= yield %>
+  </div>
+<% end %>

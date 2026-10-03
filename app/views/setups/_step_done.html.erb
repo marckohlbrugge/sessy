@@ -1,0 +1,12 @@
+<%# locals: (source:, readonly: false) %>
+<%# The terminal step: always current (a later step is never requested), so readonly is unused. %>
+<section data-setup-step="3">
+  <h1 class="text-xl font-semibold text-balance"><span aria-hidden="true">&#10003;</span> You're all set</h1>
+  <p class="mt-2 text-zinc-500 dark:text-zinc-400" data-setup-summary>
+    <%= safe_join(setup_summary_parts(source), tag.span(" · ", aria: { hidden: true }, class: "text-zinc-300 dark:text-zinc-600")) %>
+  </p>
+  <p class="mt-5">
+    Deliveries, bounces, complaints, opens and clicks show up as they happen.
+    <%= link_to "Go to Overview", source_path(source), class: "underline" %>
+  </p>
+</section>
