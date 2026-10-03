@@ -98,9 +98,6 @@
     "SnsDestination":{"TopicArn":"arn:aws:sns:<%= ses_region(@source) %>:&lt;account-id&gt;:<%= sns_topic_name(@source) %>"}
   }' \
   --region <%= ses_region(@source) %></code></pre>
-            <p class="text-zinc-500 dark:text-zinc-400 mt-2 text-sm">
-              "Include original email headers" can't be set via the CLI. Enable it afterwards by editing the event destination in the SES console.
-            </p>
           </section>
         </div>
       </details>

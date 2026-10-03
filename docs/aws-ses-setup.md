@@ -149,7 +149,7 @@ aws sesv2 create-configuration-set-event-destination \
   --region "$REGION"
 ```
 
-Note: the "Include original email headers" option is only available in the SES console. If you set up the event destination via the CLI and want original headers in your events, enable it afterwards by editing the event destination in the console.
+Event publishing always includes the original email headers (`mail.headers` and `mail.commonHeaders`) in each event, so Sessy can show subjects without any further setting. The "Include original headers" toggle you may see elsewhere in the SES console applies only to per-identity bounce and complaint notifications, not to configuration set event destinations.
 
 Verify:
 

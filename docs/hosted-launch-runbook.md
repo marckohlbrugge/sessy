@@ -86,7 +86,7 @@ Then:
 2. Record the digest in `PUBLISHED_TEMPLATE_SHA256` in `test/cloudformation_template_test.rb`. That test fails whenever the committed template drifts from the published one, and in CI it also fetches the published URL and compares digests, which is the check that notices a swapped object.
 3. For a template change: bump the key (`v2/sessy-ses.yml`), publish, then repeat steps 1 and 2. Never delete or replace an old key while stacks may still reference it.
 
-Before the first production launch, create one stack from the published URL in a sandbox account (Setup page → Launch Stack) and confirm: the stack reaches `CREATE_COMPLETE` with no capabilities prompt; the webhook receives and confirms the `SubscriptionConfirmation`; whether the quick-create form prefills a `NoEcho` parameter (if so, mark `WebhookUrl` as `NoEcho: true` in the next template version); whether event payloads include original email headers (the Setup page currently says this must be enabled in the console); and that the quick-create link survives the console sign-in redirect from a signed-out browser.
+Before the first production launch, create one stack from the published URL in a sandbox account (Setup page → Launch Stack) and confirm: the stack reaches `CREATE_COMPLETE` with no capabilities prompt; the webhook receives and confirms the `SubscriptionConfirmation`; whether the quick-create form prefills a `NoEcho` parameter (if so, mark `WebhookUrl` as `NoEcho: true` in the next template version); and that the quick-create link survives the console sign-in redirect from a signed-out browser.
 
 ## Suspending accounts
 
