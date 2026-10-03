@@ -1,24 +1,14 @@
-<%# locals: (source:) %>
-<%# Compact checklist of the three setup steps; states come from the recorded status, never colour alone. %>
-<nav aria-label="Setup progress" class="border border-zinc-950/10 dark:border-white/10 px-4 py-3">
-  <ol class="flex flex-wrap items-center gap-x-6 gap-y-2">
-    <% SourcesHelper::SETUP_STEP_LABELS.each_with_index do |label, index| %>
-      <% state = setup_progress_state(source, index + 1) %>
-      <%= tag.li class: "flex items-center gap-2 #{'text-zinc-400 dark:text-zinc-500' if state == :upcoming}",
-            aria: { current: ("step" if state == :current) } do %>
-        <% case state %>
-        <% when :done %>
-          <span aria-hidden="true" class="inline-flex size-4 items-center justify-center text-[10px] border border-zinc-950 dark:border-white">&#10003;</span>
-          <span class="sr-only">Done:</span>
-        <% when :current %>
-          <span aria-hidden="true" class="inline-flex size-4 items-center justify-center border border-zinc-950 dark:border-white"><span class="size-1.5 bg-zinc-950 dark:bg-white animate-pulse"></span></span>
-          <span class="sr-only">Current step:</span>
-        <% else %>
-          <span aria-hidden="true" class="inline-block size-4 border border-zinc-950/20 dark:border-white/20"></span>
-          <span class="sr-only">Next:</span>
-        <% end %>
-        <span class="<%= 'font-medium' if state == :current %>"><%= index + 1 %>. <%= label %></span>
+<%# locals: (current:) %>
+<%# Three pill segments plus a label; filled for done and current, muted for upcoming. States are also in text for assistive technology. %>
+<nav aria-label="Setup progress" class="flex items-center gap-3">
+  <ol class="flex items-center gap-1.5">
+    <% (1..3).each do |number| %>
+      <% filled = number <= current %>
+      <%= tag.li class: "h-2 w-16 rounded-full #{filled ? 'bg-zinc-950 dark:bg-white' : 'bg-zinc-950/10 dark:bg-white/10'}",
+            data: ({ filled: true } if filled), aria: { current: ("step" if number == current) } do %>
+        <span class="sr-only">Step <%= number %>: <%= setup_step_label(number) %><%= ", done" if number < current %><%= ", current" if number == current %></span>
       <% end %>
     <% end %>
   </ol>
+  <span class="text-xs text-zinc-500 dark:text-zinc-400" data-setup-progress-label>Step <%= current %> of 3</span>
 </nav>

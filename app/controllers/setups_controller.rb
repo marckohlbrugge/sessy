@@ -1,10 +1,18 @@
 class SetupsController < ApplicationController
   include SourceScoped
 
-  # The status strip polls this action inside a Turbo Frame; answer those
-  # requests with the strip alone instead of rendering the whole page.
+  # The status line polls this action inside a Turbo Frame; answer those
+  # requests with the line alone instead of rendering the whole page.
+  #
+  # One step is rendered per request: the current one, or an earlier one
+  # read-only when ?step= asks for it. A later step is clamped back to the
+  # current one so the URL cannot skip ahead.
   def show
-    render partial: "setups/status", locals: { source: @source } if turbo_frame_request?
+    if turbo_frame_request?
+      render partial: "setups/status", locals: { source: @source }
+    else
+      @step = shown_step
+    end
   end
 
   # Only the SES region lives here: SourcesController#update redirects to
@@ -13,6 +21,7 @@ class SetupsController < ApplicationController
     if @source.update(setup_params)
       redirect_to source_setup_path(@source)
     else
+      @step = helpers.setup_current_step(@source)
       render :show, status: :unprocessable_entity
     end
   end
@@ -21,5 +30,10 @@ class SetupsController < ApplicationController
 
   def setup_params
     params.require(:source).permit(:aws_region)
+  end
+
+  def shown_step
+    current = helpers.setup_current_step(@source)
+    params[:step].present? ? params[:step].to_i.clamp(1, current) : current
   end
 end

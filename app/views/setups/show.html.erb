@@ -1,169 +1,33 @@
+<%#
+  One step per screen. The server picks the step from the recorded status
+  (SetupsController#show); the polled status line inside the current step
+  re-renders the page when that status changes. An earlier step can be
+  reopened read-only through ?step=, which renders it without the live line
+  or the region form.
+%>
 <%= render layout: "sources/layout", locals: { source: @source, active: :setup } do %>
-  <div class="space-y-6 text-sm">
-    <section class="text-zinc-500 dark:text-zinc-400 space-y-1">
-      <p>Three steps, about 5 minutes. No AWS credentials shared with Sessy — you configure AWS to push events to your webhook URL, and every event is cryptographically verified.</p>
-      <p>
-        New to SES?
-        <%= link_to "Follow the full AWS SES setup guide", "https://github.com/marckohlbrugge/sessy/blob/main/docs/aws-ses-setup.md", target: "_blank", class: "underline" %>.
-        Running in production?
-        <%= link_to "Review security and deliverability best practices", "https://github.com/marckohlbrugge/sessy/blob/main/docs/ses-security-best-practices.md", target: "_blank", class: "underline" %>.
-      </p>
-    </section>
+  <% current = setup_current_step(@source) %>
+  <% readonly = @step != current %>
+  <div class="mx-auto max-w-xl text-sm">
+    <%= render "progress", current: current %>
 
-    <%= render "progress", source: @source %>
+    <div class="mt-8">
+      <%= render "step_#{%w[connect send done][@step - 1]}", source: @source, readonly: readonly %>
+    </div>
 
-    <% step_state = (1..3).index_with { |number| setup_step_state(@source, number) } %>
-
-    <%= render layout: "setups/step", locals: { number: 1, title: "Connect SES to Sessy", state: step_state[1], summary: setup_connected_summary(@source) } do %>
-      <p class="text-zinc-500 dark:text-zinc-400 mb-3">One click creates everything SES needs to send events to this source.</p>
-      <%= render "launch_stack", source: @source, live: step_state[1] == :current %>
-
-      <details class="mt-5">
-        <summary class="cursor-pointer text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white select-none">Set up manually instead</summary>
-        <div class="mt-4 space-y-6">
-          <section>
-            <h3 class="font-semibold mb-2">a. Create a Configuration Set</h3>
-            <p class="text-zinc-500 dark:text-zinc-400 mb-3">A Configuration Set tracks what happens after emails are sent.</p>
-            <ol class="list-decimal list-inside space-y-1.5 text-zinc-600 dark:text-zinc-300">
-              <li>Go to <strong>Amazon SES</strong> (correct region)</li>
-              <li>Navigate to <strong>Configuration sets</strong></li>
-              <li>Click <strong>Create set</strong></li>
-              <li>Name: <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(@source) %></code></li>
-              <li>Leave defaults, click <strong>Create set</strong></li>
-            </ol>
-            <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
-            <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws ses create-configuration-set \
-  --configuration-set '{"Name":"<%= config_set_name(@source) %>"}' \
-  --region <%= ses_region(@source) %></code></pre>
-          </section>
-
-          <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
-            <h3 class="font-semibold mb-2">b. Create an SNS Topic</h3>
-            <p class="text-zinc-500 dark:text-zinc-400 mb-3">SNS forwards events to your webhook.</p>
-            <ol class="list-decimal list-inside space-y-1.5 text-zinc-600 dark:text-zinc-300">
-              <li>Go to <strong>Amazon SNS</strong></li>
-              <li>Click <strong>Topics</strong> &rarr; <strong>Create topic</strong></li>
-              <li>Select <strong>Standard</strong> (not FIFO)</li>
-              <li>Name: <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= sns_topic_name(@source) %></code></li>
-              <li>Click <strong>Create topic</strong></li>
-            </ol>
-            <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
-            <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sns create-topic \
-  --name "<%= sns_topic_name(@source) %>" \
-  --region <%= ses_region(@source) %></code></pre>
-          </section>
-
-          <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
-            <h3 class="font-semibold mb-2">c. Subscribe the Webhook</h3>
-            <p class="text-zinc-500 dark:text-zinc-400 mb-3">Create an HTTPS subscription pointing to Sessy.</p>
-            <ol class="list-decimal list-inside space-y-1.5 text-zinc-600 dark:text-zinc-300">
-              <li>From the SNS topic, click <strong>Create subscription</strong></li>
-              <li>Protocol: <strong>HTTPS</strong></li>
-              <li>Endpoint: <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono text-sm break-all"><%= webhook_url(source_token: @source.token) %></code></li>
-              <li>Leave filter policy empty</li>
-              <li>Leave <strong>"Enable raw message delivery"</strong> unchecked</li>
-              <li>Click <strong>Create subscription</strong></li>
-              <li>Confirmation is automatic</li>
-            </ol>
-            <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
-            <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sns subscribe \
-  --topic-arn arn:aws:sns:<%= ses_region(@source) %>:&lt;account-id&gt;:<%= sns_topic_name(@source) %> \
-  --protocol https \
-  --notification-endpoint "<%= webhook_url(source_token: @source.token) %>" \
-  --region <%= ses_region(@source) %></code></pre>
-          </section>
-
-          <section class="border-t border-zinc-950/10 dark:border-white/10 pt-5">
-            <h3 class="font-semibold mb-2">d. Add an Event Destination</h3>
-            <p class="text-zinc-500 dark:text-zinc-400 mb-3">Connect your Configuration Set to SNS.</p>
-            <ol class="list-decimal list-inside space-y-1.5 text-zinc-600 dark:text-zinc-300">
-              <li>Go to <strong>SES &rarr; Configuration sets</strong></li>
-              <li>Click <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= config_set_name(@source) %></code></li>
-              <li><strong>Event destinations</strong> tab &rarr; <strong>Add destination</strong></li>
-              <li>
-                Select event types:
-                <span class="text-zinc-400 dark:text-zinc-500">Sends, Deliveries, Bounces, Complaints, Opens, Clicks, Delivery delays, Rejections</span>
-              </li>
-              <li>Destination type: <strong>Amazon SNS</strong></li>
-              <li>Topic: <code class="bg-zinc-100 dark:bg-white/5 px-1 font-mono"><%= sns_topic_name(@source) %></code></li>
-              <li>Click <strong>Add destination</strong></li>
-            </ol>
-            <p class="text-zinc-500 dark:text-zinc-400 mt-3 mb-2">Prefer CLI?</p>
-            <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sesv2 create-configuration-set-event-destination \
-  --configuration-set-name "<%= config_set_name(@source) %>" \
-  --event-destination-name "<%= sns_topic_name(@source) %>" \
-  --event-destination '{
-    "Enabled":true,
-    "MatchingEventTypes":["SEND","DELIVERY","DELIVERY_DELAY","BOUNCE","COMPLAINT","REJECT","OPEN","CLICK","RENDERING_FAILURE","SUBSCRIPTION"],
-    "SnsDestination":{"TopicArn":"arn:aws:sns:<%= ses_region(@source) %>:&lt;account-id&gt;:<%= sns_topic_name(@source) %>"}
-  }' \
-  --region <%= ses_region(@source) %></code></pre>
-          </section>
-        </div>
-      </details>
-    <% end %>
-
-    <%= render layout: "setups/step", locals: { number: 2, title: "Send a test email through the Configuration Set", state: step_state[2], summary: setup_first_event_summary(@source) } do %>
-      <p class="text-zinc-500 dark:text-zinc-400">Specify your Configuration Set when sending. Any email through it — a test to yourself is enough — shows up in Sessy within seconds.</p>
-      <%= render "status", source: @source if step_state[2] == :current %>
-
-      <div class="mt-5">
-        <p class="font-medium mb-2">
-          With <%= link_to "aws-sdk-sesv2", "https://github.com/aws/aws-sdk-ruby", target: "_blank", class: "underline" %>:
-        </p>
-        <pre class="text-sm overflow-x-auto"><code class="language-ruby" data-controller="highlight">ses.send_email(
-  from_email_address: "you@example.com",
-  destination: { to_addresses: ["user@example.com"] },
-  content: { ... },
-  configuration_set_name: "<%= config_set_name(@source) %>"
-)</code></pre>
-      </div>
-
-      <div class="mt-5">
-        <p class="font-medium mb-2">
-          With <%= link_to "aws-actionmailer-ses", "https://github.com/aws/aws-actionmailer-ses-ruby", target: "_blank", class: "underline" %>:
-        </p>
-        <p class="text-zinc-500 dark:text-zinc-400 mb-2">Set globally:</p>
-        <pre class="text-sm overflow-x-auto"><code class="language-ruby" data-controller="highlight">class ApplicationMailer < ActionMailer::Base
-  default "X-SES-CONFIGURATION-SET" => "<%= config_set_name(@source) %>"
-end</code></pre>
-        <p class="text-zinc-500 dark:text-zinc-400 mt-4 mb-2">Or per mailer:</p>
-        <pre class="text-sm overflow-x-auto"><code class="language-ruby" data-controller="highlight">class UserMailer < ApplicationMailer
-  def welcome(user)
-    headers["X-SES-CONFIGURATION-SET"] = "<%= config_set_name(@source) %>"
-    mail(to: user.email, subject: "Welcome!")
-  end
-end</code></pre>
-      </div>
-
-      <div class="mt-5">
-        <p class="font-medium mb-2">Or make it the default for everything a verified identity sends:</p>
-        <p class="text-zinc-500 dark:text-zinc-400 mb-2">No code changes — SES applies the Configuration Set to every email from that domain or address.</p>
-        <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sesv2 put-email-identity-configuration-set-attributes \
-  --email-identity example.com \
-  --configuration-set-name "<%= config_set_name(@source) %>" \
-  --region <%= ses_region(@source) %></code></pre>
-      </div>
-
-      <div class="mt-5">
-        <p class="text-zinc-500 dark:text-zinc-400 mb-2">Nothing arriving? Check the wiring from the CLI:</p>
-        <pre class="text-xs overflow-x-auto"><code class="language-shell" data-controller="highlight">aws sns list-subscriptions-by-topic \
-  --topic-arn arn:aws:sns:<%= ses_region(@source) %>:&lt;account-id&gt;:<%= sns_topic_name(@source) %> \
-  --region <%= ses_region(@source) %>
-
-aws sesv2 get-configuration-set-event-destinations \
-  --configuration-set-name "<%= config_set_name(@source) %>" \
-  --region <%= ses_region(@source) %></code></pre>
-      </div>
-    <% end %>
-
-    <%= render layout: "setups/step", locals: { number: 3, title: "Receiving events", state: step_state[3] } do %>
-      <%= render "status", source: @source %>
-      <p class="text-zinc-500 dark:text-zinc-400 mt-3">
-        Deliveries, bounces, complaints, opens and clicks show up in
-        <%= link_to "Activity", source_events_path(@source), class: "underline" %>
-        as they happen. You're all set.
-      </p>
+    <% if @step > 1 || readonly %>
+      <nav aria-label="Other steps" class="mt-10 flex flex-wrap justify-between gap-3 text-zinc-500 dark:text-zinc-400">
+        <% if @step > 1 %>
+          <%= link_to source_setup_path(@source, step: @step - 1), class: "hover:text-zinc-950 dark:hover:text-white" do %>
+            <span aria-hidden="true">&larr;</span> Show step <%= @step - 1 %>
+          <% end %>
+        <% end %>
+        <% if readonly %>
+          <%= link_to source_setup_path(@source), class: "ml-auto font-medium text-zinc-950 dark:text-white" do %>
+            Continue to step <%= current %> <span aria-hidden="true">&rarr;</span>
+          <% end %>
+        <% end %>
+      </nav>
     <% end %>
   </div>
 <% end %>

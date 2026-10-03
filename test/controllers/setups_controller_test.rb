@@ -8,48 +8,69 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
     @source = accounts(:instance).sources.create!(name: "BetaList")
   end
 
-  test "a fresh source opens step 1 only, with a working region-less Launch Stack and the region as an override" do
+  test "a fresh source renders step 1 alone in a narrow column with everything secondary behind More options" do
     get source_setup_path(@source)
 
     assert_response :success
-    assert_progress current: "Connect SES"
-    assert_open_step 1
+    assert_select "nav a", text: "Setup"
+    assert_select ".max-w-xl [data-setup-step]", count: 1
+    assert_progress step: 1
+    assert_only_step 1
 
-    assert_select "[data-setup-step='1'][data-step-state='current']" do
+    assert_select "[data-setup-step='1']" do
+      assert_select "h1", text: /Connect SES/
       assert_select "a[href^='https://console.aws.amazon.com/cloudformation/'][target='_blank'][rel='noopener noreferrer']", text: /Launch Stack/
-      assert_select "[aria-disabled='true']", count: 0
-      assert_select "select[name='source[aws_region]']" do
+      assert_select "button[data-action='clipboard#copy']", text: /Copy instructions for your AI agent/
+      assert_select "turbo-frame#setup_status[data-controller='poll'][data-poll-status-value='waiting']", text: /Waiting for AWS/
+      assert_select "details", count: 1
+      assert_select "details > summary", text: "More options"
+      assert_select "details select[name='source[aws_region]']" do
         assert_select "option[value='']", text: /Choose the region/
         assert_select "option[selected]", count: 0
         assert_select "option", count: Source::SES_REGIONS.size + 1
       end
-      assert_select "details summary", text: /Set up manually instead/
-      assert_select "turbo-frame#setup_status[data-controller='poll'][data-poll-status-value='waiting']"
+      assert_select "details", text: /aws sesv2 create-configuration-set/
+      assert_select "details", text: /ExistingConfigurationSetName/
+      assert_select "details a[href*='aws-ses-setup.md']"
+      assert_select "details a[href*='ses-security-best-practices.md']"
+      assert_select "pre", text: /configuration_set_name:/, count: 0
     end
+    assert_match "No AWS credentials", response.body
     assert_match "Not opening in the right region?", response.body
     assert_match "AWS_REGION", response.body
-    assert_match "email-smtp.eu-west-1.amazonaws.com", response.body
     assert_match "region you used last", response.body
-    assert_match "&lt;region&gt;", response.body
-
-    assert_select "[data-setup-step='2'][data-step-state='upcoming']" do
-      assert_select "pre", count: 0
-    end
-    assert_select "[data-setup-step='3'][data-step-state='upcoming']"
+    assert_no_match "Three steps, about 5 minutes", response.body
+    assert_select "a", text: /Show step/, count: 0
   end
 
-  test "a chosen region keeps step 1 open and makes Launch Stack and the CLI snippets regional" do
+  test "the hidden agent prompt on step 1 carries this source's webhook URL and Launch Stack URL" do
+    get source_setup_path(@source)
+
+    assert_select "textarea[data-clipboard-target='source'][hidden][readonly]", count: 1 do |textareas|
+      prompt = textareas.first.text
+      assert_includes prompt, webhook_url(source_token: @source.token)
+      assert_includes prompt, @source.config_set_name
+      assert_includes prompt, @source.stack_name
+      assert_includes prompt, "stacks/create/review"
+      assert_includes prompt, "--region <region-code>"
+    end
+  end
+
+  test "a chosen region keeps step 1 open and makes Launch Stack, the CLI commands and the prompt regional" do
     @source.update!(aws_region: "eu-west-1")
 
     get source_setup_path(@source)
 
     assert_response :success
-    assert_open_step 1
+    assert_only_step 1
     assert_select "a[href^='https://eu-west-1.console.aws.amazon.com/cloudformation/']", text: /Launch Stack/
     assert_select "option[value='eu-west-1'][selected]"
-    assert_match "Opens the CloudFormation console in Europe (Ireland)", response.body
+    assert_match "Europe (Ireland)", response.body
     assert_match "--region eu-west-1", response.body
-    assert_no_match "&lt;region&gt;", response.body
+    assert_no_match "&lt;region", response.body
+    assert_select "textarea[data-clipboard-target='source']" do |textareas|
+      assert_includes textareas.first.text, "--region eu-west-1"
+    end
   end
 
   test "updating the region persists it and returns to the setup page with the regional link" do
@@ -80,7 +101,6 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
       assert_select "[data-setup-status='waiting'][aria-live='polite']"
       assert_select "[data-poll-target='paused'][hidden]", text: /Stopped checking/
     end
-    assert_match "Waiting for AWS", response.body
     assert_match "updates automatically", response.body
   end
 
@@ -89,57 +109,94 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "turbo-frame#setup_status"
-    assert_select "h2", count: 0
+    assert_select "h1", count: 0
     assert_select "select[name='source[aws_region]']", count: 0
     assert_select "details", count: 0
     assert_select "[data-setup-step]", count: 0
   end
 
-  test "a connected source collapses step 1 to a summary with the inferred region and opens step 2" do
+  test "a connected source renders step 2 with one code sample at a time and a back link" do
     @source.record_subscription_confirmed(TOPIC_ARN)
 
     get source_setup_path(@source)
 
     assert_response :success
-    assert_progress current: "Send a test email"
-    assert_open_step 2
+    assert_progress step: 2
+    assert_only_step 2
 
-    assert_select "details[data-setup-step='1'][data-step-state='done']" do
-      assert_select "summary", text: /Connected/
-      assert_select "summary", text: /Europe \(Ireland\)/
-      assert_select "summary", text: /#{Regexp.escape(TOPIC_ARN)}/
-      assert_select "a", text: /Launch Stack/
+    assert_select "[data-setup-step='2']" do
+      assert_select "h1", text: /Send a test email/
+      assert_select "[role='tablist'] button[role='tab']", count: 3
+      assert_select "button[role='tab'][aria-selected='true']", text: "aws-sdk-sesv2", count: 1
+      assert_select "[data-tabs-target='panel']", count: 3
+      assert_select "[data-tabs-target='panel']:not([hidden]) pre", text: /configuration_set_name:/, count: 1
+      assert_select "[data-tabs-target='panel'][hidden] pre", text: /X-SES-CONFIGURATION-SET/
+      assert_select "[data-tabs-target='panel'][hidden] pre", text: /put-email-identity-configuration-set-attributes/
+      assert_select "button[data-action='clipboard#copy']", text: /Copy instructions for your AI agent/
+      assert_select "turbo-frame#setup_status[data-controller='poll'][data-poll-status-value='connected']", text: /Waiting for the first event/
+      assert_select "details", count: 1
+      assert_select "details > summary", text: "More options"
+      assert_select "details", text: /list-subscriptions-by-topic/
+      assert_select "select", count: 0
     end
-    assert_select "[data-setup-step='2'][data-step-state='current']" do
-      assert_select "pre", minimum: 3
-      assert_select "turbo-frame#setup_status[data-controller='poll'][data-poll-status-value='connected']" do
-        assert_select "[data-setup-status='connected']"
-      end
+    assert_select "a[href='#{source_setup_path(@source, step: 1)}']", text: /Show step 1/
+    assert_select "a", text: /Launch Stack/, count: 0
+    assert_select "textarea[data-clipboard-target='source']" do |textareas|
+      assert_includes textareas.first.text, "X-SES-CONFIGURATION-SET"
+      assert_includes textareas.first.text, "--region eu-west-1"
     end
-    assert_select "[data-setup-step='2']", text: /Waiting for the first event/
-    assert_match "put-email-identity-configuration-set-attributes", response.body
-    assert_select "[data-setup-step='3'][data-step-state='upcoming']"
   end
 
-  test "a complete source collapses steps 1 and 2, opens step 3, and stops polling" do
-    @source.update!(aws_region: "eu-west-1", subscribed_at: 2.days.ago, first_event_at: 1.day.ago, sns_topic_arn: TOPIC_ARN)
+  test "a previous step reopens read-only without polling or the region form" do
+    @source.record_subscription_confirmed(TOPIC_ARN)
+
+    get source_setup_path(@source, step: 1)
+
+    assert_response :success
+    assert_progress step: 2
+    assert_only_step 1
+    assert_select "[data-setup-step='1'][data-setup-readonly]"
+    assert_select "a[href^='https://eu-west-1.console.aws.amazon.com/cloudformation/']", text: /Launch Stack/
+    assert_select "turbo-frame#setup_status", count: 0
+    assert_select "select", count: 0
+    assert_match "Europe (Ireland)", response.body
+    assert_select "a[href='#{source_setup_path(@source)}']", text: /Continue to step 2/
+  end
+
+  test "a step beyond the current one is clamped to the current step" do
+    @source.record_subscription_confirmed(TOPIC_ARN)
+
+    get source_setup_path(@source, step: 3)
+
+    assert_only_step 2
+    assert_select "[data-setup-readonly]", count: 0
+    assert_select "turbo-frame#setup_status", count: 1
+  end
+
+  test "a complete source renders step 3 with a one-line summary and stops polling" do
+    @source.update!(aws_region: "eu-west-1", subscribed_at: Time.zone.local(2026, 9, 30, 12), first_event_at: Time.zone.local(2026, 10, 1, 12), sns_topic_arn: TOPIC_ARN)
 
     get source_setup_path(@source)
 
     assert_response :success
-    assert_progress current: nil
-    assert_select "nav[aria-label='Setup progress'] li", text: /Done:/, count: 3
-    assert_open_step 3
+    assert_progress step: 3
+    assert_only_step 3
 
-    assert_select "details[data-setup-step='1'][data-step-state='done'] summary", text: /Connected/
-    assert_select "details[data-setup-step='2'][data-step-state='done'] summary", text: /First event received/
-    assert_select "[data-setup-step='3'][data-step-state='current']" do
-      assert_select "turbo-frame#setup_status", text: /Receiving events since/
-      assert_select "turbo-frame#setup_status[data-controller]", count: 0
-      assert_select "turbo-frame#setup_status[data-poll-url-value]", count: 0
-      assert_select "turbo-frame#setup_status[src]", count: 0
-      assert_select "a[href='#{source_events_path(@source)}']"
+    assert_select "[data-setup-step='3']" do
+      assert_select "h1"
+      assert_select "[data-setup-summary]" do |summaries|
+        text = summaries.first.text.squish
+        assert_match(/Connected .*Sep 30, 2026/, text)
+        assert_match(/Europe \(Ireland\)/, text)
+        assert_match(/First event .*Oct 1, 2026/, text)
+        assert_no_match(/arn:/, text)
+      end
+      assert_select "a[href='#{source_path(@source)}']", text: /Overview/
+      assert_select "turbo-frame#setup_status", count: 0
+      assert_select "details", count: 0
     end
+    assert_select "[data-controller='poll']", count: 0
+    assert_select "a[href='#{source_setup_path(@source, step: 2)}']", text: /Show step 2/
   end
 
   test "a backfilled complete source shows only what it knows" do
@@ -147,14 +204,13 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
 
     get source_setup_path(@source)
 
-    assert_select "details[data-setup-step='1'] summary" do |summaries|
+    assert_select "[data-setup-summary]" do |summaries|
       text = summaries.first.text.squish
-      assert_match(/Connected/, text)
-      assert_no_match(/Region|Topic|arn:/, text)
+      assert_match(/First event/, text)
+      assert_no_match(/Connected|Region|arn:/, text)
       assert_no_match(/(·|\u00b7)\s*(·|\u00b7)/, text)
-      assert_no_match(/(·|\u00b7)\s*\z/, text)
+      assert_no_match(/\A\s*(·|\u00b7)|(·|\u00b7)\s*\z/, text)
     end
-    assert_select "turbo-frame#setup_status", text: /Receiving events since/
   end
 
   test "another account's source setup is not reachable" do
@@ -170,21 +226,20 @@ class SetupsControllerTest < ActionDispatch::IntegrationTest
 
   private
 
-  def assert_progress(current:)
-    assert_select "nav[aria-label='Setup progress'] ol li", count: 3
-    if current
-      assert_select "nav[aria-label='Setup progress'] li[aria-current='step']", text: /#{current}/, count: 1
-    else
-      assert_select "nav[aria-label='Setup progress'] li[aria-current='step']", count: 0
+  # Pills: three segments, the first `step` filled; the label names the step.
+  def assert_progress(step:)
+    assert_select "nav[aria-label='Setup progress']" do
+      assert_select "ol li", count: 3
+      assert_select "ol li[data-filled]", count: step
+      assert_select "ol li[aria-current='step']", count: 1
+      assert_select "ol li:nth-child(#{step})[aria-current='step']"
+      assert_select "[data-setup-progress-label]", text: "Step #{step} of 3"
     end
   end
 
-  # The polled frame must appear exactly once, inside the open step: a second
-  # copy would give Turbo two frames with the same id.
-  def assert_open_step(number)
-    assert_select "[data-step-state='current']", count: 1
-    assert_select "[data-setup-step='#{number}'][data-step-state='current']"
-    assert_select "turbo-frame#setup_status", count: 1
-    assert_select "[data-setup-step='#{number}'] turbo-frame#setup_status", count: 1
+  # Exactly one step is rendered, so the polled frame can never appear twice.
+  def assert_only_step(number)
+    assert_select "[data-setup-step]", count: 1
+    assert_select "[data-setup-step='#{number}']"
   end
 end
