@@ -104,4 +104,25 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_match "marc@example.com", response.body
     assert_no_match "john@example.com", response.body
   end
+
+  test "index lists newest first by default" do
+    get source_events_path(@source)
+
+    assert_response :success
+    times = css_select("tbody time").map { |time| Time.iso8601(time["datetime"]) }
+    assert_operator times.size, :>, 1
+    assert_equal times.sort.reverse, times
+    assert_select "th[aria-sort=descending] a[href*='sort=asc']"
+  end
+
+  test "index lists oldest first with sort=asc and keeps it across filters" do
+    get source_events_path(@source, sort: "asc")
+
+    assert_response :success
+    times = css_select("tbody time").map { |time| Time.iso8601(time["datetime"]) }
+    assert_operator times.size, :>, 1
+    assert_equal times.sort, times
+    assert_select "th[aria-sort=ascending] a:not([href*='sort='])"
+    assert_select "#events-filter-form input[type=hidden][name=sort][value=asc]"
+  end
 end

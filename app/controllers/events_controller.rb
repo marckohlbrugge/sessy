@@ -1,8 +1,12 @@
 class EventsController < ApplicationController
   include SourceScoped
 
+  helper_method :ascending?
+
   def index
-    events = filtered_events.filter_by_params(filter_params).reverse_chronologically.includes(:message)
+    events = filtered_events.filter_by_params(filter_params)
+    events = ascending? ? events.chronologically : events.reverse_chronologically
+    events = events.includes(:message)
 
     respond_to do |format|
       format.html do
@@ -35,6 +39,10 @@ class EventsController < ApplicationController
     events = @source.events
     events = events.search(params[:query]) if searching?
     events
+  end
+
+  def ascending?
+    params[:sort] == "asc"
   end
 
   def searching?
