@@ -1,6 +1,7 @@
 <%= render layout: "sources/layout", locals: { source: @source, active: :activity } do %>
   <div class="mb-5 space-y-3">
     <%= form_with url: source_events_path(@source), method: :get, id: "events-filter-form", class: "space-y-3", data: { controller: "debounced-submit" } do |f| %>
+      <%= hidden_field_tag :sort, "asc" if ascending? %>
       <div class="flex items-center gap-3">
         <%= search_field_tag :query, params[:query],
             placeholder: "Search by email or subject...",
@@ -68,7 +69,13 @@
               <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Event</th>
               <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Recipient</th>
               <th class="py-2 pr-3 text-left font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Subject</th>
-              <th class="py-2 text-right font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400">Time</th>
+              <th class="py-2 text-right font-medium whitespace-nowrap text-zinc-500 dark:text-zinc-400" aria-sort="<%= ascending? ? "ascending" : "descending" %>">
+                <%= link_to source_events_path(@source, request.query_parameters.except("page").merge("sort" => (ascending? ? nil : "asc")).compact),
+                    class: "inline-flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-200",
+                    title: ascending? ? "Showing oldest first" : "Showing newest first" do %>
+                  Time <span aria-hidden="true"><%= ascending? ? "↑" : "↓" %></span>
+                <% end %>
+              </th>
             </tr>
           </thead>
           <tbody>

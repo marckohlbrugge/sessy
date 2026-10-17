@@ -32,4 +32,6 @@ en:
   time:
     formats:
       event_timestamp: "%b %-d, %l:%M:%S %p"
+      event_timestamp_24h: "%b %-d, %H:%M:%S"
       message_timestamp: "%B %-d, %Y at %l:%M:%S %p"
+      message_timestamp_24h: "%B %-d, %Y at %H:%M:%S"
