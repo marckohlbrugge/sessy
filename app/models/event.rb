@@ -11,6 +11,6 @@ class Event < ApplicationRecord
 
   normalizes :recipient_email, with: ->(email) { email.downcase.strip }
 
-  scope :reverse_chronologically, -> { order(event_at: :desc) }
+  scope :reverse_chronologically, -> { order(event_at: :desc, id: :desc) }
   scope :chronologically, -> { order(event_at: :asc, id: :asc) }
 end
