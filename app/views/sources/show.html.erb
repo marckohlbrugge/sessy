@@ -91,27 +91,59 @@
     </section>
 
     <section class="grid gap-6 lg:grid-cols-2">
-      <div>
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-medium">Bounces</h3>
-          <span class="text-sm text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_to_percentage(@bounce_rate, precision: 1) %></span>
+      <div class="space-y-8">
+        <div>
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium">Bounces</h3>
+            <span class="text-sm text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_to_percentage(@bounce_rate, precision: 1) %></span>
+          </div>
+
+          <% if @bounce_count.positive? %>
+            <div class="mt-3 space-y-4">
+              <% @bounce_breakdown.sort_by { |_, count| -count }.each do |bounce_type, count| %>
+                <% percentage = (count.to_f / @bounce_count) * 100 %>
+                <div>
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-zinc-600 dark:text-zinc-300"><%= bounce_label(bounce_type) %></span>
+                    <span class="text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_with_delimiter(count) %></span>
+                  </div>
+                  <div class="mt-2 h-px bg-zinc-100 dark:bg-white/5">
+                    <div class="h-px bg-rose-400 dark:bg-rose-500" style="width: <%= percentage.round(1) %>%"></div>
+                  </div>
+                  <ul class="mt-2 space-y-1">
+                    <% bounce_reasons_for(@bounce_reasons, bounce_type).each do |subtype, reason_count| %>
+                      <li class="flex items-center justify-between pl-3 text-sm">
+                        <span class="text-zinc-500 dark:text-zinc-400"><%= bounce_reason_label(subtype) %></span>
+                        <span class="text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_with_delimiter(reason_count) %></span>
+                      </li>
+                    <% end %>
+                  </ul>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="mt-3 text-sm text-zinc-400 dark:text-zinc-500">No bounces in the last 30 days.</p>
+          <% end %>
         </div>
 
-        <% if @bounce_count.positive? %>
-          <div class="mt-3 space-y-2">
-            <% @bounce_breakdown.sort_by { |_, count| -count }.each do |bounce_type, count| %>
-              <% percentage = @bounce_count.positive? ? (count.to_f / @bounce_count) * 100 : 0 %>
-              <div class="flex items-center justify-between text-sm">
-                <span class="text-zinc-600 dark:text-zinc-300"><%= bounce_label(bounce_type) %></span>
-                <span class="text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_with_delimiter(count) %></span>
-              </div>
-              <div class="h-px bg-zinc-100 dark:bg-white/5">
-                <div class="h-px bg-rose-400 dark:bg-rose-500" style="width: <%= percentage.round(1) %>%"></div>
-              </div>
-            <% end %>
+        <% if @repeat_bouncers.any? %>
+          <div>
+            <h3 class="text-sm font-medium">Repeat bouncers</h3>
+            <p class="mt-1 text-sm text-zinc-400 dark:text-zinc-500">
+              Bounced more than once in the last 30 days. Worth pausing sends to these addresses.
+            </p>
+            <ul class="mt-3 divide-y divide-zinc-950/5 dark:divide-white/5">
+              <% @repeat_bouncers.each do |email, count| %>
+                <li class="flex items-center justify-between py-1.5 text-sm">
+                  <%= link_to source_events_path(@source, query: email, event_types: [ "bounce" ]), class: "flex min-w-0 items-center gap-2 hover:underline" do %>
+                    <span class="size-4 shrink-0 rounded-full bg-zinc-200 dark:bg-zinc-700 inline-block"><img src="<%= gravatar_url(email) %>" alt="" class="size-4 rounded-full"></span>
+                    <span class="truncate"><%= email %></span>
+                  <% end %>
+                  <span class="ml-4 shrink-0 text-zinc-400 dark:text-zinc-500 tabular-nums"><%= pluralize(count, "bounce") %></span>
+                </li>
+              <% end %>
+            </ul>
           </div>
-        <% else %>
-          <p class="mt-3 text-sm text-zinc-400 dark:text-zinc-500">No bounces in the last 30 days.</p>
         <% end %>
       </div>
 

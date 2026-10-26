@@ -27,6 +27,8 @@ class SourcesController < ApplicationController
     @chart_data = stats.daily_series
     @sent_today_count = @chart_data[:series].find { |s| s[:key] == :sent }[:values].last || 0
     @bounce_breakdown = stats.bounce_breakdown
+    @bounce_reasons = stats.bounce_reasons
+    @repeat_bouncers = stats.repeat_bouncers
   end
 
   def new

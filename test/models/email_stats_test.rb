@@ -26,6 +26,36 @@ class EmailStatsTest < ActiveSupport::TestCase
     assert_equal({ "Permanent" => 1, "Transient" => 1, "Unknown" => 1 }, stats.bounce_breakdown)
   end
 
+  test "bounce reasons split each bounce type by SES subtype" do
+    record "Bounce", "r0@example.com", 3.days.ago, bounce_type: "Permanent", bounce_subtype: "General"
+    record "Bounce", "r1@example.com", 3.days.ago, bounce_type: "Permanent", bounce_subtype: "Suppressed"
+    record "Bounce", "r2@example.com", 2.days.ago, bounce_type: "Transient", bounce_subtype: "MailboxFull"
+    record "Bounce", "r3@example.com", 2.days.ago, bounce_type: "Transient", bounce_subtype: "MailboxFull"
+    record "Bounce", "r4@example.com", 2.days.ago, bounce_type: nil, bounce_subtype: nil
+
+    reasons = EmailStats.new(@source.events, @range).bounce_reasons
+
+    assert_equal({
+      [ "Permanent", "General" ] => 1,
+      [ "Permanent", "Suppressed" ] => 1,
+      [ "Transient", "MailboxFull" ] => 2,
+      [ "Unknown", nil ] => 1
+    }, reasons)
+  end
+
+  test "repeat bouncers lists recipients with more than one bounce, most bounced first" do
+    3.times { |i| record "Bounce", "full@example.com", (3 - i).days.ago, bounce_type: "Transient" }
+    2.times { |i| record "Bounce", "gone@example.com", (3 - i).days.ago, bounce_type: "Permanent" }
+    record "Bounce", "once@example.com", 2.days.ago, bounce_type: "Permanent"
+    record "Bounce", "old@example.com", 40.days.ago, bounce_type: "Permanent"
+    record "Bounce", "old@example.com", 41.days.ago, bounce_type: "Permanent"
+
+    stats = EmailStats.new(@source.events, @range)
+
+    assert_equal({ "full@example.com" => 3, "gone@example.com" => 2 }, stats.repeat_bouncers)
+    assert_equal({ "full@example.com" => 3 }, stats.repeat_bouncers(limit: 1))
+  end
+
   test "unique opens and clicks count distinct recipient and message pairs" do
     2.times { |i| record "Send", "r#{i}@example.com", 2.days.ago }
     record "Open", "r0@example.com", 1.day.ago
@@ -81,8 +111,8 @@ class EmailStatsTest < ActiveSupport::TestCase
 
   private
 
-  def record(type, recipient, at, bounce_type: nil)
+  def record(type, recipient, at, bounce_type: nil, bounce_subtype: nil)
     @message.events.create!(source: @source, ses_message_id: @message.ses_message_id, event_type: type,
-      event_at: at, recipient_email: recipient, bounce_type: bounce_type)
+      event_at: at, recipient_email: recipient, bounce_type: bounce_type, bounce_subtype: bounce_subtype)
   end
 end

@@ -33,6 +33,28 @@ class EmailStats
     end
   end
 
+  # Bounce counts keyed by [bounce_type, bounce_subtype]: SES's own reason
+  # codes (MailboxFull, General, Suppressed…) under the hard/soft split the
+  # breakdown shows. Keys use the same "Unknown" placeholder as the breakdown
+  # so the two line up; a nil subtype stays nil for events without one.
+  def bounce_reasons
+    @events.event_type_bounce.group(:bounce_type, :bounce_subtype).count.transform_keys do |bounce_type, subtype|
+      [ bounce_type.presence || "Unknown", subtype ]
+    end
+  end
+
+  # Recipients that bounced more than once in the range, most bounced first.
+  # The same full mailbox hit by every email of a drip sequence is the usual
+  # culprit behind a creeping soft-bounce rate.
+  def repeat_bouncers(limit: 10)
+    @events.event_type_bounce
+      .group(:recipient_email)
+      .having("COUNT(*) > 1")
+      .order(Arel.sql("COUNT(*) DESC"), :recipient_email)
+      .limit(limit)
+      .count
+  end
+
   # Daily sent/delivered/bounced series with zero-filled dates.
   def daily_series
     rows = @events
