@@ -8,15 +8,15 @@ module Event::BounceSubtypeBackfill
 
   def self.run
     Event.event_type_bounce.where(bounce_subtype: nil).in_batches(of: BATCH_SIZE) do |batch|
-      batch.update_all("bounce_subtype = #{subtype_expression}")
+      batch.update_all(subtype_assignment)
     end
   end
 
-  def self.subtype_expression
+  def self.subtype_assignment
     if Event.connection.adapter_name.match?(/postg/i)
-      "event_data->>'bounceSubType'"
+      Arel.sql("bounce_subtype = event_data->>'bounceSubType'")
     else
-      "json_extract(event_data, '$.bounceSubType')"
+      Arel.sql("bounce_subtype = json_extract(event_data, '$.bounceSubType')")
     end
   end
 end
