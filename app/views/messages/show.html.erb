@@ -51,17 +51,32 @@
       <dt class="text-zinc-500 dark:text-zinc-400 mb-2">Events (<%= @message.events_count %>)</dt>
       <dd class="space-y-1">
         <% @message.events.reverse_chronologically.each do |event| %>
-          <div class="flex items-center justify-between py-1.5">
-            <div class="flex items-center gap-2.5">
-              <span class="inline-flex items-center px-1.5 py-0.5 text-sm font-medium <%= event_badge_classes(event) %>">
-                <%= event_label(event) %>
-              </span>
-              <div class="flex items-center gap-1.5">
-                <span class="size-4 rounded-full bg-zinc-200 dark:bg-zinc-700 inline-block"><img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-4 rounded-full"></span>
-                <span><%= event.recipient_email %></span>
+          <div class="py-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <span class="inline-flex items-center px-1.5 py-0.5 text-sm font-medium <%= event_badge_classes(event) %>">
+                  <%= event_label(event) %>
+                </span>
+                <div class="flex items-center gap-1.5">
+                  <span class="size-4 rounded-full bg-zinc-200 dark:bg-zinc-700 inline-block"><img src="<%= gravatar_url(event.recipient_email) %>" alt="" class="size-4 rounded-full"></span>
+                  <span><%= event.recipient_email %></span>
+                </div>
               </div>
+              <span class="text-zinc-500 dark:text-zinc-400 tabular-nums"><%= local_time(event.event_at, format: :event_timestamp) %></span>
             </div>
-            <span class="text-zinc-500 dark:text-zinc-400 tabular-nums"><%= local_time(event.event_at, format: :event_timestamp) %></span>
+            <% if event.diagnostics? %>
+              <div class="mt-1.5 ml-2 border-l-2 border-zinc-200 dark:border-zinc-700 pl-3 text-sm">
+                <% if (reason = event_reason_label(event)) %>
+                  <span class="text-zinc-700 dark:text-zinc-200"><%= reason %></span>
+                  <% if event.smtp_status %>
+                    <span class="text-zinc-400 dark:text-zinc-500 tabular-nums">&middot; <%= event.smtp_status %></span>
+                  <% end %>
+                <% end %>
+                <% if event.diagnostic_code %>
+                  <p class="mt-0.5 font-mono break-words text-zinc-500 dark:text-zinc-400"><%= event.diagnostic_code %></p>
+                <% end %>
+              </div>
+            <% end %>
           </div>
         <% end %>
       </dd>

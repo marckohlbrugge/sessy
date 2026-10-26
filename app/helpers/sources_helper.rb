@@ -33,4 +33,32 @@ module SourcesHelper
       bounce_type
     end
   end
+
+  # SES bounceSubType values, worded for someone who hasn't read the SES docs.
+  # "General" stays as is: SES uses it when the receiving server gave no
+  # specific reason, so there is nothing more honest to call it.
+  BOUNCE_REASON_LABELS = {
+    "General" => "General",
+    "NoEmail" => "Address doesn't exist",
+    "Suppressed" => "On SES global suppression list",
+    "OnAccountSuppressionList" => "On account suppression list",
+    "MailboxFull" => "Mailbox full",
+    "MessageTooLarge" => "Message too large",
+    "ContentRejected" => "Content rejected",
+    "AttachmentRejected" => "Attachment rejected",
+    "Undetermined" => "Undetermined"
+  }.freeze
+
+  def bounce_reason_label(subtype)
+    return "Unknown" if subtype.blank?
+
+    BOUNCE_REASON_LABELS.fetch(subtype) { subtype.underscore.humanize }
+  end
+
+  # The subtype rows under one hard/soft bounce row, largest first.
+  def bounce_reasons_for(bounce_reasons, bounce_type)
+    bounce_reasons.select { |(type, _), _| type == bounce_type }
+      .map { |(_, subtype), count| [ subtype, count ] }
+      .sort_by { |_, count| -count }
+  end
 end

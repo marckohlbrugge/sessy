@@ -19,6 +19,24 @@ class EventSnsIngestibleTest < ActiveSupport::TestCase
     assert_equal "welcome", events.first.event_data["templateName"]
   end
 
+  test "records the bounce type and SES subtype on bounce events" do
+    payload = EventPayload.new({
+      "eventType" => "Bounce",
+      "mail" => mail("msg-bounce"),
+      "bounce" => {
+        "bounceType" => "Transient",
+        "bounceSubType" => "MailboxFull",
+        "timestamp" => "2024-01-01T12:00:00.000Z",
+        "bouncedRecipients" => [ { "emailAddress" => "r@example.com", "status" => "4.2.2", "diagnosticCode" => "smtp; 452-4.2.2 over quota" } ]
+      }
+    })
+
+    event = Event.ingest(payload, source: @source).first
+
+    assert_equal "Transient", event.bounce_type
+    assert_equal "MailboxFull", event.bounce_subtype
+  end
+
   test "stores open and click details in event_data" do
     open = EventPayload.new({
       "eventType" => "Open",

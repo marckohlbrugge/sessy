@@ -79,6 +79,20 @@ module EventsHelper
     end
   end
 
+  # Human wording of Event#reason: bounce subtypes share the dashboard's
+  # labels, the other SES codes (MailboxFull, SpamDetected, abuse…) read fine
+  # once humanized.
+  def event_reason_label(event)
+    reason = event.reason
+    return if reason.blank?
+
+    case event.event_type
+    when "bounce" then bounce_reason_label(reason)
+    when "delivery_delay", "complaint" then reason.underscore.humanize
+    else reason
+    end
+  end
+
   def gravatar_url(email, size: 32)
     hash = Digest::MD5.hexdigest(email.to_s.downcase)
     "https://www.gravatar.com/avatar/#{hash}?s=#{size}&d=blank"

@@ -18,7 +18,10 @@ module Event::SnsIngestible
           event.webhook = webhook
           event.event_data = event_payload.event_data
           event.raw_payload = event_payload.raw
-          event.bounce_type = event_payload.event_data["bounceType"] if event_payload.event_type == "Bounce"
+          if event_payload.event_type == "Bounce"
+            event.bounce_type = event_payload.event_data["bounceType"]
+            event.bounce_subtype = event_payload.event_data["bounceSubType"]
+          end
         end
       end
 
