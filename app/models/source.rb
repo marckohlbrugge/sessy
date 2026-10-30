@@ -25,7 +25,9 @@ class Source < ApplicationRecord
       .group(:source_id, :event_type)
       .count
 
-    last_event_at = Event.where(source_id: source_ids).group(:source_id).maximum(:event_at)
+    # One MAX per source rather than a grouped MAX: Postgres answers the former
+    # from an index but the latter with a full table scan.
+    last_event_at = sources.to_h { |source| [ source.id, source.events.maximum(:event_at) ] }
 
     source_ids.index_with do |id|
       sent = counts[[ id, "send" ]] || 0
