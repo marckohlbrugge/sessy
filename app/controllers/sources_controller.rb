@@ -23,6 +23,8 @@ class SourcesController < ApplicationController
     @complaint_rate = stats.complaint_rate
     @open_rate = stats.open_rate
     @click_rate = stats.click_rate
+    @bounce_reputation = stats.bounce_reputation
+    @complaint_reputation = stats.complaint_reputation
 
     @chart_data = stats.daily_series
     @sent_today_count = @chart_data[:series].find { |s| s[:key] == :sent }[:values].last || 0

@@ -1,0 +1,6 @@
+<div class="flex items-center justify-end gap-2.5">
+  <div class="w-12">
+    <%= render "sources/reputation_meter", rate: rate %>
+  </div>
+  <span class="<%= reputation_text_class(rate, ok: "text-zinc-500 dark:text-zinc-400") %>"><%= number_to_percentage(rate.percent, precision: precision) %></span>
+</div>

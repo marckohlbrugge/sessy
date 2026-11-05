@@ -1,0 +1,11 @@
+<%# The track runs from 0 to the AWS pause level; the tick marks the review level. %>
+<div class="relative h-1 bg-zinc-100 dark:bg-white/5"
+     role="meter"
+     aria-label="<%= rate.kind.to_s.humanize %> rate against AWS thresholds"
+     aria-valuemin="0"
+     aria-valuemax="<%= rate.pause_at %>"
+     aria-valuenow="<%= rate.percent.round(2) %>"
+     title="<%= reputation_explanation(rate) %>">
+  <div class="h-1 <%= rate.ok? ? "bg-zinc-400 dark:bg-zinc-500" : "bg-rose-500" %>" style="width: <%= rate.percent_of_pause.round(1) %>%"></div>
+  <div class="absolute -top-0.5 h-2 w-px bg-zinc-500 dark:bg-zinc-400" style="left: <%= rate.review_percent_of_pause.round(1) %>%"></div>
+</div>
