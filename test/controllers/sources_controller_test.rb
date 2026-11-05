@@ -60,6 +60,53 @@ class SourcesControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", text: /once@example\.com/, count: 0
   end
 
+  test "dashboard frames bounce and complaint rates against AWS thresholds" do
+    source = accounts(:instance).sources.create!(name: "Healthy")
+    message = source.messages.create!(ses_message_id: SecureRandom.uuid, subject: "Hello", sent_at: 2.days.ago)
+    100.times do |i|
+      message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Send",
+        event_at: 2.days.ago, recipient_email: "r#{i}@example.com")
+    end
+    message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Bounce",
+      event_at: 2.days.ago, recipient_email: "r0@example.com", bounce_type: "Permanent")
+
+    get source_path(source)
+
+    assert_response :success
+    assert_match "AWS reviews at 5%, may pause at 10%", response.body
+    assert_match "AWS reviews at 0.1%, may pause at 0.5%", response.body
+    assert_select "[role=meter][aria-valuenow='1.0'][aria-valuemax='10.0']"
+  end
+
+  test "dashboard flags a rate above the AWS review level" do
+    source = accounts(:instance).sources.create!(name: "Bouncy")
+    message = source.messages.create!(ses_message_id: SecureRandom.uuid, subject: "Hello", sent_at: 2.days.ago)
+    10.times do |i|
+      message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Send",
+        event_at: 2.days.ago, recipient_email: "r#{i}@example.com")
+    end
+    message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Bounce",
+      event_at: 2.days.ago, recipient_email: "r0@example.com", bounce_type: "Permanent")
+
+    get source_path(source)
+
+    assert_match "Above the 10% where AWS may pause sending", response.body
+  end
+
+  test "index shows bounce and complaint rates with the AWS thresholds" do
+    source = accounts(:instance).sources.create!(name: "Listed")
+    message = source.messages.create!(ses_message_id: SecureRandom.uuid, subject: "Hello", sent_at: 2.days.ago)
+    message.events.create!(source: source, ses_message_id: message.ses_message_id, event_type: "Send",
+      event_at: 2.days.ago, recipient_email: "r0@example.com")
+
+    get sources_path
+
+    assert_response :success
+    assert_select "th", text: "Complaint rate"
+    assert_match "AWS reviews an account at a 5% bounce or 0.1% complaint rate and may pause its sending at 10% or 0.5%.", response.body
+    assert_select "[role=meter][aria-valuemax='0.5']"
+  end
+
   test "dashboard renders with zero events" do
     source = accounts(:instance).sources.create!(name: "Empty")
 
