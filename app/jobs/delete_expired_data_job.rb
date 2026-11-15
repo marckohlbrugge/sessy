@@ -5,5 +5,7 @@ class DeleteExpiredDataJob < ApplicationJob
     Source.with_retention_policy.find_each do |source|
       source.delete_expired_data
     end
+
+    Webhook.delete_orphaned
   end
 end
