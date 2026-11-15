@@ -66,6 +66,7 @@ aws sns subscribe \
   --topic-arn arn:aws:sns:<%= ses_region(source) %>:&lt;account-id&gt;:<%= sns_topic_name(source) %> \
   --protocol https \
   --notification-endpoint "<%= webhook_url(source_token: source.token) %>" \
+  --attributes '<%= source.sns_subscription_attributes %>' \
   --region <%= ses_region(source) %>
 
 aws sesv2 create-configuration-set-event-destination \
