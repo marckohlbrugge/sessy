@@ -48,8 +48,28 @@ class Source < ApplicationRecord
   # capped so the longest derived name fits SES's 64-character limit.
   RESOURCE_SLUG_MAX_LENGTH = 64 - "-ses-events".length
 
+  # How long SNS keeps retrying a webhook that is unreachable: 3 retries 20
+  # seconds apart, then 26 retries 2 minutes apart, about 53 minutes in all.
+  # SNS caps the total at one hour. config/cloudformation/sessy-ses.yml sets
+  # the same policy; a test keeps the two in step.
+  SNS_RETRY_POLICY = {
+    "minDelayTarget" => 20,
+    "maxDelayTarget" => 120,
+    "numRetries" => 29,
+    "numNoDelayRetries" => 0,
+    "numMinDelayRetries" => 3,
+    "numMaxDelayRetries" => 26,
+    "backoffFunction" => "linear"
+  }.freeze
+
   def config_set_name
     "#{resource_slug}-ses"
+  end
+
+  # The retry policy the CloudFormation template sets on the subscription, as
+  # the --attributes value for `aws sns subscribe`.
+  def sns_subscription_attributes
+    { "DeliveryPolicy" => { "healthyRetryPolicy" => SNS_RETRY_POLICY }.to_json }.to_json
   end
 
   def sns_topic_name
