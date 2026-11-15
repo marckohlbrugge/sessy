@@ -102,6 +102,11 @@ docker run --environment DATABASE_URL=postgres://user:pass@host/sessy ...
 
 Sessy will automatically detect PostgreSQL from the URL and configure itself accordingly.
 
+#### Background jobs
+
+Sessy's background jobs (deleting data past its retention period, recurring cleanup) run inside the web process, so one container is a complete install.
+If you would rather run jobs in a container of their own, set `SOLID_QUEUE_IN_PUMA=false` on the web container and start a second container from the same image with the command `./bin/jobs`.
+
 ## Example
 
 Here's an example of a `docker-compose.yml` that you could use to run Sessy via `docker compose up`:
