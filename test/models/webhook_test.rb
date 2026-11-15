@@ -27,15 +27,24 @@ class WebhookTest < ActiveSupport::TestCase
     end
   end
 
+  test "delete_orphaned keeps webhooks that failed to process" do
+    create_webhook("unprocessed", created_at: 2.days.ago, processed_at: nil)
+
+    assert_no_difference -> { Webhook.count } do
+      Webhook.delete_orphaned
+    end
+  end
+
   private
 
-  def create_webhook(sns_message_id, created_at:)
+  def create_webhook(sns_message_id, created_at:, processed_at: created_at)
     Webhook.create!(
       sns_message_id: sns_message_id,
       sns_type: "Notification",
       sns_timestamp: created_at,
       raw_payload: { "MessageId" => sns_message_id },
-      created_at: created_at
+      created_at: created_at,
+      processed_at: processed_at
     )
   end
 end

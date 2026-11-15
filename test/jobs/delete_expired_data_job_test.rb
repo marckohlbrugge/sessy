@@ -9,7 +9,8 @@ class DeleteExpiredDataJobTest < ActiveJob::TestCase
       sns_type: "Notification",
       sns_timestamp: old_message.sent_at,
       raw_payload: { "MessageId" => "expired" },
-      created_at: old_message.sent_at
+      created_at: old_message.sent_at,
+      processed_at: old_message.sent_at
     )
     old_message.events.update_all(webhook_id: webhook.id)
     assert old_message.events.exists?

@@ -12,10 +12,11 @@ class Webhook < ApplicationRecord
   validates :raw_payload, presence: true
 
   scope :reverse_chronologically, -> { order(created_at: :desc) }
-  scope :orphaned, -> { where.missing(:events).where(created_at: ..REDELIVERY_GRACE_PERIOD.ago) }
+  scope :orphaned, -> { where.missing(:events).where.not(processed_at: nil).where(created_at: ..REDELIVERY_GRACE_PERIOD.ago) }
 
   # Raw payloads hold the same email data as the events made from them, so
-  # they go once those events are gone (retention, a deleted source).
+  # they go once those events are gone (retention, a deleted source). Webhooks
+  # that never processed are kept: they are the only copy of that event.
   def self.delete_orphaned
     orphaned.in_batches(of: DELETE_BATCH_SIZE).delete_all
   end
