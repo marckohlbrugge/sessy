@@ -84,12 +84,10 @@ class EventsController < ApplicationController
     params.permit(:query, :date_range, :from_date, :to_date, event_types: [], bounce_types: [])
   end
 
-  # An enumerator body is sent as it is produced. Last-Modified keeps
-  # Rack::ETag from reading the whole body to compute a digest first.
+  # An enumerator body is sent as it is produced.
   def stream_csv(lines, filename:)
     headers["Content-Type"] = "text/csv; charset=utf-8"
     headers["Content-Disposition"] = ActionDispatch::Http::ContentDisposition.format(disposition: "attachment", filename: filename)
-    headers["Last-Modified"] = Time.current.httpdate
     headers["X-Accel-Buffering"] = "no"
     self.response_body = lines
   end

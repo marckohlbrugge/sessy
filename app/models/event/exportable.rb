@@ -6,7 +6,7 @@ module Event::Exportable
   CSV_HEADERS = %w[ Event Recipient Subject BounceType Time ]
 
   # Excel only reads a UTF-8 file as UTF-8 when it starts with a byte-order mark.
-  CSV_BYTE_ORDER_MARK = "﻿"
+  CSV_BYTE_ORDER_MARK = "\uFEFF"
 
   # Recipients and subjects come from outside. A spreadsheet runs a cell that
   # starts with one of these as a formula, so such cells get a leading quote.
@@ -23,6 +23,10 @@ module Event::Exportable
       Enumerator.new do |lines|
         lines << CSV_BYTE_ORDER_MARK + CSV.generate_line(CSV_HEADERS)
         events.find_each { |event| lines << CSV.generate_line(event.csv_row) }
+      rescue => error
+        # The response is already underway, so nothing else reports this.
+        Rails.error.report(error, handled: false)
+        raise
       end
     end
   end
