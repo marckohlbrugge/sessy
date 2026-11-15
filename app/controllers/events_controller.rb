@@ -28,7 +28,7 @@ class EventsController < ApplicationController
         end
       end
       format.csv do
-        send_data events_to_csv(events), filename: "#{@source.name.parameterize}-events-#{Date.current}.csv"
+        stream_csv events.csv_lines, filename: "#{@source.name.parameterize}-events-#{Date.current}.csv"
       end
     end
   end
@@ -84,19 +84,13 @@ class EventsController < ApplicationController
     params.permit(:query, :date_range, :from_date, :to_date, event_types: [], bounce_types: [])
   end
 
-  def events_to_csv(events)
-    require "csv"
-    CSV.generate do |csv|
-      csv << %w[Event Recipient Subject BounceType Time]
-      events.find_each do |event|
-        csv << [
-          event.event_type,
-          event.recipient_email,
-          event.message&.subject,
-          event.bounce_type,
-          event.event_at.iso8601
-        ]
-      end
-    end
+  # An enumerator body is sent as it is produced. Last-Modified keeps
+  # Rack::ETag from reading the whole body to compute a digest first.
+  def stream_csv(lines, filename:)
+    headers["Content-Type"] = "text/csv; charset=utf-8"
+    headers["Content-Disposition"] = ActionDispatch::Http::ContentDisposition.format(disposition: "attachment", filename: filename)
+    headers["Last-Modified"] = Time.current.httpdate
+    headers["X-Accel-Buffering"] = "no"
+    self.response_body = lines
   end
 end
