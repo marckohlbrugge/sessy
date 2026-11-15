@@ -12,6 +12,10 @@ class RecurringScheduleTest < ActiveSupport::TestCase
     assert_equal false, result unless Sessy.saas?
   end
 
+  test "the Docker image runs the schedule without extra configuration" do
+    assert_match(/^ENV SOLID_QUEUE_IN_PUMA="true"$/, Rails.root.join("Dockerfile").read)
+  end
+
   private
 
   def recurring_schedule
