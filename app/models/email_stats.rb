@@ -27,6 +27,9 @@ class EmailStats
   def open_rate = percent(unique_open_count, sent_count)
   def click_rate = percent(unique_click_count, sent_count)
 
+  def bounce_reputation = ReputationRate.new(:bounce, bounce_rate)
+  def complaint_reputation = ReputationRate.new(:complaint, complaint_rate)
+
   def bounce_breakdown
     @events.event_type_bounce.group(:bounce_type).count.transform_keys do |bounce_type|
       bounce_type.presence || "Unknown"

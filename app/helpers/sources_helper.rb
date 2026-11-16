@@ -21,6 +21,38 @@ module SourcesHelper
     Source::SES_REGIONS.map { |code, label| [ "#{label} (#{code})", code ] }
   end
 
+  def reputation_caption(rate)
+    case rate.status
+    when :pause
+      "Above the #{threshold_percentage(rate.pause_at)} where AWS may pause sending"
+    when :review
+      "Above the #{threshold_percentage(rate.review_at)} where AWS reviews accounts"
+    else
+      "AWS reviews at #{threshold_percentage(rate.review_at)}, may pause at #{threshold_percentage(rate.pause_at)}"
+    end
+  end
+
+  def reputation_explanation(rate)
+    "AWS puts an account under review at a #{threshold_percentage(rate.review_at)} #{rate.kind} rate " \
+      "and may pause its sending at #{threshold_percentage(rate.pause_at)}, measured across the whole account."
+  end
+
+  def reputation_thresholds_summary
+    bounce, complaint = ReputationRate::THRESHOLDS.values_at(:bounce, :complaint)
+
+    "AWS reviews an account at a #{threshold_percentage(bounce[:review])} bounce or " \
+      "#{threshold_percentage(complaint[:review])} complaint rate and may pause its sending at " \
+      "#{threshold_percentage(bounce[:pause])} or #{threshold_percentage(complaint[:pause])}."
+  end
+
+  def reputation_text_class(rate, ok: "")
+    rate.ok? ? ok : "text-rose-600 dark:text-rose-400"
+  end
+
+  def threshold_percentage(percent)
+    number_to_percentage(percent, strip_insignificant_zeros: true)
+  end
+
   def bounce_label(bounce_type)
     case bounce_type
     when "Permanent"

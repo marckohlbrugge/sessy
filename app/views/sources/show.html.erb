@@ -34,11 +34,11 @@
         <%= number_with_delimiter(@delivered_count) %> delivered
         <% if @bounce_count.positive? %>
           <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
-          <span class="<%= @bounce_rate > 5 ? 'text-rose-600 dark:text-rose-400' : '' %>"><%= number_to_percentage(@bounce_rate, precision: 1) %> bounced</span>
+          <span class="<%= reputation_text_class(@bounce_reputation) %>"><%= number_to_percentage(@bounce_rate, precision: 1) %> bounced</span>
         <% end %>
         <% if @complaint_count.positive? %>
           <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
-          <span class="<%= @complaint_rate > 0.1 ? 'text-rose-600 dark:text-rose-400' : '' %>"><%= pluralize(@complaint_count, "complaint") %></span>
+          <span class="<%= reputation_text_class(@complaint_reputation) %>"><%= pluralize(@complaint_count, "complaint") %></span>
         <% end %>
         <% if @unique_open_count.positive? %>
           <span class="text-zinc-300 dark:text-zinc-600">&middot;</span>
@@ -67,13 +67,21 @@
         <div class="border-b border-r border-zinc-950/5 dark:border-white/5 py-3 pr-4 lg:border-r-0 lg:pl-4">
           <div class="text-sm text-zinc-500 dark:text-zinc-400">Bounces</div>
           <div class="text-xl font-semibold tabular-nums mt-0.5"><%= number_with_delimiter(@bounce_count) %></div>
-          <div class="text-sm text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_to_percentage(@bounce_rate, precision: 1) %></div>
+          <div class="text-sm tabular-nums <%= reputation_text_class(@bounce_reputation, ok: "text-zinc-400 dark:text-zinc-500") %>"><%= number_to_percentage(@bounce_rate, precision: 1) %></div>
+          <div class="mt-2 max-w-48">
+            <%= render "sources/reputation_meter", rate: @bounce_reputation %>
+          </div>
+          <div class="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500"><%= reputation_caption(@bounce_reputation) %></div>
         </div>
 
         <div class="border-b border-zinc-950/5 dark:border-white/5 py-3 pl-4 lg:pl-0 lg:pr-4 lg:border-b-0 lg:border-r">
           <div class="text-sm text-zinc-500 dark:text-zinc-400">Complaints</div>
           <div class="text-xl font-semibold tabular-nums mt-0.5"><%= number_with_delimiter(@complaint_count) %></div>
-          <div class="text-sm text-zinc-400 dark:text-zinc-500 tabular-nums"><%= number_to_percentage(@complaint_rate, precision: 2) %></div>
+          <div class="text-sm tabular-nums <%= reputation_text_class(@complaint_reputation, ok: "text-zinc-400 dark:text-zinc-500") %>"><%= number_to_percentage(@complaint_rate, precision: 2) %></div>
+          <div class="mt-2 max-w-48">
+            <%= render "sources/reputation_meter", rate: @complaint_reputation %>
+          </div>
+          <div class="mt-1.5 text-xs text-zinc-400 dark:text-zinc-500"><%= reputation_caption(@complaint_reputation) %></div>
         </div>
 
         <div class="border-b border-r border-zinc-950/5 dark:border-white/5 py-3 pr-4 lg:pl-4 lg:border-b-0 lg:pr-4">
