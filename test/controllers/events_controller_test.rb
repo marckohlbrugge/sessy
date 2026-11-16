@@ -105,6 +105,32 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_no_match "john@example.com", response.body
   end
 
+  test "index csv exports only the source's own events" do
+    get source_events_path(@source, format: :csv)
+
+    assert_match "marc@example.com", response.body
+    assert_no_match sources(:wip).events.first.recipient_email, response.body
+  end
+
+  test "index csv starts with a byte-order mark and the header row" do
+    get source_events_path(@source, format: :csv)
+
+    assert_equal "text/csv; charset=utf-8", response.headers["Content-Type"]
+    assert_match(/attachment; filename="betalist-events-/, response.headers["Content-Disposition"])
+    assert response.body.start_with?("\uFEFFEvent,Recipient,Subject,BounceType,Time\n")
+  end
+
+  test "index csv neutralises cells a spreadsheet would run as a formula" do
+    messages(:welcome).update!(subject: "=HYPERLINK(\"https://evil.example\")")
+
+    get source_events_path(@source, format: :csv)
+
+    rows = CSV.parse(response.body.delete_prefix("\uFEFF"), headers: true)
+    subjects = rows.map { |row| row["Subject"] }
+    assert_includes subjects, "'=HYPERLINK(\"https://evil.example\")"
+    assert subjects.none? { |subject| subject.to_s.start_with?("=") }
+  end
+
   test "index lists newest first by default" do
     get source_events_path(@source)
 

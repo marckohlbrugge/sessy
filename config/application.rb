@@ -33,7 +33,7 @@ module Sessy
     # and point this at it. The default key is versioned and write-once; see
     # docs/hosted-launch-runbook.md.
     config.x.cloudformation_template_url = ENV.fetch("CLOUDFORMATION_TEMPLATE_URL",
-      "https://sessy-cloudformation.s3.us-east-1.amazonaws.com/v1/sessy-ses.yml")
+      "https://sessy-cloudformation.s3.us-east-1.amazonaws.com/v2/sessy-ses.yml")
 
     config.active_storage.variant_processor = :disabled
 

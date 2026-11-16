@@ -19,6 +19,7 @@ class SourceAgentInstructionsTest < ActiveSupport::TestCase
     assert_includes prompt, "aws sesv2 create-configuration-set"
     assert_includes prompt, "aws sns create-topic"
     assert_includes prompt, "aws sns subscribe"
+    assert_includes prompt, %(--attributes '#{@source.sns_subscription_attributes}')
     assert_includes prompt, "create-configuration-set-event-destination"
     assert_includes prompt, "get_source_setup"
     assert_match(/SNS connected/i, prompt)
