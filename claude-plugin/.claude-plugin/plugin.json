@@ -8,8 +8,10 @@
     "email": "hello@sessy.do"
   },
   "homepage": "https://sessy.do/docs/mcp",
+  "privacyPolicyUrl": "https://sessy.do/privacy",
   "repository": "https://github.com/marckohlbrugge/sessy",
   "license": "MIT",
+  "icon": "./.claude-plugin/icon.png",
   "keywords": [
     "amazon-ses",
     "aws-ses",
@@ -23,5 +25,21 @@
     "mcp",
     "claude-code"
   ],
-  "mcpServers": "./mcp.json"
+  "userConfig": {
+    "api_key": {
+      "type": "string",
+      "title": "Sessy API key",
+      "description": "Create one at https://app.sessy.do/api_keys",
+      "sensitive": true
+    }
+  },
+  "mcpServers": {
+    "sessy": {
+      "type": "http",
+      "url": "https://api.sessy.do/mcp",
+      "headers": {
+        "Authorization": "Bearer ${user_config.api_key}"
+      }
+    }
+  }
 }

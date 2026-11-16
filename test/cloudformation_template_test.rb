@@ -13,7 +13,7 @@ class CloudformationTemplateTest < ActiveSupport::TestCase
   # When this test fails after editing the template: publish the new body
   # under a new key, point config.x.cloudformation_template_url at it, then
   # update this constant.
-  PUBLISHED_TEMPLATE_SHA256 = "d2654febb2d522130d563f067764fee539732e177f3344ebe099ac9973d8f221"
+  PUBLISHED_TEMPLATE_SHA256 = "661cce20cfa60a62b50c91179e3ab9efc7104aabf2635ad2676c1dc47750845b"
 
   EVENT_TYPES = %w[SEND REJECT BOUNCE COMPLAINT DELIVERY OPEN CLICK RENDERING_FAILURE DELIVERY_DELAY SUBSCRIPTION]
 
@@ -46,6 +46,22 @@ class CloudformationTemplateTest < ActiveSupport::TestCase
 
     assert_equal "https", subscription["Protocol"]
     assert_equal({ "Ref" => "WebhookUrl" }, subscription["Endpoint"])
+  end
+
+  test "subscription keeps retrying for close to the hour SNS allows" do
+    policy = resources_of_type("AWS::SNS::Subscription").values.sole.dig("Properties", "DeliveryPolicy", "healthyRetryPolicy")
+
+    assert_equal Source::SNS_RETRY_POLICY, policy
+
+    # No backoff phase, so the retry time is exactly the two fixed phases.
+    assert_equal policy["numRetries"], policy["numNoDelayRetries"] + policy["numMinDelayRetries"] + policy["numMaxDelayRetries"]
+    retry_seconds = policy["numMinDelayRetries"] * policy["minDelayTarget"] + policy["numMaxDelayRetries"] * policy["maxDelayTarget"]
+    assert_operator retry_seconds, :>=, 50.minutes
+
+    # SNS rejects an HTTPS policy whose total retry time exceeds 3,600 seconds,
+    # which would fail every Launch Stack. Stay under it even if every retry
+    # were counted at the maximum delay.
+    assert_operator policy["numRetries"] * policy["maxDelayTarget"], :<=, 3600
   end
 
   test "template creates no IAM resources" do

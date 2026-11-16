@@ -75,7 +75,7 @@ Publishing a version:
 
 ```bash
 aws cloudformation validate-template --template-body file://config/cloudformation/sessy-ses.yml
-aws s3api put-object --bucket sessy-cloudformation --key v1/sessy-ses.yml \
+aws s3api put-object --bucket sessy-cloudformation --key v2/sessy-ses.yml \
   --body config/cloudformation/sessy-ses.yml --content-type text/yaml --if-none-match '*'
 shasum -a 256 config/cloudformation/sessy-ses.yml
 ```

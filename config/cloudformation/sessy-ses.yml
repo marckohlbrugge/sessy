@@ -91,6 +91,19 @@ Resources:
         Ref: WebhookUrl
       TopicArn:
         Ref: Topic
+      # SNS gives up on an HTTPS endpoint after 3 retries, about a minute, by
+      # default. This keeps retrying for about 53 minutes, close to the
+      # one-hour ceiling SNS allows, so Sessy can be down for a deploy or a
+      # short incident without losing events.
+      DeliveryPolicy:
+        healthyRetryPolicy:
+          minDelayTarget: 20
+          maxDelayTarget: 120
+          numRetries: 29
+          numNoDelayRetries: 0
+          numMinDelayRetries: 3
+          numMaxDelayRetries: 26
+          backoffFunction: linear
 
   EventDestination:
     Type: AWS::SES::ConfigurationSetEventDestination

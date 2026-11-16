@@ -72,6 +72,8 @@ aws ses get-identity-mail-from-domain-attributes --identities "$DOMAIN" --region
 ## 3) Create a configuration set
 
 > **Shortcut:** steps 3 and 4 can be done in one click. On the source's Setup page in Sessy, click **Launch Stack**. It opens the CloudFormation console in your AWS account (in the region you used last; pick a region on the Setup page if it is the wrong one) with a template that creates the configuration set, SNS topic, webhook subscription, and event destination (no IAM resources). Review the stack, click **Create stack**, then continue with step 5.
+>
+> **Already created a stack with an earlier template?** Update it to pick up the longer SNS retry window: in the CloudFormation console choose **Update stack**, **Replace existing template**, and paste the template URL from the Launch Stack link on the Setup page. Nothing is recreated; only the subscription's delivery policy changes.
 
 In SES:
 
@@ -130,10 +132,13 @@ TOPIC_ARN="arn:aws:sns:$REGION:$ACCOUNT_ID:$TOPIC_NAME"
 aws sns create-topic --name "$TOPIC_NAME" --region "$REGION"
 
 # Subscribe Sessy webhook
+# The delivery policy makes SNS keep retrying for about 53 minutes when Sessy is
+# unreachable. Without it SNS gives up after about a minute.
 aws sns subscribe \
   --topic-arn "$TOPIC_ARN" \
   --protocol https \
   --notification-endpoint "$WEBHOOK_URL" \
+  --attributes '{"DeliveryPolicy":"{\"healthyRetryPolicy\":{\"minDelayTarget\":20,\"maxDelayTarget\":120,\"numRetries\":29,\"numNoDelayRetries\":0,\"numMinDelayRetries\":3,\"numMaxDelayRetries\":26,\"backoffFunction\":\"linear\"}}"}' \
   --region "$REGION"
 
 # Connect configuration set to SNS topic

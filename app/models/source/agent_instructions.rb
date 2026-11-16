@@ -46,7 +46,8 @@ class Source::AgentInstructions
       aws sns subscribe \\
         --topic-arn "arn:aws:sns:#{region_or_placeholder}:<account-id>:#{sns_topic_name}" \\
         --protocol https \\
-        --notification-endpoint "#{webhook_url}"#{region_flag}
+        --notification-endpoint "#{webhook_url}" \\
+        --attributes '#{sns_subscription_attributes}'#{region_flag}
 
       aws sesv2 create-configuration-set-event-destination \\
         --configuration-set-name "#{config_set_name}" \\
@@ -121,7 +122,7 @@ class Source::AgentInstructions
 
   attr_reader :source, :webhook_url, :launch_stack_url
 
-  delegate :config_set_name, :sns_topic_name, :stack_name, to: :source
+  delegate :config_set_name, :sns_topic_name, :sns_subscription_attributes, :stack_name, to: :source
 
   # Commands always carry the region flag: when none is recorded the agent
   # swaps one placeholder instead of guessing where the flag goes.

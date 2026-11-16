@@ -1,5 +1,5 @@
 class Event < ApplicationRecord
-  include Diagnostics, Filterable, Searchable, SnsIngestible, Types
+  include Diagnostics, Exportable, Filterable, Searchable, SnsIngestible, Types
 
   belongs_to :message, counter_cache: :events_count
   belongs_to :source, optional: true
