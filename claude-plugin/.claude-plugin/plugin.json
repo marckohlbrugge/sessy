@@ -8,6 +8,7 @@
     "email": "hello@sessy.do"
   },
   "homepage": "https://sessy.do/docs/mcp",
+  "privacyPolicyUrl": "https://sessy.do/privacy",
   "repository": "https://github.com/marckohlbrugge/sessy",
   "license": "MIT",
   "icon": "./.claude-plugin/icon.png",
