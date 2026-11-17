@@ -89,8 +89,8 @@ GEM
       aws-sdk-ses (~> 1, >= 1.50.0)
       aws-sdk-sesv2 (~> 1, >= 1.34.0)
     aws-eventstream (1.4.1)
-    aws-partitions (1.1299.0)
-    aws-sdk-core (3.261.0)
+    aws-partitions (1.1307.0)
+    aws-sdk-core (3.269.0)
       aws-eventstream (~> 1, >= 1.4.1)
       aws-partitions (~> 1, >= 1.992.0)
       aws-sigv4 (~> 1.9)
@@ -102,14 +102,14 @@ GEM
     aws-sdk-rails (5.2.0)
       aws-sdk-core (~> 3)
       railties (>= 7.1.0)
-    aws-sdk-ses (1.107.0)
-      aws-sdk-core (~> 3, >= 3.260.0)
+    aws-sdk-ses (1.115.0)
+      aws-sdk-core (~> 3, >= 3.269.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-sesv2 (1.115.0)
-      aws-sdk-core (~> 3, >= 3.260.0)
+    aws-sdk-sesv2 (1.123.0)
+      aws-sdk-core (~> 3, >= 3.269.0)
       aws-sigv4 (~> 1.5)
-    aws-sdk-sns (1.124.0)
-      aws-sdk-core (~> 3, >= 3.260.0)
+    aws-sdk-sns (1.131.0)
+      aws-sdk-core (~> 3, >= 3.268.0)
       aws-sigv4 (~> 1.5)
     aws-sigv4 (1.12.1)
       aws-eventstream (~> 1, >= 1.0.2)
@@ -270,6 +270,7 @@ GEM
     pp (0.6.4)
       prettyprint
     prettyprint (0.2.1)
+    prism (2.1.0)
     prism (2.1.0-aarch64-linux-gnu)
     prism (2.1.0-aarch64-linux-musl)
     prism (2.1.0-arm-linux-gnu)
@@ -514,12 +515,12 @@ CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
   aws-actionmailer-ses (1.2.0) sha256=e01ccfcc5bf1449abb91bb8b15e7945e97310144c7f67fee8d9b76de2e89107f
   aws-eventstream (1.4.1) sha256=ceb6a99c61df4bb00344e54aed0351574beca24f87a0d1487d1d2ed80929ce96
-  aws-partitions (1.1299.0) sha256=de8a9cf51f505a57343cb81a79279b4ae91e7acc09647f692416be85788ffce9
-  aws-sdk-core (3.261.0) sha256=db5499a701378d1113458e1d6ea3e9d61436f998d0449b67298821bcdcd2eab6
+  aws-partitions (1.1307.0) sha256=3bc12f849026b21bc29e4b7b07adaca3f051999da6041d73fc16b20ad8c5f491
+  aws-sdk-core (3.269.0) sha256=ad9e2b4bf9a11339cebb3a039ae8557944dd60c851abba5000bb7fa48923faa8
   aws-sdk-rails (5.2.0) sha256=639b168a3fdfae4b6ac3c714fabdb5c390f0246f73740502273447958b30e8b4
-  aws-sdk-ses (1.107.0) sha256=302580b48ee8050a9da53ff5d99db360f7fcb165ecf1104ef62ba308b0cc4f19
-  aws-sdk-sesv2 (1.115.0) sha256=d336abd17c1707c38f051e2699d31435425a15425449043e62f261bd8c8971a2
-  aws-sdk-sns (1.124.0) sha256=55fc1dc033f9d2d4aa05455a4f50be5003156348e7b8966b82b3845db0bfc203
+  aws-sdk-ses (1.115.0) sha256=5c199de0447ef50e3fe4b1ce2f1779f60f274436e5d4cc03fdaefd46b4999ac4
+  aws-sdk-sesv2 (1.123.0) sha256=dacfdfba6f86a4534bdf57a0eab4ab816c866063a62206bf3cd9362549eaf4af
+  aws-sdk-sns (1.131.0) sha256=bc632df5bc1e086f1cb271ef2c0df2567f016e6af104120e014bbaaf4196eaa8
   aws-sigv4 (1.12.1) sha256=6973ff95cb0fd0dc58ba26e90e9510a2219525d07620c8babeb70ef831826c00
   base64 (0.3.0) sha256=27337aeabad6ffae05c265c450490628ef3ebd4b67be58257393227588f5a97b
   bcrypt_pbkdf (1.1.2) sha256=c2414c23ce66869b3eb9f643d6a3374d8322dfb5078125c82792304c10b94cf6
@@ -594,6 +595,7 @@ CHECKSUMS
   pg (1.7.0-x86_64-linux-musl) sha256=0c9bc93b6e0aca2a5b07daef00b7ec4f9882bfe21ef3872b4371f8ecffe1f1e1
   pp (0.6.4) sha256=dfcb0fce700c41456265922884f9fe195d7fbb0674a3578e6c0f69588e82b570
   prettyprint (0.2.1) sha256=d555d57ea6d7cf001d4774b693546a6bd88bec1e778ddffb5c60b68ceec4b7d4
+  prism (2.1.0) sha256=1c0a7c6dea0e93183390fb123f007564dbe663198e2f86ad87204151147601f3
   prism (2.1.0-aarch64-linux-gnu) sha256=808dddc72def68e1a0463689414c97e0ba211938eddbab05387a4844aa2b3ec2
   prism (2.1.0-aarch64-linux-musl) sha256=dd1a0732620c1e575dabb07a297a62911fabd72f8e20ce850b522a866f877930
   prism (2.1.0-arm-linux-gnu) sha256=96b2426b9dbab05448c4add735619929042be3cd7e871ff186468121b62bcfa8
